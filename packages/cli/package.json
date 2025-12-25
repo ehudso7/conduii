@@ -1,0 +1,42 @@
+{
+  "name": "@conduii/cli",
+  "version": "1.0.0",
+  "description": "Conduii CLI - Test your deployments from the command line",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "conduii": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/cli.ts --format cjs --dts --clean",
+    "dev": "tsup src/cli.ts --format cjs --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@conduii/core": "workspace:*",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1",
+    "ora": "^7.0.1",
+    "cli-table3": "^0.6.3",
+    "boxen": "^7.1.1",
+    "inquirer": "^9.2.12",
+    "conf": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "cli",
+    "testing",
+    "conduii"
+  ],
+  "author": "Conduii",
+  "license": "MIT"
+}

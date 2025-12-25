@@ -1,0 +1,64 @@
+name: 'Conduii'
+description: 'AI-Powered Testing Platform - Validate your deployments automatically'
+author: 'Conduii'
+branding:
+  icon: 'zap'
+  color: 'purple'
+
+inputs:
+  api-key:
+    description: 'Conduii API key'
+    required: false
+  test-type:
+    description: 'Type of tests to run (all, health, integration, api, e2e)'
+    required: false
+    default: 'all'
+  environment:
+    description: 'Environment name'
+    required: false
+    default: 'preview'
+  deployment-url:
+    description: 'URL of the deployment to test'
+    required: false
+  working-directory:
+    description: 'Working directory'
+    required: false
+    default: '.'
+  fail-on-error:
+    description: 'Fail the workflow if tests fail'
+    required: false
+    default: 'true'
+  vercel-token:
+    description: 'Vercel API token'
+    required: false
+  supabase-url:
+    description: 'Supabase project URL'
+    required: false
+  supabase-key:
+    description: 'Supabase service role key'
+    required: false
+  stripe-key:
+    description: 'Stripe secret key'
+    required: false
+  github-token:
+    description: 'GitHub token for PR comments'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  status:
+    description: 'Overall test status (passed/failed)'
+  total:
+    description: 'Total number of tests'
+  passed:
+    description: 'Number of passed tests'
+  failed:
+    description: 'Number of failed tests'
+  duration:
+    description: 'Total test duration in milliseconds'
+  summary:
+    description: 'JSON summary of test results'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
