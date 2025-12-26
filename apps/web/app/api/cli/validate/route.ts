@@ -39,6 +39,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!apiKey.user) {
+      return NextResponse.json(
+        { error: "API key has no associated user" },
+        { status: 401 }
+      );
+    }
+
     // Update last used timestamp
     await db.apiKey.update({
       where: { id: apiKey.id },
