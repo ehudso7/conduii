@@ -14,7 +14,7 @@ function generateApiKey(): string {
 }
 
 // GET /api/api-keys - List API keys
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const user = await requireAuth();
 
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Mask the keys for security
-    const maskedKeys = apiKeys.map((key) => ({
+    const maskedKeys = apiKeys.map((key: { id: string; name: string; key: string; lastUsedAt: Date | null; expiresAt: Date | null; createdAt: Date; user: { id: string; name: string | null; email: string } | null }) => ({
       ...key,
       key: `${key.key.slice(0, 8)}...${key.key.slice(-4)}`,
     }));

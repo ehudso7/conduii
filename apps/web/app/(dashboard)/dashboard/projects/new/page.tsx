@@ -12,7 +12,6 @@ export default function NewProjectPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -43,7 +42,7 @@ export default function NewProjectPage() {
       });
 
       router.push(`/dashboard/projects/${project.id}`);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to create project. Please try again.",

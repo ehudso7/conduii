@@ -4,7 +4,6 @@ import {
   CreditCard,
   Check,
   Zap,
-  Building2,
   ArrowRight,
   Download,
   Calendar,
@@ -19,7 +18,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
-import { PLANS, getPlanLimits } from "@/lib/stripe";
+import { getPlanLimits } from "@/lib/stripe";
 
 async function getBillingData(userId: string) {
   const user = await db.user.findUnique({

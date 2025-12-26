@@ -17,7 +17,7 @@
     "start": "node dist/cli.js"
   },
   "dependencies": {
-    "@conduii/core": "workspace:*",
+    "@conduii/core": "*",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
     "dotenv": "^16.3.1",
