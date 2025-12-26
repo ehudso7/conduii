@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     if (!organizationId) {
       const defaultOrg = await getDefaultOrg(user.id);
-      organizationId = defaultOrg?.id;
+      organizationId = defaultOrg?.id ?? null;
     }
 
     if (!organizationId) {
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
     if (!organizationId) {
       const defaultOrg = await getDefaultOrg(user.id);
-      organizationId = defaultOrg?.id;
+      organizationId = defaultOrg?.id ?? null;
     }
 
     if (!organizationId) {
