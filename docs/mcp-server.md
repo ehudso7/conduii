@@ -56,11 +56,9 @@ Claude will run service discovery and report:
 
 ### Running Tests
 
-> "Run health checks on my deployment"
-
-> "Test all integrations for my production environment"
-
-> "Run API tests against my preview deployment"
+- "Run health checks on my deployment"
+- "Test all integrations for my production environment"
+- "Run API tests against my preview deployment"
 
 ### Analyzing Results
 
@@ -73,9 +71,8 @@ Claude will analyze the failure and provide:
 
 ### Checking Health
 
-> "Is my production deployment healthy?"
-
-> "Check the status of all my services"
+- "Is my production deployment healthy?"
+- "Check the status of all my services"
 
 ## Available Commands
 
@@ -120,7 +117,7 @@ The MCP server exposes these tools to Claude:
 
 ### Full Test Run
 
-```
+```text
 User: Run all tests for my project and tell me if anything is broken
 
 Claude: I'll run a full test suite for your project.
@@ -150,7 +147,7 @@ the connection pool is exhausted. I recommend:
 
 ### Service Discovery
 
-```
+```text
 User: What does my project use?
 
 Claude: I'll scan your project to detect integrations.
