@@ -45,6 +45,7 @@ vi.mock("@clerk/nextjs", () => ({
   }),
   useUser: () => ({
     isLoaded: true,
+    isSignedIn: false,
     user: null,
   }),
 }));
