@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { stripe, getPlanFromPriceId, PLANS } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import Stripe from "stripe";
 
@@ -39,19 +39,26 @@ export async function POST(req: Request) {
       session.subscription as string
     );
 
+    const priceId = subscription.items.data[0].price.id;
+    const planInfo = getPlanFromPriceId(priceId);
+
+    // Default to PRO if we can't determine the plan
+    const planType = planInfo?.plan || "PRO";
+    const planData = PLANS[planType];
+
     await db.organization.update({
       where: {
         stripeCustomerId: session.customer as string,
       },
       data: {
         stripeSubscriptionId: subscription.id,
-        stripePriceId: subscription.items.data[0].price.id,
+        stripePriceId: priceId,
         stripeCurrentPeriodEnd: new Date(
           subscription.current_period_end * 1000
         ),
-        plan: "PRO",
-        projectLimit: -1,
-        testRunLimit: 5000,
+        plan: planType,
+        projectLimit: planData.projectLimit,
+        testRunLimit: planData.testRunLimit,
       },
     });
   }

@@ -81,6 +81,7 @@ enum OrgRole {
 
 enum Plan {
   FREE
+  BASIC
   PRO
   ENTERPRISE
 }
