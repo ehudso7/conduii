@@ -126,39 +126,3 @@ export {
   ToastAction,
 };
 
-// Toaster component
-"use client";
-
-import {
-  Toast as ToastComponent,
-  ToastClose as ToastCloseComponent,
-  ToastDescription as ToastDescriptionComponent,
-  ToastProvider as ToastProviderComponent,
-  ToastTitle as ToastTitleComponent,
-  ToastViewport as ToastViewportComponent,
-} from "@/components/ui/toast";
-import { useToast } from "@/components/ui/use-toast";
-
-export function Toaster() {
-  const { toasts } = useToast();
-
-  return (
-    <ToastProviderComponent>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
-        return (
-          <ToastComponent key={id} {...props}>
-            <div className="grid gap-1">
-              {title && <ToastTitleComponent>{title}</ToastTitleComponent>}
-              {description && (
-                <ToastDescriptionComponent>{description}</ToastDescriptionComponent>
-              )}
-            </div>
-            {action}
-            <ToastCloseComponent />
-          </ToastComponent>
-        );
-      })}
-      <ToastViewportComponent />
-    </ToastProviderComponent>
-  );
-}

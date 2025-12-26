@@ -37,13 +37,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { db } from "@/lib/db";
 
-interface TestRunSummary {
-  total: number;
-  passed: number;
-  failed: number;
-  skipped: number;
-}
-
 async function getProject(projectId: string, userId: string) {
   const user = await db.user.findUnique({
     where: { clerkId: userId },
@@ -60,7 +53,7 @@ async function getProject(projectId: string, userId: string) {
     return null;
   }
 
-  const orgIds = user.organizations.map((m) => m.organizationId);
+  const orgIds = user.organizations.map((m: { organizationId: string }) => m.organizationId);
 
   const project = await db.project.findFirst({
     where: {
@@ -122,19 +115,6 @@ async function getProject(projectId: string, userId: string) {
   return project;
 }
 
-function getServiceStatusColor(status: string) {
-  switch (status) {
-    case "HEALTHY":
-      return "bg-green-500";
-    case "DEGRADED":
-      return "bg-yellow-500";
-    case "UNHEALTHY":
-      return "bg-red-500";
-    default:
-      return "bg-gray-400";
-  }
-}
-
 function getServiceStatusIcon(status: string) {
   switch (status) {
     case "HEALTHY":
@@ -145,19 +125,6 @@ function getServiceStatusIcon(status: string) {
       return <XCircle className="w-4 h-4 text-red-500" />;
     default:
       return <Clock className="w-4 h-4 text-gray-400" />;
-  }
-}
-
-function getTestRunStatusColor(status: string) {
-  switch (status) {
-    case "PASSED":
-      return "success";
-    case "FAILED":
-      return "destructive";
-    case "RUNNING":
-      return "secondary";
-    default:
-      return "outline";
   }
 }
 
@@ -180,13 +147,13 @@ export default async function ProjectDetailPage({
 
   // Calculate stats
   const healthyServices = project.services.filter(
-    (s) => s.status === "HEALTHY"
+    (s: { status: string }) => s.status === "HEALTHY"
   ).length;
   const totalServices = project.services.length;
   const passRate =
     project.testRuns.length > 0
       ? Math.round(
-          (project.testRuns.filter((r) => r.status === "PASSED").length /
+          (project.testRuns.filter((r: { status: string }) => r.status === "PASSED").length /
             project.testRuns.length) *
             100
         )
@@ -360,7 +327,7 @@ export default async function ProjectDetailPage({
               </div>
             ) : (
               <div className="space-y-3">
-                {project.services.map((service) => (
+                {project.services.map((service: { id: string; name: string; type: string; status: string; latency: number | null }) => (
                   <div
                     key={service.id}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
@@ -423,12 +390,12 @@ export default async function ProjectDetailPage({
               </div>
             ) : (
               <div className="space-y-3">
-                {project.testRuns.map((run) => {
+                {project.testRuns.map((run: { id: string; status: string; trigger: string; createdAt: Date; environment: { id: string; name: string } | null; results: Array<{ status: string }> }) => {
                   const passed = run.results.filter(
-                    (r) => r.status === "PASSED"
+                    (r: { status: string }) => r.status === "PASSED"
                   ).length;
                   const failed = run.results.filter(
-                    (r) => r.status === "FAILED"
+                    (r: { status: string }) => r.status === "FAILED"
                   ).length;
                   const total = run.results.length;
 
@@ -504,7 +471,7 @@ export default async function ProjectDetailPage({
               </div>
             ) : (
               <div className="space-y-3">
-                {project.environments.map((env) => (
+                {project.environments.map((env: { id: string; name: string; url: string | null; isProduction: boolean }) => (
                   <div
                     key={env.id}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
@@ -552,7 +519,7 @@ export default async function ProjectDetailPage({
               </div>
             ) : (
               <div className="space-y-2">
-                {project.endpoints.map((endpoint) => (
+                {project.endpoints.map((endpoint: { id: string; path: string; method: string }) => (
                   <div
                     key={endpoint.id}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50"
@@ -614,7 +581,7 @@ export default async function ProjectDetailPage({
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {project.testSuites.map((suite) => (
+              {project.testSuites.map((suite: { id: string; name: string; description: string | null; isDefault: boolean; _count: { tests: number } }) => (
                 <div
                   key={suite.id}
                   className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"

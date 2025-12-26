@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { auth, currentUser, UserButton } from "@clerk/nextjs";
+import { auth, UserButton } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -10,46 +10,8 @@ import {
   Plus,
   Bell,
   Search,
-  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/db";
-
-async function getOrganization(userId: string) {
-  // Get user's organization or create one
-  const user = await db.user.findUnique({
-    where: { clerkId: userId },
-    include: {
-      organizations: {
-        include: { organization: true },
-        take: 1,
-      },
-    },
-  });
-
-  if (!user) {
-    return null;
-  }
-
-  if (user.organizations.length === 0) {
-    // Create default organization
-    const org = await db.organization.create({
-      data: {
-        name: "My Organization",
-        slug: `org-${userId.slice(-8)}`,
-        members: {
-          create: {
-            userId: user.id,
-            role: "OWNER",
-          },
-        },
-      },
-    });
-    return org;
-  }
-
-  return user.organizations[0].organization;
-}
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -68,8 +30,6 @@ export default async function DashboardLayout({
   if (!userId) {
     redirect("/sign-in");
   }
-
-  const user = await currentUser();
 
   return (
     <div className="min-h-screen bg-muted/30">

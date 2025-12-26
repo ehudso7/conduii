@@ -14,7 +14,7 @@ const updateMemberSchema = z.object({
 });
 
 // GET /api/organizations/members - List organization members
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const user = await requireAuth();
 

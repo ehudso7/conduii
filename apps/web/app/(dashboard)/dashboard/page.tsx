@@ -53,12 +53,12 @@ async function getDashboardData(userId: string) {
 
   // Calculate stats
   const totalProjects = projects.length;
-  const allTestRuns = projects.flatMap((p) => p.testRuns);
+  const allTestRuns = projects.flatMap((p: { testRuns: Array<{ status: string; results: Array<{ status: string }> }> }) => p.testRuns);
   const recentRuns = allTestRuns.slice(0, 10);
-  
-  const passedRuns = allTestRuns.filter((r) => r.status === "PASSED").length;
-  const failedRuns = allTestRuns.filter((r) => r.status === "FAILED").length;
-  const totalServices = projects.reduce((acc, p) => acc + p.services.length, 0);
+
+  const passedRuns = allTestRuns.filter((r: { status: string }) => r.status === "PASSED").length;
+  const failedRuns = allTestRuns.filter((r: { status: string }) => r.status === "FAILED").length;
+  const totalServices = projects.reduce((acc: number, p: { services: unknown[] }) => acc + p.services.length, 0);
 
   return {
     organization: org,
@@ -194,7 +194,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {projects.slice(0, 5).map((project) => {
+                {projects.slice(0, 5).map((project: { id: string; name: string; services: unknown[]; testRuns: Array<{ status: string }> }) => {
                   const lastRun = project.testRuns[0];
                   return (
                     <Link
@@ -242,9 +242,9 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {recentRuns.slice(0, 5).map((run) => {
-                  const passed = run.results.filter((r) => r.status === "PASSED").length;
-                  const failed = run.results.filter((r) => r.status === "FAILED").length;
+                {recentRuns.slice(0, 5).map((run: { id: string; status: string; trigger: string; duration: number | null; createdAt: Date; results: Array<{ status: string }> }) => {
+                  const passed = run.results.filter((r: { status: string }) => r.status === "PASSED").length;
+                  const failed = run.results.filter((r: { status: string }) => r.status === "FAILED").length;
                   return (
                     <div
                       key={run.id}

@@ -1,4 +1,4 @@
-import { auth, currentUser } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 

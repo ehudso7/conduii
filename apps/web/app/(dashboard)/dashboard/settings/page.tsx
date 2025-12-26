@@ -9,8 +9,6 @@ import {
   Trash2,
   Plus,
   Copy,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -169,7 +167,7 @@ export default async function SettingsPage() {
                   </Button>
                 </div>
                 <div className="space-y-3">
-                  {organization.members.map((member) => (
+                  {organization.members.map((member: { id: string; role: string; user: { id: string; name: string | null; email: string; imageUrl: string | null } }) => (
                     <div
                       key={member.id}
                       className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
@@ -234,7 +232,7 @@ export default async function SettingsPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {organization?.apiKeys.map((key) => (
+                {organization?.apiKeys.map((key: { id: string; name: string; key: string; createdAt: Date; lastUsedAt: Date | null }) => (
                   <div
                     key={key.id}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50"

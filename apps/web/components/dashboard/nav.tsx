@@ -6,7 +6,6 @@ import { UserButton } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   FolderKanban,
-  TestTube2,
   Settings,
   CreditCard,
   Zap,

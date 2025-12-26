@@ -4,11 +4,7 @@ import Link from "next/link";
 import {
   Plus,
   FolderKanban,
-  MoreVertical,
   Play,
-  Settings,
-  Trash2,
-  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,11 +93,8 @@ export default async function ProjectsPage() {
         </Card>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => {
+          {projects.map((project: { id: string; name: string; description: string | null; framework: string | null; services: Array<{ id: string; name: string; status: string }>; testRuns: Array<{ status: string }>; _count: { testRuns: number } }) => {
             const lastRun = project.testRuns[0];
-            const healthyServices = project.services.filter(
-              (s) => s.status === "HEALTHY"
-            ).length;
 
             return (
               <Card key={project.id} className="hover:shadow-md transition-shadow">
@@ -145,7 +138,7 @@ export default async function ProjectsPage() {
                   {/* Service Health */}
                   {project.services.length > 0 && (
                     <div className="flex items-center gap-1 mb-4">
-                      {project.services.slice(0, 5).map((service) => (
+                      {project.services.slice(0, 5).map((service: { id: string; name: string; status: string }) => (
                         <div
                           key={service.id}
                           className={`w-2 h-2 rounded-full ${
