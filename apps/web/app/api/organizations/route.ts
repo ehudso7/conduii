@@ -74,9 +74,14 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
+    // Only include defined values in the update
+    const updateData: { name?: string; imageUrl?: string | null } = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+
     const organization = await db.organization.update({
       where: { id: membership.organizationId },
-      data,
+      data: updateData,
     });
 
     return NextResponse.json({ organization });
