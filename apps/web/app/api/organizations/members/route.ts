@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, handleApiError } from "@/lib/auth";
+import { sendInvitationEmail } from "@/lib/email";
 import { z } from "zod";
 
 const inviteMemberSchema = z.object({
@@ -77,10 +78,20 @@ export async function POST(req: NextRequest) {
     });
 
     if (!invitedUser) {
-      // In a real app, you'd send an invitation email here
+      // Send invitation email to non-existent user
+      const inviterName = user.name || user.email;
+      const orgName = membership.organization.name;
+
+      await sendInvitationEmail(
+        data.email,
+        orgName,
+        inviterName,
+        data.role
+      );
+
       return NextResponse.json(
-        { error: "User not found. An invitation email would be sent in production." },
-        { status: 404 }
+        { message: "Invitation email sent. User will be added when they sign up." },
+        { status: 200 }
       );
     }
 

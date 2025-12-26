@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
+import { executeTestRun } from "@/lib/test-runner";
 import { z } from "zod";
 
 const createTestRunSchema = z.object({
@@ -62,6 +63,27 @@ export async function POST(req: NextRequest) {
 
     await requireProjectAccess(projectId, user.id);
 
+    // Check usage limits
+    const project = await db.project.findUnique({
+      where: { id: projectId },
+      include: { organization: true },
+    });
+
+    if (!project) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: 404 }
+      );
+    }
+
+    const org = project.organization;
+    if (org.testRunLimit !== -1 && org.testRunsUsed >= org.testRunLimit) {
+      return NextResponse.json(
+        { error: "Test run limit reached. Please upgrade your plan." },
+        { status: 403 }
+      );
+    }
+
     // Create the test run
     const testRun = await db.testRun.create({
       data: {
@@ -79,9 +101,16 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // In a real implementation, this would trigger the actual test execution
-    // For now, we'll simulate starting the test run
-    await simulateTestRun(testRun.id, projectId, testType);
+    // Increment usage counter
+    await db.organization.update({
+      where: { id: org.id },
+      data: { testRunsUsed: { increment: 1 } },
+    });
+
+    // Execute tests in background (non-blocking)
+    executeTestRun(testRun.id, projectId, { testType, testSuiteId }).catch(
+      (error) => console.error("Test execution error:", error)
+    );
 
     return NextResponse.json({ testRun }, { status: 201 });
   } catch (error) {
@@ -92,148 +121,5 @@ export async function POST(req: NextRequest) {
       );
     }
     return handleApiError(error);
-  }
-}
-
-// Simulate test execution (in production, this would be a background job)
-async function simulateTestRun(
-  testRunId: string,
-  projectId: string,
-  testType: string
-) {
-  // Update status to running
-  await db.testRun.update({
-    where: { id: testRunId },
-    data: {
-      status: "RUNNING",
-      startedAt: new Date(),
-    },
-  });
-
-  // Get project services
-  const project = await db.project.findUnique({
-    where: { id: projectId },
-    include: {
-      services: true,
-      endpoints: true,
-    },
-  });
-
-  if (!project) return;
-
-  const results: Array<{
-    testId: string;
-    status: "PASSED" | "FAILED" | "SKIPPED";
-    duration: number;
-    error?: string;
-  }> = [];
-
-  // Create tests and results based on services
-  for (const service of project.services) {
-    // Health check test
-    if (testType === "all" || testType === "health") {
-      const test = await db.test.create({
-        data: {
-          name: `Health Check: ${service.name}`,
-          type: "HEALTH",
-          serviceId: service.id,
-        },
-      });
-
-      results.push({
-        testId: test.id,
-        status: Math.random() > 0.1 ? "PASSED" : "FAILED",
-        duration: Math.floor(Math.random() * 500) + 50,
-      });
-    }
-
-    // Integration test
-    if (testType === "all" || testType === "integration") {
-      const test = await db.test.create({
-        data: {
-          name: `Integration: ${service.name} Connection`,
-          type: "INTEGRATION",
-          serviceId: service.id,
-        },
-      });
-
-      results.push({
-        testId: test.id,
-        status: Math.random() > 0.15 ? "PASSED" : "FAILED",
-        duration: Math.floor(Math.random() * 1000) + 100,
-      });
-    }
-  }
-
-  // API tests
-  if (testType === "all" || testType === "api") {
-    for (const endpoint of project.endpoints.slice(0, 5)) {
-      const test = await db.test.create({
-        data: {
-          name: `API: ${endpoint.method} ${endpoint.path}`,
-          type: "API",
-          endpointId: endpoint.id,
-        },
-      });
-
-      results.push({
-        testId: test.id,
-        status: Math.random() > 0.1 ? "PASSED" : "FAILED",
-        duration: Math.floor(Math.random() * 500) + 50,
-      });
-    }
-  }
-
-  // Create test results
-  for (const result of results) {
-    await db.testResult.create({
-      data: {
-        testRunId,
-        testId: result.testId,
-        status: result.status,
-        duration: result.duration,
-        error: result.status === "FAILED" ? "Simulated failure" : null,
-      },
-    });
-  }
-
-  // Calculate summary
-  const passed = results.filter((r) => r.status === "PASSED").length;
-  const failed = results.filter((r) => r.status === "FAILED").length;
-  const skipped = results.filter((r) => r.status === "SKIPPED").length;
-  const duration = results.reduce((acc, r) => acc + r.duration, 0);
-
-  // Update test run with results
-  await db.testRun.update({
-    where: { id: testRunId },
-    data: {
-      status: failed === 0 ? "PASSED" : "FAILED",
-      finishedAt: new Date(),
-      duration,
-      summary: {
-        total: results.length,
-        passed,
-        failed,
-        skipped,
-      },
-    },
-  });
-
-  // Create diagnostics for failures
-  if (failed > 0) {
-    await db.diagnostic.create({
-      data: {
-        testRunId,
-        severity: "ERROR",
-        issue: "Test failures detected",
-        component: "test-runner",
-        description: `${failed} test(s) failed during execution`,
-        suggestions: [
-          "Check service credentials are configured correctly",
-          "Verify the deployment URL is accessible",
-          "Review the error messages for each failed test",
-        ],
-      },
-    });
   }
 }

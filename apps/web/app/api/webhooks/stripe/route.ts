@@ -76,38 +76,48 @@ export async function POST(req: Request) {
       invoice.subscription as string
     );
 
-    await db.organization.update({
-      where: {
-        stripeSubscriptionId: subscription.id,
-      },
-      data: {
-        stripePriceId: subscription.items.data[0].price.id,
-        stripeCurrentPeriodEnd: new Date(
-          subscription.current_period_end * 1000
-        ),
-        // Reset usage at the start of new billing period
-        testRunsUsed: 0,
-      },
+    // Find org by stripeSubscriptionId (not unique, use findFirst)
+    const org = await db.organization.findFirst({
+      where: { stripeSubscriptionId: subscription.id },
     });
+
+    if (org) {
+      await db.organization.update({
+        where: { id: org.id },
+        data: {
+          stripePriceId: subscription.items.data[0].price.id,
+          stripeCurrentPeriodEnd: new Date(
+            subscription.current_period_end * 1000
+          ),
+          // Reset usage at the start of new billing period
+          testRunsUsed: 0,
+        },
+      });
+    }
   }
 
   // Handle subscription cancellation
   if (event.type === "customer.subscription.deleted") {
     const subscription = event.data.object as Stripe.Subscription;
 
-    await db.organization.update({
-      where: {
-        stripeSubscriptionId: subscription.id,
-      },
-      data: {
-        stripeSubscriptionId: null,
-        stripePriceId: null,
-        stripeCurrentPeriodEnd: null,
-        plan: "FREE",
-        projectLimit: 3,
-        testRunLimit: 100,
-      },
+    // Find org by stripeSubscriptionId (not unique, use findFirst)
+    const org = await db.organization.findFirst({
+      where: { stripeSubscriptionId: subscription.id },
     });
+
+    if (org) {
+      await db.organization.update({
+        where: { id: org.id },
+        data: {
+          stripeSubscriptionId: null,
+          stripePriceId: null,
+          stripeCurrentPeriodEnd: null,
+          plan: "FREE",
+          projectLimit: 3,
+          testRunLimit: 100,
+        },
+      });
+    }
   }
 
   return new NextResponse(null, { status: 200 });
