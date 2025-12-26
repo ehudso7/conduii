@@ -6,7 +6,7 @@ import ora from "ora";
 import Table from "cli-table3";
 import boxen from "boxen";
 import * as dotenv from "dotenv";
-import { readFileSync, existsSync, writeFileSync } from "fs";
+import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 
 // Load environment variables
@@ -370,18 +370,58 @@ program
     const spinner = ora("Authenticating...").start();
 
     try {
-      // TODO: Validate token with API
-      // For now, just store it
-      const configDir = join(process.env.HOME || "~", ".conduii");
+      // Validate token format
+      if (!token || token.length < 32) {
+        throw new Error("Invalid token format. Token must be at least 32 characters.");
+      }
+
+      // Validate token with API
+      const apiUrl = process.env.CONDUII_API_URL || "https://conduii.com";
+      try {
+        const response = await fetch(`${apiUrl}/api/cli/validate`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Invalid or expired token. Please generate a new token from the dashboard.");
+          }
+          throw new Error(`Token validation failed: ${response.statusText}`);
+        }
+      } catch (fetchError) {
+        // If API is unreachable, store token locally but warn user
+        if (fetchError instanceof TypeError && fetchError.message.includes("fetch")) {
+          spinner.warn("Could not reach API for validation. Token stored locally.");
+        } else {
+          throw fetchError;
+        }
+      }
+
+      // Ensure config directory exists
+      const configDir = join(process.env.HOME || process.env.USERPROFILE || "~", ".conduii");
+      if (!existsSync(configDir)) {
+        mkdirSync(configDir, { recursive: true });
+      }
+
       const configPath = join(configDir, "config.json");
 
-      // Simple config storage
-      const config = { token };
+      // Store token with metadata
+      const config = {
+        token,
+        createdAt: new Date().toISOString(),
+        apiUrl: process.env.CONDUII_API_URL || "https://conduii.com",
+      };
       writeFileSync(configPath, JSON.stringify(config, null, 2));
 
       spinner.succeed("Authentication successful!");
       console.log();
       console.log("You can now use Conduii commands with your account.");
+      console.log();
+      console.log(`Configuration saved to ${chalk.dim(configPath)}`);
     } catch (error) {
       spinner.fail("Authentication failed");
       console.error(chalk.red(error instanceof Error ? error.message : "Unknown error"));
