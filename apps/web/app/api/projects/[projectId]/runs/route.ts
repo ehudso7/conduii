@@ -41,7 +41,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      runs,
+      testRuns: runs,
       nextCursor,
     });
   } catch (error) {

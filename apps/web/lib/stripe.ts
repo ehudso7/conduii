@@ -77,3 +77,11 @@ export function canRunTests(usedRuns: number, plan: PlanType): boolean {
   const limit = PLANS[plan].testRunLimit;
   return limit === -1 || usedRuns < limit;
 }
+
+export function getPlanLimits(plan: PlanType) {
+  const planData = PLANS[plan];
+  return {
+    projects: planData.projectLimit,
+    testRunsPerMonth: planData.testRunLimit,
+  };
+}

@@ -34,15 +34,20 @@ model User {
 }
 
 model Organization {
-  id                   String   @id @default(cuid())
-  name                 String
-  slug                 String   @unique
-  imageUrl             String?
-  plan                 Plan     @default(FREE)
-  stripeCustomerId     String?  @unique
-  stripeSubscriptionId String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id                      String    @id @default(cuid())
+  name                    String
+  slug                    String    @unique
+  imageUrl                String?
+  plan                    Plan      @default(FREE)
+  stripeCustomerId        String?   @unique
+  stripeSubscriptionId    String?
+  stripePriceId           String?
+  stripeCurrentPeriodEnd  DateTime?
+  projectLimit            Int       @default(3)
+  testRunLimit            Int       @default(100)
+  testRunsUsed            Int       @default(0)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
   members  OrganizationMember[]
   projects Project[]
@@ -243,6 +248,7 @@ model TestSuite {
   name        String
   description String?
   config      Json?
+  isDefault   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -392,6 +398,7 @@ model ApiKey {
   key            String        @unique
   lastUsedAt     DateTime?
   expiresAt      DateTime?
+  revokedAt      DateTime?
   createdAt      DateTime      @default(now())
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String?
