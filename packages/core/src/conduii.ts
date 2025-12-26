@@ -109,6 +109,7 @@ export class Conduii extends EventEmitter<ConduiiEvents> {
 
     const environment = this.config.environments?.[this.config.environment] ?? {
       name: this.config.environment,
+      isProduction: false,
     };
 
     this.emit("suite:start", {

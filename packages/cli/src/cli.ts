@@ -458,7 +458,7 @@ async function checkHealth(dir: string): Promise<ServiceHealth[]> {
   const absolutePath = resolve(dir);
 
   // Create Conduii instance and use real health checks
-  const conduii = createConduii({
+  const conduii = await createConduii({
     projectDir: absolutePath,
   });
 
@@ -468,7 +468,7 @@ async function checkHealth(dir: string): Promise<ServiceHealth[]> {
   // Run health checks
   const healthResult = await conduii.healthCheck();
 
-  return healthResult.services.map((s) => ({
+  return healthResult.services.map((s: { name: string; type: string; status: string; latency?: number; error?: string }) => ({
     name: s.name,
     type: s.type,
     status: s.status as "healthy" | "degraded" | "unhealthy" | "unknown",
@@ -481,7 +481,7 @@ async function runTests(dir: string, type: string, _env: string): Promise<TestRe
   const absolutePath = resolve(dir);
 
   // Create Conduii instance
-  const conduii = createConduii({
+  const conduii = await createConduii({
     projectDir: absolutePath,
   });
 
@@ -507,12 +507,12 @@ async function runTests(dir: string, type: string, _env: string): Promise<TestRe
       result = await conduii.runAll();
   }
 
-  return result.results.map((r) => ({
+  return result.tests.map((r) => ({
     name: r.name,
     type: r.type || "test",
     status: r.status as "passed" | "failed" | "skipped",
     duration: r.duration,
-    error: r.error,
+    error: r.error?.message,
   }));
 }
 
