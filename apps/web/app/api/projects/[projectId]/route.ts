@@ -6,7 +6,7 @@ import { z } from "zod";
 const updateProjectSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
-  repoUrl: z.string().url().optional().nullable(),
+  repositoryUrl: z.string().url().optional().nullable(),
   config: z.record(z.unknown()).optional(),
 });
 
@@ -96,9 +96,21 @@ export async function PATCH(
     const body = await req.json();
     const data = updateProjectSchema.parse(body);
 
+    // Only include defined values in the update to avoid undefined vs null type mismatch
+    const updateData: {
+      name?: string;
+      description?: string;
+      repositoryUrl?: string | null;
+      config?: Record<string, unknown>;
+    } = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.repositoryUrl !== undefined) updateData.repositoryUrl = data.repositoryUrl;
+    if (data.config !== undefined) updateData.config = data.config;
+
     const project = await db.project.update({
       where: { id: params.projectId },
-      data,
+      data: updateData,
     });
 
     return NextResponse.json({ project });
