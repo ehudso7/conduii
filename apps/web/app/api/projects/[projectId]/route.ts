@@ -52,11 +52,16 @@ export async function GET(
           select: {
             id: true,
             status: true,
+            trigger: true,
             duration: true,
-            total: true,
-            passed: true,
-            failed: true,
+            summary: true,
             createdAt: true,
+            environment: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
         _count: {

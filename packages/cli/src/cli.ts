@@ -7,7 +7,8 @@ import Table from "cli-table3";
 import boxen from "boxen";
 import * as dotenv from "dotenv";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { join, resolve } from "path";
+import { createConduii, discoverProject as coreDiscoverProject } from "@conduii/core";
 
 // Load environment variables
 dotenv.config();
@@ -430,170 +431,89 @@ program
   });
 
 // =============================================================================
-// HELPER FUNCTIONS (Simplified for CLI - real implementation uses @conduii/core)
+// HELPER FUNCTIONS (Using @conduii/core for real implementation)
 // =============================================================================
 
 async function discoverProject(dir: string): Promise<DiscoveryResult> {
-  const result: DiscoveryResult = {
-    services: [],
-    endpoints: [],
+  const absolutePath = resolve(dir);
+
+  // Use the real @conduii/core discovery engine
+  const discovery = await coreDiscoverProject(absolutePath);
+
+  return {
+    framework: discovery.framework,
+    services: discovery.services.map((s) => ({
+      type: s.type,
+      name: s.name,
+      confidence: s.confidence,
+    })),
+    endpoints: discovery.endpoints.map((e) => ({
+      path: e.path,
+      method: e.method,
+    })),
   };
-
-  // Check package.json
-  const pkgPath = join(dir, "package.json");
-  if (existsSync(pkgPath)) {
-    const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
-    const deps = { ...pkg.dependencies, ...pkg.devDependencies };
-
-    // Detect framework
-    if (deps["next"]) result.framework = "Next.js";
-    else if (deps["nuxt"]) result.framework = "Nuxt";
-    else if (deps["@sveltejs/kit"]) result.framework = "SvelteKit";
-    else if (deps["astro"]) result.framework = "Astro";
-
-    // Detect services
-    if (deps["@supabase/supabase-js"]) {
-      result.services.push({ type: "database", name: "supabase", confidence: 0.95 });
-    }
-    if (deps["stripe"]) {
-      result.services.push({ type: "payment", name: "stripe", confidence: 0.95 });
-    }
-    if (deps["@clerk/nextjs"]) {
-      result.services.push({ type: "auth", name: "clerk", confidence: 0.95 });
-    }
-    if (deps["@auth/core"] || deps["next-auth"]) {
-      result.services.push({ type: "auth", name: "nextauth", confidence: 0.9 });
-    }
-    if (deps["resend"]) {
-      result.services.push({ type: "email", name: "resend", confidence: 0.95 });
-    }
-  }
-
-  // Check for Vercel
-  if (existsSync(join(dir, "vercel.json")) || process.env.VERCEL_TOKEN) {
-    result.services.push({ type: "platform", name: "vercel", confidence: 0.95 });
-  }
-
-  // Check for .env files to detect more services
-  const envPath = join(dir, ".env");
-  if (existsSync(envPath)) {
-    const envContent = readFileSync(envPath, "utf-8");
-    
-    if (envContent.includes("SUPABASE")) {
-      if (!result.services.find((s) => s.name === "supabase")) {
-        result.services.push({ type: "database", name: "supabase", confidence: 0.8 });
-      }
-    }
-    if (envContent.includes("STRIPE")) {
-      if (!result.services.find((s) => s.name === "stripe")) {
-        result.services.push({ type: "payment", name: "stripe", confidence: 0.8 });
-      }
-    }
-    if (envContent.includes("GITHUB")) {
-      result.services.push({ type: "repository", name: "github", confidence: 0.8 });
-    }
-  }
-
-  // Discover API endpoints (simplified)
-  // In real implementation, this scans app/api and pages/api directories
-  result.endpoints = [
-    { path: "/api/health", method: "GET" },
-  ];
-
-  return result;
 }
 
 async function checkHealth(dir: string): Promise<ServiceHealth[]> {
-  const discovery = await discoverProject(dir);
-  const results: ServiceHealth[] = [];
+  const absolutePath = resolve(dir);
 
-  for (const service of discovery.services) {
-    // Simplified health check - real implementation uses adapters
-    const start = Date.now();
-    
-    try {
-      // Check if service credentials are configured
-      let isConfigured = false;
-      
-      switch (service.name) {
-        case "vercel":
-          isConfigured = !!process.env.VERCEL_TOKEN;
-          break;
-        case "supabase":
-          isConfigured = !!process.env.SUPABASE_URL;
-          break;
-        case "stripe":
-          isConfigured = !!process.env.STRIPE_SECRET_KEY;
-          break;
-        case "github":
-          isConfigured = !!process.env.GITHUB_TOKEN;
-          break;
-        default:
-          isConfigured = true;
-      }
+  // Create Conduii instance and use real health checks
+  const conduii = createConduii({
+    projectDir: absolutePath,
+  });
 
-      results.push({
-        name: service.name,
-        type: service.type,
-        status: isConfigured ? "healthy" : "unknown",
-        latency: isConfigured ? Date.now() - start : undefined,
-        error: isConfigured ? undefined : "Credentials not configured",
-      });
-    } catch (error) {
-      results.push({
-        name: service.name,
-        type: service.type,
-        status: "unhealthy",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  }
+  // Initialize (runs discovery)
+  await conduii.initialize();
 
-  return results;
+  // Run health checks
+  const healthResult = await conduii.healthCheck();
+
+  return healthResult.services.map((s) => ({
+    name: s.name,
+    type: s.type,
+    status: s.status as "healthy" | "degraded" | "unhealthy" | "unknown",
+    latency: s.latency,
+    error: s.error,
+  }));
 }
 
-async function runTests(dir: string, type: string, env: string): Promise<TestResult[]> {
-  const discovery = await discoverProject(dir);
-  const results: TestResult[] = [];
+async function runTests(dir: string, type: string, _env: string): Promise<TestResult[]> {
+  const absolutePath = resolve(dir);
 
-  // Generate and run tests based on discovered services
-  for (const service of discovery.services) {
-    const start = Date.now();
-    
-    // Health check test
-    if (type === "all" || type === "health") {
-      results.push({
-        name: `Health Check: ${service.name}`,
-        type: "health",
-        status: "passed", // Simplified - real implementation actually tests
-        duration: Date.now() - start,
-      });
-    }
+  // Create Conduii instance
+  const conduii = createConduii({
+    projectDir: absolutePath,
+  });
 
-    // Integration test
-    if (type === "all" || type === "integration") {
-      results.push({
-        name: `Integration: ${service.name} Connection`,
-        type: "integration",
-        status: "passed",
-        duration: Date.now() - start + 100,
-      });
-    }
+  // Initialize
+  await conduii.initialize();
+
+  // Run appropriate tests based on type
+  let result;
+  switch (type) {
+    case "health":
+      result = await conduii.runHealthChecks();
+      break;
+    case "integration":
+      result = await conduii.runIntegrationTests();
+      break;
+    case "api":
+      result = await conduii.runApiTests();
+      break;
+    case "e2e":
+      result = await conduii.runE2ETests();
+      break;
+    default:
+      result = await conduii.runAll();
   }
 
-  // API endpoint tests
-  if (type === "all" || type === "api") {
-    for (const endpoint of discovery.endpoints) {
-      results.push({
-        name: `API: ${endpoint.method} ${endpoint.path}`,
-        type: "api",
-        status: "passed",
-        duration: 150,
-      });
-    }
-  }
-
-  return results;
+  return result.results.map((r) => ({
+    name: r.name,
+    type: r.type || "test",
+    status: r.status as "passed" | "failed" | "skipped",
+    duration: r.duration,
+    error: r.error,
+  }));
 }
 
 // =============================================================================
