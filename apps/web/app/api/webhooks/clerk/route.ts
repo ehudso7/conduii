@@ -43,20 +43,25 @@ export async function POST(req: Request) {
     const { id, email_addresses, first_name, last_name, image_url } = evt.data;
 
     const email = email_addresses[0]?.email_address;
+    if (!email) {
+      console.error("No email address found for user.created event");
+      return new NextResponse("Missing email address", { status: 400 });
+    }
+
     const name = [first_name, last_name].filter(Boolean).join(" ");
 
     // Create user
     const user = await db.user.create({
       data: {
         clerkId: id,
-        email: email!,
+        email,
         name: name || null,
         imageUrl: image_url || null,
       },
     });
 
     // Create personal organization
-    const slug = email!.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
+    const slug = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
     const org = await db.organization.create({
       data: {
         name: `${name || email}'s Workspace`,
@@ -77,12 +82,17 @@ export async function POST(req: Request) {
     const { id, email_addresses, first_name, last_name, image_url } = evt.data;
 
     const email = email_addresses[0]?.email_address;
+    if (!email) {
+      console.error("No email address found for user.updated event");
+      return new NextResponse("Missing email address", { status: 400 });
+    }
+
     const name = [first_name, last_name].filter(Boolean).join(" ");
 
     await db.user.update({
       where: { clerkId: id },
       data: {
-        email: email!,
+        email,
         name: name || null,
         imageUrl: image_url || null,
       },

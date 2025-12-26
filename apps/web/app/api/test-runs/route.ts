@@ -192,7 +192,7 @@ async function simulateTestRun(
         testId: result.testId,
         status: result.status,
         duration: result.duration,
-        error: result.status === "FAILED" ? "Simulated failure" : undefined,
+        error: result.status === "FAILED" ? "Simulated failure" : null,
       },
     });
   }
