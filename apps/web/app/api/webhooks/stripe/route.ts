@@ -6,7 +6,11 @@ import Stripe from "stripe";
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const signature = headers().get("Stripe-Signature") as string;
+  const signature = headers().get("Stripe-Signature");
+
+  if (!signature) {
+    return new NextResponse("Missing Stripe signature", { status: 400 });
+  }
 
   let event: Stripe.Event;
 
@@ -16,15 +20,21 @@ export async function POST(req: Request) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed: ${err.message}`);
-    return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error(`Webhook signature verification failed: ${message}`);
+    return new NextResponse(`Webhook Error: ${message}`, { status: 400 });
   }
-
-  const session = event.data.object as Stripe.Checkout.Session;
 
   // Handle checkout completion
   if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+
+    if (!session.subscription || !session.customer) {
+      console.error("Missing subscription or customer in checkout session");
+      return new NextResponse("Invalid session data", { status: 400 });
+    }
+
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription as string
     );
@@ -46,10 +56,17 @@ export async function POST(req: Request) {
     });
   }
 
-  // Handle subscription updates
+  // Handle subscription updates (invoice payment)
   if (event.type === "invoice.payment_succeeded") {
+    const invoice = event.data.object as Stripe.Invoice;
+
+    if (!invoice.subscription) {
+      // One-time payment, not a subscription invoice
+      return new NextResponse(null, { status: 200 });
+    }
+
     const subscription = await stripe.subscriptions.retrieve(
-      session.subscription as string
+      invoice.subscription as string
     );
 
     await db.organization.update({
