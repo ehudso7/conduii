@@ -45,7 +45,7 @@ npm run dev
 
 ## Project Structure
 
-```
+```text
 conduii/
 ├── apps/
 │   └── web/           # Next.js web application
@@ -108,7 +108,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `chore:` - Maintenance tasks
 
 Examples:
-```
+```text
 feat: add Stripe webhook handler
 fix: resolve authentication error on refresh
 docs: update CLI documentation
@@ -171,7 +171,7 @@ npm run format
 ### PR Title Format
 
 Follow the commit message format:
-```
+```text
 feat: add new authentication method
 fix: resolve database connection issue
 ```

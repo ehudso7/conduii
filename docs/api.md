@@ -4,7 +4,7 @@ The Conduii API provides programmatic access to the testing platform. All API en
 
 ## Base URL
 
-```
+```text
 https://conduii.com/api
 ```
 
@@ -170,7 +170,7 @@ POST /api/cli/validate
 ```
 
 Headers:
-```
+```http
 Authorization: Bearer <api-token>
 ```
 
@@ -221,7 +221,7 @@ API requests are rate-limited based on your plan:
 | Enterprise | Unlimited |
 
 Rate limit headers:
-```
+```http
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 59
 X-RateLimit-Reset: 1704067200

@@ -194,7 +194,7 @@ The CLI uses the following environment variables:
 
 | Variable | Description |
 |----------|-------------|
-| `CONDUII_API_URL` | API URL (default: https://conduii.com) |
+| `CONDUII_API_URL` | API URL (default: `https://conduii.com`) |
 | `VERCEL_TOKEN` | Vercel API token for platform checks |
 | `SUPABASE_URL` | Supabase project URL |
 | `STRIPE_SECRET_KEY` | Stripe secret key |
