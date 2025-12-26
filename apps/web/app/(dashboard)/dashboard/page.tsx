@@ -53,7 +53,7 @@ async function getDashboardData(userId: string) {
 
   // Calculate stats
   const totalProjects = projects.length;
-  const allTestRuns = projects.flatMap((p: { testRuns: Array<{ status: string; results: Array<{ status: string }> }> }) => p.testRuns);
+  const allTestRuns = projects.flatMap((p: { testRuns: Array<{ id: string; status: string; trigger: string; duration: number | null; createdAt: Date; results: Array<{ status: string }> }> }) => p.testRuns);
   const recentRuns = allTestRuns.slice(0, 10);
 
   const passedRuns = allTestRuns.filter((r: { status: string }) => r.status === "PASSED").length;
