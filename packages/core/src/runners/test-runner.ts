@@ -210,7 +210,7 @@ export class TestRunner {
   ): Promise<TestSuiteResult> {
     const {
       tests = Array.from(this.tests.values()).map((t) => t.config),
-      environment = { name: "default" },
+      environment = { name: "default", isProduction: false },
       parallel = true,
       maxConcurrency = 5,
       stopOnFirstFailure = false,
