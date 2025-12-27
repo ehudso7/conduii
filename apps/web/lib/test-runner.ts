@@ -9,8 +9,8 @@
 
 import { db } from "@/lib/db";
 
-// JSON-compatible type for Prisma Json fields
-type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+// JSON-compatible type for Prisma Json fields (excluding null at top level)
+type JsonValue = string | number | boolean | JsonValue[] | { [key: string]: JsonValue | null };
 
 export interface TestExecutionResult {
   testId: string;
