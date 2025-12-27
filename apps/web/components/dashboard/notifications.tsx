@@ -49,45 +49,14 @@ export function NotificationDropdown() {
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
+      } else {
+        setNotifications([]);
       }
     } catch {
-      // Use sample notifications if API fails
-      setNotifications(getSampleNotifications());
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
-  }
-
-  function getSampleNotifications(): Notification[] {
-    return [
-      {
-        id: "1",
-        type: "success",
-        title: "Test run completed",
-        description: "All 24 tests passed in 12.4s",
-        timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
-        read: false,
-        link: "/dashboard/projects",
-      },
-      {
-        id: "2",
-        type: "info",
-        title: "New service detected",
-        description: "Stripe integration discovered",
-        timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 mins ago
-        read: false,
-        link: "/dashboard/projects",
-      },
-      {
-        id: "3",
-        type: "warning",
-        title: "Usage approaching limit",
-        description: "You've used 80% of your test runs",
-        timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-        read: true,
-        link: "/dashboard/billing",
-      },
-    ];
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -120,15 +89,39 @@ export function NotificationDropdown() {
   };
 
   const markAsRead = async (id: string) => {
+    // Optimistically update UI
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
-    // TODO: Call API to mark as read
+
+    // Persist to database
+    try {
+      await fetch(`/api/user/notifications/${id}`, {
+        method: "PATCH",
+      });
+    } catch {
+      // Revert on error
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: false } : n))
+      );
+    }
   };
 
   const markAllAsRead = async () => {
+    const previousNotifications = notifications;
+
+    // Optimistically update UI
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    // TODO: Call API to mark all as read
+
+    // Persist to database
+    try {
+      await fetch("/api/user/notifications/read-all", {
+        method: "POST",
+      });
+    } catch {
+      // Revert on error
+      setNotifications(previousNotifications);
+    }
   };
 
   return (

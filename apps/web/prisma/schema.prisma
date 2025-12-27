@@ -16,21 +16,49 @@ datasource db {
 // ============================================================================
 
 model User {
-  id            String   @id @default(cuid())
-  clerkId       String   @unique
-  email         String   @unique
-  name          String?
-  imageUrl      String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                      String   @id @default(cuid())
+  clerkId                 String   @unique
+  email                   String   @unique
+  name                    String?
+  imageUrl                String?
+  notificationPreferences Json?    // Stores user notification preferences
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
-  organizations OrganizationMember[]
-  projects      ProjectMember[]
-  testRuns      TestRun[]
-  apiKeys       ApiKey[]
+  organizations   OrganizationMember[]
+  projects        ProjectMember[]
+  testRuns        TestRun[]
+  apiKeys         ApiKey[]
+  notifications   Notification[]
 
   @@index([clerkId])
   @@index([email])
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  type        NotificationType
+  title       String
+  description String
+  read        Boolean          @default(false)
+  link        String?
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  TEST_PASSED
+  TEST_FAILED
+  TEST_RUNNING
+  SERVICE_DISCOVERED
+  USAGE_WARNING
+  SYSTEM
 }
 
 model Organization {
