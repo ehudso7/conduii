@@ -3,28 +3,43 @@ import { canCreateProject, canRunTests, getPlan, PLANS } from "@/lib/stripe";
 
 describe("Stripe utilities", () => {
   describe("PLANS", () => {
-    it("should have FREE, PRO, and ENTERPRISE plans", () => {
+    it("should have FREE, BASIC, PRO, and ENTERPRISE plans", () => {
       expect(PLANS).toHaveProperty("FREE");
+      expect(PLANS).toHaveProperty("BASIC");
       expect(PLANS).toHaveProperty("PRO");
       expect(PLANS).toHaveProperty("ENTERPRISE");
     });
 
     it("should have correct project limits for each plan", () => {
       expect(PLANS.FREE.projectLimit).toBe(3);
+      expect(PLANS.BASIC.projectLimit).toBe(5);
       expect(PLANS.PRO.projectLimit).toBe(-1); // unlimited
       expect(PLANS.ENTERPRISE.projectLimit).toBe(-1); // unlimited
     });
 
     it("should have correct test run limits for each plan", () => {
       expect(PLANS.FREE.testRunLimit).toBe(100);
+      expect(PLANS.BASIC.testRunLimit).toBe(500);
       expect(PLANS.PRO.testRunLimit).toBe(5000);
       expect(PLANS.ENTERPRISE.testRunLimit).toBe(-1); // unlimited
     });
 
-    it("should have correct pricing for each plan", () => {
-      expect(PLANS.FREE.price).toBe(0);
-      expect(PLANS.PRO.price).toBe(29);
-      expect(PLANS.ENTERPRISE.price).toBeNull(); // custom
+    it("should have correct pricing structure for each plan", () => {
+      // Free plan
+      expect(PLANS.FREE.price.monthly).toBe(0);
+      expect(PLANS.FREE.price.yearly).toBe(0);
+
+      // Basic plan
+      expect(PLANS.BASIC.price.monthly).toBe(9.99);
+      expect(PLANS.BASIC.price.yearly).toBe(99.99);
+
+      // Pro plan
+      expect(PLANS.PRO.price.monthly).toBe(29.99);
+      expect(PLANS.PRO.price.yearly).toBe(299.99);
+
+      // Enterprise plan
+      expect(PLANS.ENTERPRISE.price.monthly).toBe(99.99);
+      expect(PLANS.ENTERPRISE.price.yearly).toBe(999.99);
     });
   });
 
