@@ -57,37 +57,39 @@ export default function BlogPage() {
 
         <div className="space-y-6">
           {posts.map((post) => (
-            <Card key={post.slug} className="hover:shadow-lg transition cursor-pointer">
-              <CardHeader>
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="secondary">{post.category}</Badge>
-                </div>
-                <CardTitle className="text-2xl hover:text-primary transition">
-                  {post.title}
-                </CardTitle>
-                <CardDescription className="text-base">
-                  {post.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {post.date}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      {post.readTime}
+            <Link key={post.slug} href={`/blog/${post.slug}`}>
+              <Card className="hover:shadow-lg transition cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="secondary">{post.category}</Badge>
+                  </div>
+                  <CardTitle className="text-2xl hover:text-primary transition">
+                    {post.title}
+                  </CardTitle>
+                  <CardDescription className="text-base">
+                    {post.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {post.date}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        {post.readTime}
+                      </span>
+                    </div>
+                    <span className="text-primary flex items-center gap-1 text-sm font-medium">
+                      Read more
+                      <ArrowRight className="w-4 h-4" />
                     </span>
                   </div>
-                  <span className="text-primary flex items-center gap-1 text-sm font-medium">
-                    Read more
-                    <ArrowRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>
