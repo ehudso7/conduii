@@ -9,13 +9,16 @@ type NotificationType =
   | "USAGE_WARNING"
   | "SYSTEM";
 
+// JSON-compatible type for metadata
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
 interface CreateNotificationInput {
   userId: string;
   type: NotificationType;
   title: string;
   description: string;
   link?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: JsonValue;
 }
 
 /**
