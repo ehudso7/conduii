@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+// Helper to run query with timeout
+async function queryWithTimeout<T>(
+  query: Promise<T>,
+  timeoutMs: number
+): Promise<T> {
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Database query timeout")), timeoutMs)
+  );
+  return Promise.race([query, timeoutPromise]);
+}
+
 export async function GET() {
   const checks: Record<string, { status: string; latency?: number; error?: string }> = {};
 
-  // Check database connection
+  // Check database connection with 5 second timeout
   const dbStart = Date.now();
   try {
-    await db.$queryRaw`SELECT 1`;
+    await queryWithTimeout(db.$queryRaw`SELECT 1`, 5000);
     checks.database = { status: "healthy", latency: Date.now() - dbStart };
   } catch (error) {
     checks.database = {

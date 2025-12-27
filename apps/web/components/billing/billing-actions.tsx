@@ -5,11 +5,6 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
-interface BillingActionsProps {
-  currentPlan: string;
-  organizationId: string;
-}
-
 export function UpgradeButton({
   planId,
   organizationId,
