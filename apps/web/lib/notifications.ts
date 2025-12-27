@@ -9,8 +9,8 @@ type NotificationType =
   | "USAGE_WARNING"
   | "SYSTEM";
 
-// JSON-compatible type for metadata
-type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+// JSON-compatible type for metadata (excludes null as Prisma uses JsonNull for that)
+type JsonValue = string | number | boolean | JsonValue[] | { [key: string]: JsonValue };
 
 interface CreateNotificationInput {
   userId: string;
