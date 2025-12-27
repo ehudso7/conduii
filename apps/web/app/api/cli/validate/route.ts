@@ -20,6 +20,10 @@ export async function POST(req: NextRequest) {
       where: {
         key: token,
         revokedAt: null,
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } },
+        ],
       },
       include: {
         user: {

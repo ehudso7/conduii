@@ -4,7 +4,6 @@ import {
   CreditCard,
   Check,
   Zap,
-  ArrowRight,
   Download,
   Calendar,
 } from "lucide-react";
@@ -19,6 +18,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
 import { getPlanLimits } from "@/lib/stripe";
+import {
+  UpgradeButton,
+  ManageBillingButton,
+  ContactSalesButton,
+  UpgradePromptCard,
+  InvoiceList,
+} from "@/components/billing";
 
 async function getBillingData(userId: string) {
   const user = await db.user.findUnique({
@@ -63,6 +69,7 @@ export default async function BillingPage() {
   const organization = user.organizations[0]?.organization;
   const currentPlan = organization?.plan || "FREE";
   const limits = getPlanLimits(currentPlan);
+  const organizationId = organization?.id || "";
 
   // Calculate usage percentage
   const testRunsUsed = organization?.testRunsUsed || 0;
@@ -77,11 +84,16 @@ export default async function BillingPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Billing</h1>
-        <p className="text-muted-foreground">
-          Manage your subscription and billing information
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Billing</h1>
+          <p className="text-muted-foreground">
+            Manage your subscription and billing information
+          </p>
+        </div>
+        {currentPlan !== "FREE" && organization && (
+          <ManageBillingButton organizationId={organizationId} />
+        )}
       </div>
 
       <div className="grid gap-6">
@@ -165,17 +177,8 @@ export default async function BillingPage() {
               </div>
             )}
 
-            {currentPlan === "FREE" && (
-              <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200">
-                <p className="font-medium text-blue-900">Upgrade to Pro</p>
-                <p className="text-sm text-blue-700 mt-1">
-                  Get unlimited projects, 5,000 test runs/month, and priority support.
-                </p>
-                <Button className="mt-3">
-                  Upgrade Now
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
+            {currentPlan === "FREE" && organization && (
+              <UpgradePromptCard organizationId={organizationId} />
             )}
           </CardContent>
         </Card>
@@ -219,11 +222,9 @@ export default async function BillingPage() {
                 <Button className="w-full mt-6" variant="outline" disabled>
                   Current Plan
                 </Button>
-              ) : (
-                <Button className="w-full mt-6" variant="outline">
-                  Downgrade
-                </Button>
-              )}
+              ) : organization ? (
+                <ManageBillingButton organizationId={organizationId} />
+              ) : null}
             </CardContent>
           </Card>
 
@@ -277,9 +278,15 @@ export default async function BillingPage() {
                 <Button className="w-full mt-6" variant="outline" disabled>
                   Current Plan
                 </Button>
-              ) : (
-                <Button className="w-full mt-6">Upgrade to Pro</Button>
-              )}
+              ) : organization ? (
+                <UpgradeButton
+                  planId="PRO"
+                  organizationId={organizationId}
+                  className="w-full mt-6"
+                >
+                  Upgrade to Pro
+                </UpgradeButton>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -324,16 +331,14 @@ export default async function BillingPage() {
                   Current Plan
                 </Button>
               ) : (
-                <Button className="w-full mt-6" variant="outline">
-                  Contact Sales
-                </Button>
+                <ContactSalesButton />
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Payment Method */}
-        {currentPlan !== "FREE" && (
+        {/* Payment Method - Only show for paid plans, link to Stripe portal */}
+        {currentPlan !== "FREE" && organization && (
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -346,16 +351,16 @@ export default async function BillingPage() {
               <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded flex items-center justify-center text-white text-xs font-bold">
-                    VISA
+                    CARD
                   </div>
                   <div>
-                    <p className="font-medium">**** **** **** 4242</p>
+                    <p className="font-medium">Payment method on file</p>
                     <p className="text-sm text-muted-foreground">
-                      Expires 12/2025
+                      Managed through Stripe billing portal
                     </p>
                   </div>
                 </div>
-                <Button variant="outline">Update</Button>
+                <ManageBillingButton organizationId={organizationId} />
               </div>
             </CardContent>
           </Card>
@@ -364,54 +369,17 @@ export default async function BillingPage() {
         {/* Billing History */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Download className="w-5 h-5" />
-                <CardTitle>Billing History</CardTitle>
-              </div>
-              <Button variant="outline" size="sm">
-                Download All
-              </Button>
+            <div className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              <CardTitle>Billing History</CardTitle>
             </div>
             <CardDescription>Your recent invoices and receipts</CardDescription>
           </CardHeader>
           <CardContent>
-            {currentPlan === "FREE" ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <CreditCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No billing history.</p>
-                <p className="text-sm">
-                  Upgrade to a paid plan to see invoices here.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {[
-                  { date: "Dec 1, 2024", amount: "$29.00", status: "Paid" },
-                  { date: "Nov 1, 2024", amount: "$29.00", status: "Paid" },
-                  { date: "Oct 1, 2024", amount: "$29.00", status: "Paid" },
-                ].map((invoice, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                  >
-                    <div>
-                      <p className="font-medium">{invoice.date}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Monthly subscription
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="font-medium">{invoice.amount}</span>
-                      <Badge variant="success">{invoice.status}</Badge>
-                      <Button variant="ghost" size="sm">
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <InvoiceList
+              organizationId={organizationId}
+              currentPlan={currentPlan}
+            />
           </CardContent>
         </Card>
       </div>

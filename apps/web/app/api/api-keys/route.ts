@@ -32,6 +32,10 @@ export async function GET(_req: NextRequest) {
       where: {
         organizationId: membership.organizationId,
         revokedAt: null,
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } },
+        ],
       },
       select: {
         id: true,
