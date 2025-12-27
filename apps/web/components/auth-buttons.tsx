@@ -1,23 +1,33 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 export function NavAuthButtons() {
+  const [mounted, setMounted] = useState(false);
   const { isLoaded, isSignedIn } = useAuth();
 
-  // Show placeholder while Clerk loads
-  if (!isLoaded) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // SSR and initial render - show sign in/up links
+  if (!mounted || !isLoaded) {
     return (
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm">
-          Sign In
-        </Button>
-        <Button size="sm">
-          Get Started
-        </Button>
+        <Link href="/sign-in">
+          <Button variant="ghost" size="sm">
+            Sign In
+          </Button>
+        </Link>
+        <Link href="/sign-up">
+          <Button size="sm">
+            Get Started
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -50,16 +60,23 @@ export function NavAuthButtons() {
 }
 
 export function HeroAuthButtons() {
+  const [mounted, setMounted] = useState(false);
   const { isLoaded, isSignedIn } = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-      {!isLoaded ? (
-        // Show button while loading - clicking will work once hydrated
-        <Button size="xl" variant="gradient" className="group">
-          Start Testing Free
-          <ArrowRight className="ml-2 w-5 h-5" />
-        </Button>
+      {!mounted || !isLoaded ? (
+        // SSR: Always show a working link
+        <Link href="/sign-up">
+          <Button size="xl" variant="gradient" className="group">
+            Start Testing Free
+            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+          </Button>
+        </Link>
       ) : isSignedIn ? (
         <Link href="/dashboard">
           <Button size="xl" variant="gradient" className="group">
@@ -85,14 +102,22 @@ export function HeroAuthButtons() {
 }
 
 export function CTAAuthButtons() {
+  const [mounted, setMounted] = useState(false);
   const { isLoaded, isSignedIn } = useAuth();
 
-  if (!isLoaded) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // SSR: Always show a working link
+  if (!mounted || !isLoaded) {
     return (
-      <Button size="xl" variant="gradient" className="group">
-        Get Started for Free
-        <ArrowRight className="ml-2 w-5 h-5" />
-      </Button>
+      <Link href="/sign-up">
+        <Button size="xl" variant="gradient" className="group">
+          Get Started for Free
+          <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+        </Button>
+      </Link>
     );
   }
 
@@ -123,9 +148,14 @@ interface PricingButtonProps {
 }
 
 export function PricingButton({ cta, popular }: PricingButtonProps) {
+  const [mounted, setMounted] = useState(false);
   const { isLoaded, isSignedIn } = useAuth();
 
-  // Contact Sales links to mailto
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Contact Sales links to mailto - always works
   if (cta === "Contact Sales") {
     return (
       <Button className="w-full" variant="outline" asChild>
@@ -136,11 +166,13 @@ export function PricingButton({ cta, popular }: PricingButtonProps) {
     );
   }
 
-  // Show placeholder while loading
-  if (!isLoaded) {
+  // SSR: Always show a working link
+  if (!mounted || !isLoaded) {
     return (
-      <Button className="w-full" variant={popular ? "gradient" : "outline"}>
-        {cta}
+      <Button className="w-full" variant={popular ? "gradient" : "outline"} asChild>
+        <Link href="/sign-up">
+          {cta}
+        </Link>
       </Button>
     );
   }
@@ -156,7 +188,7 @@ export function PricingButton({ cta, popular }: PricingButtonProps) {
     );
   }
 
-  // Get Started / Start Free Trial buttons trigger sign up
+  // Client-side with Clerk loaded: use modal
   return (
     <SignUpButton mode="modal">
       <Button className="w-full" variant={popular ? "gradient" : "outline"}>
