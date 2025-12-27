@@ -6,16 +6,11 @@ import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
-export function NavAuthButtons() {
-  const [mounted, setMounted] = useState(false);
+// Inner component that uses auth hooks - only rendered after mount
+function NavAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // SSR and initial render - show sign in/up links
-  if (!mounted || !isLoaded) {
+  if (!isLoaded) {
     return (
       <div className="flex items-center gap-4">
         <Link href="/sign-in">
@@ -59,9 +54,73 @@ export function NavAuthButtons() {
   );
 }
 
+export function NavAuthButtons() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // SSR: Always show working links
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-4">
+        <Link href="/sign-in">
+          <Button variant="ghost" size="sm">
+            Sign In
+          </Button>
+        </Link>
+        <Link href="/sign-up">
+          <Button size="sm">
+            Get Started
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  // Client: Use auth-aware component
+  return <NavAuthButtonsInner />;
+}
+
+// Inner component for hero auth buttons
+function HeroAuthButtonsInner() {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <Link href="/sign-up">
+        <Button size="xl" variant="gradient" className="group">
+          Start Testing Free
+          <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+        </Button>
+      </Link>
+    );
+  }
+
+  if (isSignedIn) {
+    return (
+      <Link href="/dashboard">
+        <Button size="xl" variant="gradient" className="group">
+          Go to Dashboard
+          <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+        </Button>
+      </Link>
+    );
+  }
+
+  return (
+    <SignUpButton mode="modal">
+      <Button size="xl" variant="gradient" className="group">
+        Start Testing Free
+        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+      </Button>
+    </SignUpButton>
+  );
+}
+
 export function HeroAuthButtons() {
   const [mounted, setMounted] = useState(false);
-  const { isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -69,28 +128,15 @@ export function HeroAuthButtons() {
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-      {!mounted || !isLoaded ? (
-        // SSR: Always show a working link
+      {!mounted ? (
         <Link href="/sign-up">
           <Button size="xl" variant="gradient" className="group">
             Start Testing Free
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
           </Button>
         </Link>
-      ) : isSignedIn ? (
-        <Link href="/dashboard">
-          <Button size="xl" variant="gradient" className="group">
-            Go to Dashboard
-            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-          </Button>
-        </Link>
       ) : (
-        <SignUpButton mode="modal">
-          <Button size="xl" variant="gradient" className="group">
-            Start Testing Free
-            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-          </Button>
-        </SignUpButton>
+        <HeroAuthButtonsInner />
       )}
       <Button size="xl" variant="outline" asChild>
         <Link href="/docs">
@@ -101,16 +147,11 @@ export function HeroAuthButtons() {
   );
 }
 
-export function CTAAuthButtons() {
-  const [mounted, setMounted] = useState(false);
+// Inner component for CTA auth buttons
+function CTAAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // SSR: Always show a working link
-  if (!mounted || !isLoaded) {
+  if (!isLoaded) {
     return (
       <Link href="/sign-up">
         <Button size="xl" variant="gradient" className="group">
@@ -142,14 +183,68 @@ export function CTAAuthButtons() {
   );
 }
 
+export function CTAAuthButtons() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // SSR: Always show a working link
+  if (!mounted) {
+    return (
+      <Link href="/sign-up">
+        <Button size="xl" variant="gradient" className="group">
+          Get Started for Free
+          <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+        </Button>
+      </Link>
+    );
+  }
+
+  return <CTAAuthButtonsInner />;
+}
+
 interface PricingButtonProps {
   cta: string;
   popular?: boolean;
 }
 
+// Inner component for pricing button auth logic
+function PricingButtonInner({ cta, popular }: PricingButtonProps) {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <Button className="w-full" variant={popular ? "gradient" : "outline"} asChild>
+        <Link href="/sign-up">
+          {cta}
+        </Link>
+      </Button>
+    );
+  }
+
+  if (isSignedIn) {
+    return (
+      <Button className="w-full" variant={popular ? "gradient" : "outline"} asChild>
+        <Link href="/dashboard">
+          Go to Dashboard
+        </Link>
+      </Button>
+    );
+  }
+
+  return (
+    <SignUpButton mode="modal">
+      <Button className="w-full" variant={popular ? "gradient" : "outline"}>
+        {cta}
+      </Button>
+    </SignUpButton>
+  );
+}
+
 export function PricingButton({ cta, popular }: PricingButtonProps) {
   const [mounted, setMounted] = useState(false);
-  const { isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -167,7 +262,7 @@ export function PricingButton({ cta, popular }: PricingButtonProps) {
   }
 
   // SSR: Always show a working link
-  if (!mounted || !isLoaded) {
+  if (!mounted) {
     return (
       <Button className="w-full" variant={popular ? "gradient" : "outline"} asChild>
         <Link href="/sign-up">
@@ -177,23 +272,5 @@ export function PricingButton({ cta, popular }: PricingButtonProps) {
     );
   }
 
-  // Signed in users go to dashboard
-  if (isSignedIn) {
-    return (
-      <Button className="w-full" variant={popular ? "gradient" : "outline"} asChild>
-        <Link href="/dashboard">
-          Go to Dashboard
-        </Link>
-      </Button>
-    );
-  }
-
-  // Client-side with Clerk loaded: use modal
-  return (
-    <SignUpButton mode="modal">
-      <Button className="w-full" variant={popular ? "gradient" : "outline"}>
-        {cta}
-      </Button>
-    </SignUpButton>
-  );
+  return <PricingButtonInner cta={cta} popular={popular} />;
 }
