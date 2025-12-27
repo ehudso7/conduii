@@ -8,7 +8,9 @@
  */
 
 import { db } from "@/lib/db";
-import { Prisma } from "@prisma/client";
+
+// JSON-compatible type for Prisma Json fields
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
 export interface TestExecutionResult {
   testId: string;
@@ -373,8 +375,8 @@ export async function executeTestRun(
             status: result.status,
             duration: result.duration,
             error: result.error,
-            assertions: result.assertions as Prisma.InputJsonValue | undefined,
-            metadata: result.metadata as Prisma.InputJsonValue | undefined,
+            assertions: result.assertions as JsonValue | undefined,
+            metadata: result.metadata as JsonValue | undefined,
           },
         });
 
