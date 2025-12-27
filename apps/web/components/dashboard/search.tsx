@@ -1,32 +1,21 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Search, Command } from "lucide-react";
+import { useCommandPaletteContext } from "@/components/command-palette-context";
 
 export function DashboardSearch() {
   const [isMac, setIsMac] = useState(true);
+  const { open } = useCommandPaletteContext();
 
   useEffect(() => {
     // Detect if user is on Mac
     setIsMac(navigator.platform.toUpperCase().indexOf("MAC") >= 0);
   }, []);
 
-  // Open command palette with keyboard shortcut
-  const handleClick = useCallback(() => {
-    // Dispatch a keyboard event to trigger the command palette
-    // Use metaKey for Mac, ctrlKey for Windows/Linux
-    const event = new KeyboardEvent("keydown", {
-      key: "k",
-      metaKey: isMac,
-      ctrlKey: !isMac,
-      bubbles: true,
-    });
-    document.dispatchEvent(event);
-  }, [isMac]);
-
   return (
     <button
-      onClick={handleClick}
+      onClick={open}
       className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted w-full max-w-sm hover:bg-muted/80 transition-colors text-left"
     >
       <Search className="w-4 h-4 text-muted-foreground" />
