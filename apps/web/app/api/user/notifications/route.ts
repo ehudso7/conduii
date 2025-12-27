@@ -11,53 +11,54 @@ const notificationsSchema = z.object({
   marketingEmails: z.boolean().optional(),
 });
 
+// Type for notification from database (before Prisma client regeneration)
+interface DbNotification {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  read: boolean;
+  link: string | null;
+  metadata: unknown;
+  createdAt: Date;
+  userId: string;
+}
+
+// Map database notification types to UI types
+function mapNotificationType(type: string): "success" | "error" | "warning" | "info" {
+  switch (type) {
+    case "TEST_PASSED":
+      return "success";
+    case "TEST_FAILED":
+      return "error";
+    case "USAGE_WARNING":
+      return "warning";
+    default:
+      return "info";
+  }
+}
+
 // GET /api/user/notifications - Get user notifications
 export async function GET() {
   try {
     const user = await requireAuth();
 
-    // Fetch recent test runs for this user's organizations to generate notifications
-    const recentTestRuns = await db.testRun.findMany({
-      where: {
-        project: {
-          organization: {
-            members: {
-              some: { userId: user.id },
-            },
-          },
-        },
-        createdAt: {
-          gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
-        },
-      },
-      include: {
-        project: {
-          select: { name: true },
-        },
-      },
+    // Fetch stored notifications from database
+    const storedNotifications = await db.notification.findMany({
+      where: { userId: user.id },
       orderBy: { createdAt: "desc" },
-      take: 10,
+      take: 20,
     });
 
-    // Transform test runs into notifications
-    const notifications = recentTestRuns.map((run: typeof recentTestRuns[0]) => ({
-      id: run.id,
-      type: run.status === "PASSED" ? "success" : run.status === "FAILED" ? "error" : "info",
-      title:
-        run.status === "PASSED"
-          ? "Test run completed"
-          : run.status === "FAILED"
-          ? "Test run failed"
-          : "Test run in progress",
-      description:
-        run.status === "PASSED"
-          ? `All tests passed for ${run.project.name}`
-          : run.status === "FAILED"
-          ? `Some tests failed for ${run.project.name}`
-          : `Running tests for ${run.project.name}`,
-      timestamp: run.createdAt,
-      read: false,
-      link: `/dashboard/projects/${run.projectId}/runs/${run.id}`,
+    // Transform to UI format
+    const notifications = (storedNotifications as DbNotification[]).map((n) => ({
+      id: n.id,
+      type: mapNotificationType(n.type),
+      title: n.title,
+      description: n.description,
+      timestamp: n.createdAt,
+      read: n.read,
+      link: n.link,
     }));
 
     return NextResponse.json({ notifications });
@@ -69,12 +70,17 @@ export async function GET() {
 // PATCH /api/user/notifications - Update notification preferences
 export async function PATCH(req: NextRequest) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
     const body = await req.json();
     const data = notificationsSchema.parse(body);
 
-    // For now, we just acknowledge the update
-    // In a production app, you would store these preferences in the database
+    // Store preferences in user's notificationPreferences JSON field
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        notificationPreferences: data,
+      },
+    });
 
     return NextResponse.json({
       success: true,

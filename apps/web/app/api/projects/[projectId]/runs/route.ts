@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { canRunTests } from "@/lib/stripe";
+import { notifyTestRunStatus } from "@/lib/notifications";
 
 // GET /api/projects/[projectId]/runs - List test runs
 export async function GET(
@@ -110,6 +111,15 @@ export async function POST(
         startedAt: new Date(),
       },
     });
+
+    // Create notification for test run started
+    await notifyTestRunStatus(
+      testRun.id,
+      "RUNNING",
+      project.name,
+      project.id,
+      user.id
+    );
 
     return NextResponse.json({ testRun }, { status: 201 });
   } catch (error) {

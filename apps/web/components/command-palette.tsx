@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useClerk } from "@clerk/nextjs";
+import { useCommandPaletteContext } from "./command-palette-context";
 
 interface CommandItem {
   id: string;
@@ -36,7 +37,7 @@ interface CommandPaletteProps {
 }
 
 export function CommandPalette({ projects = [] }: CommandPaletteProps) {
-  const [open, setOpen] = useState(false);
+  const { isOpen, close, toggle } = useCommandPaletteContext();
   const [search, setSearch] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const router = useRouter();
@@ -170,13 +171,13 @@ export function CommandPalette({ projects = [] }: CommandPaletteProps) {
       // Open command palette with Cmd+K or Ctrl+K
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setOpen((prev) => !prev);
+        toggle();
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [toggle]);
 
   // Handle navigation within palette
   const handleKeyNavigation = useCallback(
@@ -194,16 +195,16 @@ export function CommandPalette({ projects = [] }: CommandPaletteProps) {
       } else if (e.key === "Enter" && flatCommands[selectedIndex]) {
         e.preventDefault();
         flatCommands[selectedIndex].action();
-        setOpen(false);
+        close();
         setSearch("");
         setSelectedIndex(0);
       } else if (e.key === "Escape") {
-        setOpen(false);
+        close();
         setSearch("");
         setSelectedIndex(0);
       }
     },
-    [flatCommands, selectedIndex]
+    [flatCommands, selectedIndex, close]
   );
 
   // Reset selection when search changes
@@ -213,13 +214,21 @@ export function CommandPalette({ projects = [] }: CommandPaletteProps) {
 
   const handleSelect = (command: CommandItem) => {
     command.action();
-    setOpen(false);
+    close();
     setSearch("");
     setSelectedIndex(0);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      close();
+      setSearch("");
+      setSelectedIndex(0);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="overflow-hidden p-0 max-w-lg">
         <div className="flex items-center border-b px-3">
           <Search className="w-4 h-4 text-muted-foreground mr-2" />
@@ -238,7 +247,7 @@ export function CommandPalette({ projects = [] }: CommandPaletteProps) {
         <div className="max-h-[400px] overflow-y-auto p-2">
           {Object.keys(groupedCommands).length === 0 ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
-              No results found for "{search}"
+              No results found for &quot;{search}&quot;
             </div>
           ) : (
             Object.entries(groupedCommands).map(([category, items]) => (
@@ -298,23 +307,4 @@ export function CommandPalette({ projects = [] }: CommandPaletteProps) {
       </DialogContent>
     </Dialog>
   );
-}
-
-// Hook for triggering command palette
-export function useCommandPalette() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggle = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
-
-  const open = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-
-  const close = useCallback(() => {
-    setIsOpen(false);
-  }, []);
-
-  return { isOpen, toggle, open, close };
 }
