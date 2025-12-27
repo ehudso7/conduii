@@ -89,6 +89,8 @@ export function NotificationDropdown() {
   };
 
   const markAsRead = async (id: string) => {
+    const previousNotifications = notifications;
+
     // Optimistically update UI
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
@@ -100,10 +102,8 @@ export function NotificationDropdown() {
         method: "PATCH",
       });
     } catch {
-      // Revert on error
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: false } : n))
-      );
+      // Revert to original state on error
+      setNotifications(previousNotifications);
     }
   };
 
