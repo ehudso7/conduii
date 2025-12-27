@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Share2, Twitter, Linkedin, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -10,6 +10,13 @@ interface ShareButtonsProps {
 
 export function ShareButtons({ title }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
+
+  // Cleanup timer on unmount to prevent memory leak
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
 
   const handleTwitterShare = () => {
     const url = encodeURIComponent(window.location.href);
@@ -34,7 +41,6 @@ export function ShareButtons({ title }: ShareButtonsProps) {
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     } catch {
       // Silently fail if clipboard is not available
     }
