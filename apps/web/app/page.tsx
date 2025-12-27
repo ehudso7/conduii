@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NavAuthButtons, HeroAuthButtons, CTAAuthButtons } from "@/components/auth-buttons";
 import {
   Zap,
   Globe,
-  ArrowRight,
   Check,
   Terminal,
   Sparkles,
@@ -147,26 +146,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="flex items-center gap-4">
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <Button variant="ghost" size="sm">
-                    Sign In
-                  </Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button size="sm">
-                    Get Started
-                  </Button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <Link href="/dashboard">
-                  <Button size="sm">Dashboard</Button>
-                </Link>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
-            </div>
+            <NavAuthButtons />
           </div>
         </div>
       </nav>
@@ -190,29 +170,7 @@ export default function HomePage() {
               tests against your live infrastructure. No local server required.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <SignedOut>
-                <SignUpButton mode="modal">
-                  <Button size="xl" variant="gradient" className="group">
-                    Start Testing Free
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-                  </Button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <Link href="/dashboard">
-                  <Button size="xl" variant="gradient" className="group">
-                    Go to Dashboard
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-                  </Button>
-                </Link>
-              </SignedIn>
-              <Button size="xl" variant="outline" asChild>
-                <Link href="/docs">
-                  View Documentation
-                </Link>
-              </Button>
-            </div>
+            <HeroAuthButtons />
 
             {/* Code Preview */}
             <div className="max-w-2xl mx-auto">
@@ -379,22 +337,7 @@ export default function HomePage() {
             <p className="text-xl text-muted-foreground mb-8">
               Join thousands of developers who trust Conduii to validate their deployments.
             </p>
-            <SignedOut>
-              <SignUpButton mode="modal">
-                <Button size="xl" variant="gradient" className="group">
-                  Get Started for Free
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-                </Button>
-              </SignUpButton>
-            </SignedOut>
-            <SignedIn>
-              <Link href="/dashboard">
-                <Button size="xl" variant="gradient" className="group">
-                  Go to Dashboard
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-                </Button>
-              </Link>
-            </SignedIn>
+            <CTAAuthButtons />
           </div>
         </div>
       </section>
