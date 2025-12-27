@@ -8,6 +8,7 @@
  */
 
 import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 
 export interface TestExecutionResult {
   testId: string;
@@ -372,8 +373,8 @@ export async function executeTestRun(
             status: result.status,
             duration: result.duration,
             error: result.error,
-            assertions: result.assertions,
-            metadata: result.metadata,
+            assertions: result.assertions as Prisma.InputJsonValue | undefined,
+            metadata: result.metadata as Prisma.InputJsonValue | undefined,
           },
         });
 
