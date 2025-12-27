@@ -4,25 +4,32 @@ export default authMiddleware({
   // Routes that can be accessed while signed out
   publicRoutes: [
     "/",
-    "/api/webhooks(.*)",
-    "/sign-in(.*)",
-    "/sign-up(.*)",
     "/pricing",
-    "/docs(.*)",
-    "/blog(.*)",
+    "/docs",
+    "/docs/(.*)",
+    "/blog",
+    "/blog/(.*)",
     "/changelog",
     "/about",
     "/privacy",
     "/terms",
-  ],
-  // Routes that should always be treated as public
-  ignoredRoutes: [
+    "/sign-in",
+    "/sign-in/(.*)",
+    "/sign-up",
+    "/sign-up/(.*)",
     "/api/health",
-    "/api/webhooks/clerk",
-    "/api/webhooks/stripe",
+    "/api/webhooks",
+    "/api/webhooks/(.*)",
   ],
+  // Debug mode to help identify issues (remove in production after fixing)
+  debug: process.env.NODE_ENV === "development",
 });
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    // Skip Next.js internals and all static files
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes
+    "/(api|trpc)(.*)",
+  ],
 };
