@@ -7,7 +7,8 @@ import { z } from "zod";
 const createProjectSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  repositoryUrl: z.string().url().optional(),
+  repositoryUrl: z.string().url().optional().or(z.literal("")),
+  productionUrl: z.string().url().optional().or(z.literal("")),
 });
 
 // GET /api/projects - List all projects
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth();
     const body = await req.json();
-    const { name, description, repositoryUrl } = createProjectSchema.parse(body);
+    const { name, description, repositoryUrl, productionUrl } = createProjectSchema.parse(body);
 
     const orgId = body.organizationId;
     let organizationId = orgId;
@@ -124,8 +125,9 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         slug,
-        description: description ?? null,
-        repositoryUrl: repositoryUrl ?? null,
+        description: description || null,
+        repositoryUrl: repositoryUrl || null,
+        productionUrl: productionUrl || null,
         organizationId,
         members: {
           create: {

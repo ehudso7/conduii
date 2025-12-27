@@ -1,4 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { z } from "zod";
+
+// Project creation schema (matching the API route)
+const createProjectSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional(),
+  repositoryUrl: z.string().url().optional().or(z.literal("")),
+  productionUrl: z.string().url().optional().or(z.literal("")),
+});
 
 // Mock Prisma client
 vi.mock("@/lib/db", () => ({
@@ -13,6 +22,7 @@ vi.mock("@/lib/db", () => ({
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
+      count: vi.fn(),
     },
     organization: {
       findFirst: vi.fn(),
@@ -43,54 +53,116 @@ describe("Projects API", () => {
     vi.clearAllMocks();
   });
 
-  describe("GET /api/projects", () => {
-    it("should return projects for authenticated user", async () => {
-      // This is a placeholder test that validates the test setup
-      expect(true).toBe(true);
-    });
-
-    it("should return empty array if user has no projects", async () => {
-      expect([]).toHaveLength(0);
-    });
-  });
-
-  describe("POST /api/projects", () => {
-    it("should create a new project with valid data", async () => {
-      const projectData = {
+  describe("Project Schema Validation", () => {
+    it("should accept valid project data", () => {
+      const validProject = {
         name: "Test Project",
         description: "A test project",
+        repositoryUrl: "https://github.com/user/repo",
+        productionUrl: "https://example.com",
       };
-      expect(projectData.name).toBe("Test Project");
+
+      const result = createProjectSchema.safeParse(validProject);
+      expect(result.success).toBe(true);
     });
 
-    it("should reject project creation without name", async () => {
-      const projectData = {
+    it("should accept project with minimal data (name only)", () => {
+      const minimalProject = {
+        name: "My Project",
+      };
+
+      const result = createProjectSchema.safeParse(minimalProject);
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject project without name", () => {
+      const invalidProject = {
+        description: "No name provided",
+      };
+
+      const result = createProjectSchema.safeParse(invalidProject);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject project with empty name", () => {
+      const invalidProject = {
         name: "",
       };
-      expect(projectData.name.length).toBe(0);
+
+      const result = createProjectSchema.safeParse(invalidProject);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject project with name exceeding 100 characters", () => {
+      const invalidProject = {
+        name: "a".repeat(101),
+      };
+
+      const result = createProjectSchema.safeParse(invalidProject);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject project with description exceeding 500 characters", () => {
+      const invalidProject = {
+        name: "Test Project",
+        description: "a".repeat(501),
+      };
+
+      const result = createProjectSchema.safeParse(invalidProject);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject invalid repository URL", () => {
+      const invalidProject = {
+        name: "Test Project",
+        repositoryUrl: "not-a-valid-url",
+      };
+
+      const result = createProjectSchema.safeParse(invalidProject);
+      expect(result.success).toBe(false);
+    });
+
+    it("should accept empty string for optional URL fields", () => {
+      const project = {
+        name: "Test Project",
+        repositoryUrl: "",
+        productionUrl: "",
+      };
+
+      const result = createProjectSchema.safeParse(project);
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject invalid production URL", () => {
+      const invalidProject = {
+        name: "Test Project",
+        productionUrl: "not-a-valid-url",
+      };
+
+      const result = createProjectSchema.safeParse(invalidProject);
+      expect(result.success).toBe(false);
     });
   });
 
-  describe("Project Validation", () => {
-    it("should validate project name length", () => {
-      const validName = "My Project";
-      const tooLongName = "a".repeat(101);
+  describe("Project Slug Generation", () => {
+    const generateSlug = (name: string) => {
+      return name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+    };
 
-      expect(validName.length).toBeLessThanOrEqual(100);
-      expect(tooLongName.length).toBeGreaterThan(100);
+    it("should convert name to lowercase slug", () => {
+      expect(generateSlug("My Project")).toBe("my-project");
     });
 
-    it("should allow optional description", () => {
-      const projectWithDescription = {
-        name: "Project",
-        description: "Description",
-      };
-      const projectWithoutDescription = {
-        name: "Project",
-      };
+    it("should replace special characters with hyphens", () => {
+      expect(generateSlug("My_Project!@#")).toBe("my-project---");
+    });
 
-      expect(projectWithDescription.description).toBeDefined();
-      expect(projectWithoutDescription).not.toHaveProperty("description");
+    it("should handle numeric names", () => {
+      expect(generateSlug("Project123")).toBe("project123");
+    });
+
+    it("should handle names with spaces", () => {
+      expect(generateSlug("My New Project")).toBe("my-new-project");
     });
   });
 });
