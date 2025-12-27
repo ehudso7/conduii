@@ -10,7 +10,8 @@ const notificationsSchema = z.object({
 
 export async function PATCH(req: NextRequest) {
   try {
-    const user = await requireAuth();
+    // Verify user is authenticated (user data not needed for this endpoint)
+    await requireAuth();
     const body = await req.json();
     const data = notificationsSchema.parse(body);
 

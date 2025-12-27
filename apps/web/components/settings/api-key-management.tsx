@@ -27,7 +27,7 @@ interface ApiKeyManagementProps {
   organizationId: string;
 }
 
-export function ApiKeyManagement({ apiKeys: initialKeys, organizationId }: ApiKeyManagementProps) {
+export function ApiKeyManagement({ apiKeys: initialKeys, organizationId: _organizationId }: ApiKeyManagementProps) {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>(initialKeys);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [keyName, setKeyName] = useState("");
@@ -103,13 +103,21 @@ export function ApiKeyManagement({ apiKeys: initialKeys, organizationId }: ApiKe
   };
 
   const handleCopy = async (text: string, keyId: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopiedId(keyId);
-    setTimeout(() => setCopiedId(null), 2000);
-    toast({
-      title: "Copied",
-      description: "API key copied to clipboard",
-    });
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(keyId);
+      setTimeout(() => setCopiedId(null), 2000);
+      toast({
+        title: "Copied",
+        description: "API key copied to clipboard",
+      });
+    } catch {
+      toast({
+        title: "Copy failed",
+        description: "Could not copy to clipboard. Please copy manually.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatDate = (date: Date | string | null) => {
