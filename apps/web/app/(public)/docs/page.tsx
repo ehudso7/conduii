@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Book, Terminal, Code, Zap, Settings, Copy, Check, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -67,9 +67,12 @@ function CodeBlock({ code, language = "bash" }: { code: string; language?: strin
   };
 
   // Reset copied state after 2 seconds
-  if (copied) {
-    setTimeout(() => setCopied(false), 2000);
-  }
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
 
   return (
     <div className="relative group">
