@@ -143,7 +143,7 @@ export async function PATCH(
       where: { id: testRunId },
       data: {
         status,
-        completedAt: status === "CANCELLED" ? new Date() : undefined,
+        finishedAt: status === "CANCELLED" ? new Date() : undefined,
       },
     });
 

@@ -85,7 +85,7 @@ export async function DELETE() {
     await db.$transaction([
       db.organizationMember.deleteMany({ where: { userId: user.id } }),
       db.projectMember.deleteMany({ where: { userId: user.id } }),
-      db.apiKey.deleteMany({ where: { createdById: user.id } }),
+      db.apiKey.deleteMany({ where: { userId: user.id } }),
       db.user.delete({ where: { id: user.id } }),
     ]);
 

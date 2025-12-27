@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Calendar, Clock, User, Share2, Twitter, Linkedin } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ShareButtons } from "@/components/blog/share-buttons";
 
 // Blog post data - in a real app this would come from a CMS or database
 const posts: Record<string, {
@@ -456,45 +457,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 {post.author.name}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Share on Twitter"
-                onClick={() => {
-                  const url = encodeURIComponent(window.location.href);
-                  const text = encodeURIComponent(post.title);
-                  window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'noopener,noreferrer');
-                }}
-              >
-                <Twitter className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Share on LinkedIn"
-                onClick={() => {
-                  const url = encodeURIComponent(window.location.href);
-                  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'noopener,noreferrer');
-                }}
-              >
-                <Linkedin className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Copy link to share"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(window.location.href);
-                  } catch {
-                    // Silently fail if clipboard is not available
-                  }
-                }}
-              >
-                <Share2 className="w-4 h-4" />
-              </Button>
-            </div>
+            <ShareButtons title={post.title} />
           </div>
         </header>
 
