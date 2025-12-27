@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Play,
-  Settings,
   ExternalLink,
   CheckCircle2,
   XCircle,
@@ -15,8 +14,6 @@ import {
   GitBranch,
   Zap,
   Activity,
-  MoreVertical,
-  Trash2,
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,14 +25,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { db } from "@/lib/db";
+import {
+  ProjectActionsDropdown,
+  CheckHealthButton,
+  CreateTestSuiteButton,
+  RunTestSuiteButton,
+} from "@/components/project";
 
 async function getProject(projectId: string, userId: string) {
   const user = await db.user.findUnique({
@@ -214,28 +210,7 @@ export default async function ProjectDetailPage({
               Run Tests
             </Button>
           </Link>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Re-discover Services
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="w-4 h-4 mr-2" />
-                Project Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Project
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ProjectActionsDropdown projectId={project.id} projectName={project.name} />
         </div>
       </div>
 
@@ -310,10 +285,7 @@ export default async function ProjectDetailPage({
                   Detected integrations and their health status
                 </CardDescription>
               </div>
-              <Button variant="outline" size="sm">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Check Health
-              </Button>
+              <CheckHealthButton projectId={project.id} />
             </div>
           </CardHeader>
           <CardContent>
@@ -565,9 +537,7 @@ export default async function ProjectDetailPage({
                 Organized collections of tests for this project
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm">
-              Create Test Suite
-            </Button>
+            <CreateTestSuiteButton projectId={project.id} />
           </div>
         </CardHeader>
         <CardContent>
@@ -603,10 +573,7 @@ export default async function ProjectDetailPage({
                     <span className="text-sm text-muted-foreground">
                       {suite._count.tests} tests
                     </span>
-                    <Button variant="ghost" size="sm">
-                      <Play className="w-4 h-4 mr-1" />
-                      Run
-                    </Button>
+                    <RunTestSuiteButton projectId={project.id} suiteId={suite.id} />
                   </div>
                 </div>
               ))}

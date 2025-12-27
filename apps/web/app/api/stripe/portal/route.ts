@@ -9,18 +9,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { organizationId } = body;
 
-    // Get user's organization
+    // Get user's organization - require admin/owner role for billing access
     let org;
     if (organizationId) {
       org = await db.organization.findFirst({
         where: {
           id: organizationId,
-          members: { some: { userId: user.id } },
+          members: { some: { userId: user.id, role: { in: ["OWNER", "ADMIN"] } } },
         },
       });
     } else {
       const membership = await db.organizationMember.findFirst({
-        where: { userId: user.id },
+        where: { userId: user.id, role: { in: ["OWNER", "ADMIN"] } },
         include: { organization: true },
       });
       org = membership?.organization;
@@ -40,7 +40,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+      console.error("NEXT_PUBLIC_APP_URL environment variable is not set");
+      return NextResponse.json(
+        { error: "Server configuration error" },
+        { status: 500 }
+      );
+    }
 
     const session = await stripe.billingPortal.sessions.create({
       customer: org.stripeCustomerId,
