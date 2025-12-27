@@ -1,0 +1,478 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  RefreshCw,
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Lightbulb,
+  Bug,
+  Timer,
+  Activity,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+interface TestResult {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  duration: number | null;
+  error: string | null;
+  assertions: { passed: number; failed: number } | null;
+  metadata: Record<string, unknown> | null;
+}
+
+interface Diagnostic {
+  id: string;
+  severity: string;
+  issue: string;
+  suggestion: string;
+  category: string;
+}
+
+interface TestRun {
+  id: string;
+  status: string;
+  trigger: string;
+  duration: number | null;
+  summary: {
+    total: number;
+    passed: number;
+    failed: number;
+    skipped: number;
+  } | null;
+  createdAt: string;
+  completedAt: string | null;
+  environment: {
+    id: string;
+    name: string;
+    url: string | null;
+  } | null;
+  testSuite: {
+    id: string;
+    name: string;
+  } | null;
+  triggeredBy: {
+    id: string;
+    name: string | null;
+    imageUrl: string | null;
+  } | null;
+  results: TestResult[];
+  diagnostics: Diagnostic[];
+}
+
+interface Project {
+  id: string;
+  name: string;
+}
+
+function getStatusIcon(status: string) {
+  switch (status) {
+    case "PASSED":
+      return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+    case "FAILED":
+      return <XCircle className="w-5 h-5 text-red-500" />;
+    case "RUNNING":
+      return <RefreshCw className="w-5 h-5 text-blue-500 animate-spin" />;
+    case "SKIPPED":
+      return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+    default:
+      return <Clock className="w-5 h-5 text-gray-400" />;
+  }
+}
+
+function getSeverityColor(severity: string) {
+  switch (severity) {
+    case "CRITICAL":
+      return "text-red-600 bg-red-50 border-red-200";
+    case "HIGH":
+      return "text-orange-600 bg-orange-50 border-orange-200";
+    case "MEDIUM":
+      return "text-yellow-600 bg-yellow-50 border-yellow-200";
+    case "LOW":
+      return "text-blue-600 bg-blue-50 border-blue-200";
+    default:
+      return "text-gray-600 bg-gray-50 border-gray-200";
+  }
+}
+
+export default function TestRunDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const projectId = params.projectId as string;
+  const runId = params.runId as string;
+
+  const [testRun, setTestRun] = useState<TestRun | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [expandedResults, setExpandedResults] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    fetchData();
+    // Poll for updates if the run is still in progress
+    const interval = setInterval(() => {
+      if (testRun?.status === "RUNNING" || testRun?.status === "PENDING") {
+        fetchData();
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [projectId, runId, testRun?.status]);
+
+  async function fetchData() {
+    try {
+      const [runRes, projectRes] = await Promise.all([
+        fetch(`/api/test-runs/${runId}`),
+        fetch(`/api/projects/${projectId}`),
+      ]);
+
+      if (runRes.ok) {
+        const { testRun } = await runRes.json();
+        setTestRun(testRun);
+      }
+
+      if (projectRes.ok) {
+        const { project } = await projectRes.json();
+        setProject(project);
+      }
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function toggleResult(resultId: string) {
+    const newExpanded = new Set(expandedResults);
+    if (newExpanded.has(resultId)) {
+      newExpanded.delete(resultId);
+    } else {
+      newExpanded.add(resultId);
+    }
+    setExpandedResults(newExpanded);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!testRun) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <AlertTriangle className="w-16 h-16 text-muted-foreground mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Test Run Not Found</h2>
+        <p className="text-muted-foreground mb-6">
+          The test run you're looking for doesn't exist or you don't have access to it.
+        </p>
+        <Button onClick={() => router.push(`/dashboard/projects/${projectId}/runs`)}>
+          Back to Test Runs
+        </Button>
+      </div>
+    );
+  }
+
+  const summary = testRun.summary || { total: 0, passed: 0, failed: 0, skipped: 0 };
+  const passRate = summary.total > 0 ? Math.round((summary.passed / summary.total) * 100) : 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-4">
+          <Link href={`/dashboard/projects/${projectId}/runs`}>
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          </Link>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold">Test Run</h1>
+              <Badge
+                variant={
+                  testRun.status === "PASSED"
+                    ? "success"
+                    : testRun.status === "FAILED"
+                    ? "destructive"
+                    : testRun.status === "RUNNING"
+                    ? "secondary"
+                    : "outline"
+                }
+                className="text-sm"
+              >
+                {testRun.status}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground mt-1">
+              {project?.name} • {testRun.trigger} run
+              {testRun.environment && ` • ${testRun.environment.name}`}
+            </p>
+            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              <span>Started {new Date(testRun.createdAt).toLocaleString()}</span>
+              {testRun.duration && (
+                <span className="flex items-center gap-1">
+                  <Timer className="w-4 h-4" />
+                  {(testRun.duration / 1000).toFixed(1)}s
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {testRun.status === "RUNNING" && (
+            <Badge variant="secondary" className="animate-pulse">
+              <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+              Running...
+            </Badge>
+          )}
+          <Button variant="outline" onClick={fetchData}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Tests</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary.total}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-green-600">Passed</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{summary.passed}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-red-600">Failed</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{summary.failed}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Pass Rate</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${passRate >= 80 ? "text-green-600" : passRate >= 50 ? "text-yellow-600" : "text-red-600"}`}>
+              {passRate}%
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* AI Diagnostics */}
+      {testRun.diagnostics.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-yellow-500" />
+              <CardTitle>AI Diagnostics</CardTitle>
+            </div>
+            <CardDescription>
+              Intelligent analysis of test failures with actionable suggestions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {testRun.diagnostics.map((diagnostic) => (
+                <div
+                  key={diagnostic.id}
+                  className={`p-4 rounded-lg border ${getSeverityColor(diagnostic.severity)}`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      <Bug className="w-5 h-5 mt-0.5" />
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className="text-xs">
+                            {diagnostic.severity}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {diagnostic.category}
+                          </Badge>
+                        </div>
+                        <p className="font-medium">{diagnostic.issue}</p>
+                        <p className="text-sm mt-2 opacity-80">{diagnostic.suggestion}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Test Results */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            <CardTitle>Test Results</CardTitle>
+          </div>
+          <CardDescription>
+            Detailed results for each test in this run
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {testRun.results.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {testRun.status === "RUNNING" || testRun.status === "PENDING" ? (
+                <>
+                  <RefreshCw className="w-12 h-12 mx-auto mb-4 animate-spin opacity-50" />
+                  <p>Tests are currently running...</p>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No test results available.</p>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {testRun.results.map((result) => (
+                <Collapsible
+                  key={result.id}
+                  open={expandedResults.has(result.id)}
+                  onOpenChange={() => toggleResult(result.id)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors">
+                      <div className="flex items-center gap-3">
+                        {getStatusIcon(result.status)}
+                        <div>
+                          <p className="font-medium">{result.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="outline" className="text-xs">
+                              {result.type}
+                            </Badge>
+                            {result.duration && (
+                              <span className="text-xs text-muted-foreground">
+                                {result.duration}ms
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        {result.assertions && (
+                          <span className="text-sm text-muted-foreground">
+                            {result.assertions.passed}/{result.assertions.passed + result.assertions.failed} assertions
+                          </span>
+                        )}
+                        <Badge
+                          variant={
+                            result.status === "PASSED"
+                              ? "success"
+                              : result.status === "FAILED"
+                              ? "destructive"
+                              : "secondary"
+                          }
+                        >
+                          {result.status}
+                        </Badge>
+                        {expandedResults.has(result.id) ? (
+                          <ChevronDown className="w-4 h-4" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4" />
+                        )}
+                      </div>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="p-4 mt-1 rounded-lg bg-muted/30 border">
+                      {result.error && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium text-red-600 mb-2">Error</h4>
+                          <pre className="text-sm bg-red-50 text-red-800 p-3 rounded overflow-x-auto">
+                            {result.error}
+                          </pre>
+                        </div>
+                      )}
+                      {result.metadata && Object.keys(result.metadata).length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Details</h4>
+                          <pre className="text-sm bg-muted p-3 rounded overflow-x-auto">
+                            {JSON.stringify(result.metadata, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                      {!result.error && (!result.metadata || Object.keys(result.metadata).length === 0) && (
+                        <p className="text-sm text-muted-foreground">No additional details available.</p>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Environment Info */}
+      {testRun.environment && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Environment</CardTitle>
+            <CardDescription>
+              The environment this test run was executed against
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <div>
+                <p className="font-medium">{testRun.environment.name}</p>
+                {testRun.environment.url && (
+                  <a
+                    href={testRun.environment.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+                  >
+                    {testRun.environment.url}
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
