@@ -42,7 +42,9 @@
     "RESEND_HOST",
     "RESEND_PORT",
     "RESEND_USER",
-    "FROM_EMAIL"
+    "FROM_EMAIL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET"
   ],
   "tasks": {
     "build": {
