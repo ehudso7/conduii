@@ -80,3 +80,41 @@ export function CTAAuthButtons() {
     </>
   );
 }
+
+interface PricingButtonProps {
+  cta: string;
+  popular?: boolean;
+}
+
+export function PricingButton({ cta, popular }: PricingButtonProps) {
+  // Contact Sales links to mailto
+  if (cta === "Contact Sales") {
+    return (
+      <Button className="w-full" variant="outline" asChild>
+        <Link href="mailto:sales@conduii.com?subject=Enterprise%20Inquiry">
+          {cta}
+        </Link>
+      </Button>
+    );
+  }
+
+  // Get Started / Start Free Trial buttons trigger sign up
+  return (
+    <>
+      <SignedOut>
+        <SignUpButton mode="modal">
+          <Button className="w-full" variant={popular ? "gradient" : "outline"}>
+            {cta}
+          </Button>
+        </SignUpButton>
+      </SignedOut>
+      <SignedIn>
+        <Button className="w-full" variant={popular ? "gradient" : "outline"} asChild>
+          <Link href="/dashboard">
+            Go to Dashboard
+          </Link>
+        </Button>
+      </SignedIn>
+    </>
+  );
+}
