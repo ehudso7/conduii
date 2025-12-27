@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, handleApiError } from "@/lib/auth";
+import { z } from "zod";
+
+const updateTestRunSchema = z.object({
+  status: z.enum(["CANCELLED"]),
+});
 
 // GET /api/test-runs/[id] - Get test run details
 export async function GET(
@@ -87,7 +92,9 @@ export async function PATCH(
     const user = await requireAuth();
     const testRunId = params.id;
     const body = await req.json();
-    const { status } = body;
+
+    // Validate that only allowed status values can be set
+    const { status } = updateTestRunSchema.parse(body);
 
     const testRun = await db.testRun.findUnique({
       where: { id: testRunId },
@@ -142,6 +149,12 @@ export async function PATCH(
 
     return NextResponse.json({ testRun: updatedTestRun });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid status value. Only 'CANCELLED' is allowed." },
+        { status: 400 }
+      );
+    }
     return handleApiError(error);
   }
 }
