@@ -2,7 +2,7 @@
 // These types represent the data structures used throughout the application
 
 // Enum types (matching Prisma schema)
-export type Plan = "FREE" | "PRO" | "ENTERPRISE";
+export type Plan = "FREE" | "BASIC" | "PRO" | "ENTERPRISE";
 export type OrgRole = "OWNER" | "ADMIN" | "MEMBER";
 export type ProjectRole = "OWNER" | "ADMIN" | "DEVELOPER" | "VIEWER";
 export type ServiceType = "PLATFORM" | "DATABASE" | "AUTH" | "PAYMENT" | "EMAIL" | "STORAGE" | "ANALYTICS" | "MONITORING" | "REPOSITORY" | "CUSTOM";
