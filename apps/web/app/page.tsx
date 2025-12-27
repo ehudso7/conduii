@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { NavAuthButtons, HeroAuthButtons, CTAAuthButtons } from "@/components/auth-buttons";
+import { NavAuthButtons, HeroAuthButtons, CTAAuthButtons, PricingButton } from "@/components/auth-buttons";
 import {
   Zap,
   Globe,
@@ -313,12 +312,7 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <Button
-                    className="w-full"
-                    variant={plan.popular ? "gradient" : "outline"}
-                  >
-                    {plan.cta}
-                  </Button>
+                  <PricingButton cta={plan.cta} popular={plan.popular} />
                 </CardContent>
               </Card>
             ))}
