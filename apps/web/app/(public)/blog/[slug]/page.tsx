@@ -457,13 +457,41 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Share on Twitter"
+                onClick={() => {
+                  const url = encodeURIComponent(window.location.href);
+                  const text = encodeURIComponent(post.title);
+                  window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'noopener,noreferrer');
+                }}
+              >
                 <Twitter className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Share on LinkedIn"
+                onClick={() => {
+                  const url = encodeURIComponent(window.location.href);
+                  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'noopener,noreferrer');
+                }}
+              >
                 <Linkedin className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Copy link to share"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(window.location.href);
+                  } catch {
+                    // Silently fail if clipboard is not available
+                  }
+                }}
+              >
                 <Share2 className="w-4 h-4" />
               </Button>
             </div>

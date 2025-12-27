@@ -11,7 +11,6 @@ import {
   Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +25,7 @@ interface Notification {
   type: "success" | "error" | "warning" | "info";
   title: string;
   description: string;
-  timestamp: Date;
+  timestamp: string | Date;
   read: boolean;
   link?: string;
 }
@@ -51,7 +50,7 @@ export function NotificationDropdown() {
         const data = await res.json();
         setNotifications(data.notifications || []);
       }
-    } catch (error) {
+    } catch {
       // Use sample notifications if API fails
       setNotifications(getSampleNotifications());
     } finally {
@@ -106,9 +105,10 @@ export function NotificationDropdown() {
     }
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (date: string | Date) => {
+    const dateObj = typeof date === "string" ? new Date(date) : date;
     const now = new Date();
-    const diff = now.getTime() - date.getTime();
+    const diff = now.getTime() - dateObj.getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);

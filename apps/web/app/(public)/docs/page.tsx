@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Book, Terminal, Code, Zap, Settings, Copy, Check, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,10 +58,18 @@ function CodeBlock({ code, language = "bash" }: { code: string; language?: strin
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+    } catch {
+      // Silently fail if clipboard is not available
+    }
   };
+
+  // Reset copied state after 2 seconds
+  if (copied) {
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <div className="relative group">
@@ -70,6 +78,7 @@ function CodeBlock({ code, language = "bash" }: { code: string; language?: strin
       </pre>
       <button
         onClick={handleCopy}
+        aria-label={copied ? "Copied" : "Copy code"}
         className="absolute top-2 right-2 p-2 rounded bg-zinc-800 text-zinc-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
       >
         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -79,28 +88,6 @@ function CodeBlock({ code, language = "bash" }: { code: string; language?: strin
 }
 
 export default function DocsPage() {
-  const [activeSection, setActiveSection] = useState("");
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const sectionElements = document.querySelectorAll("[data-section]");
-      let currentSection = "";
-
-      sectionElements.forEach((element) => {
-        const rect = element.getBoundingClientRect();
-        if (rect.top <= 100) {
-          currentSection = element.getAttribute("data-section") || "";
-        }
-      });
-
-      setActiveSection(currentSection);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {

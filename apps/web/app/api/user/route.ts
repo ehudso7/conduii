@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { requireAuth, handleApiError } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { clerkClient } from "@clerk/nextjs";
@@ -81,25 +81,13 @@ export async function DELETE() {
       );
     }
 
-    // Delete all user's organization memberships
-    await db.organizationMember.deleteMany({
-      where: { userId: user.id },
-    });
-
-    // Delete all user's project memberships
-    await db.projectMember.deleteMany({
-      where: { userId: user.id },
-    });
-
-    // Delete all API keys created by user
-    await db.apiKey.deleteMany({
-      where: { createdById: user.id },
-    });
-
-    // Delete the user record
-    await db.user.delete({
-      where: { id: user.id },
-    });
+    // Delete user and related data in a transaction
+    await db.$transaction([
+      db.organizationMember.deleteMany({ where: { userId: user.id } }),
+      db.projectMember.deleteMany({ where: { userId: user.id } }),
+      db.apiKey.deleteMany({ where: { createdById: user.id } }),
+      db.user.delete({ where: { id: user.id } }),
+    ]);
 
     // Delete from Clerk
     try {

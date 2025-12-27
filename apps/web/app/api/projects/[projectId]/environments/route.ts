@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 
 const createEnvironmentSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -41,21 +42,24 @@ export async function POST(
     const body = await req.json();
     const data = createEnvironmentSchema.parse(body);
 
-    // If this is marked as production, unmark other production environments
-    if (data.isProduction) {
-      await db.environment.updateMany({
-        where: { projectId: params.projectId, isProduction: true },
-        data: { isProduction: false },
-      });
-    }
+    // Create environment in a transaction to prevent race conditions
+    const environment = await db.$transaction(async (tx: Prisma.TransactionClient) => {
+      // If this is marked as production, unmark other production environments
+      if (data.isProduction) {
+        await tx.environment.updateMany({
+          where: { projectId: params.projectId, isProduction: true },
+          data: { isProduction: false },
+        });
+      }
 
-    const environment = await db.environment.create({
-      data: {
-        projectId: params.projectId,
-        name: data.name,
-        url: data.url || null,
-        isProduction: data.isProduction,
-      },
+      return tx.environment.create({
+        data: {
+          projectId: params.projectId,
+          name: data.name,
+          url: data.url || null,
+          isProduction: data.isProduction,
+        },
+      });
     });
 
     return NextResponse.json({ environment }, { status: 201 });

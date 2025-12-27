@@ -13,9 +13,6 @@ import {
   FileText,
   HelpCircle,
   LogOut,
-  Moon,
-  Sun,
-  ArrowRight,
 } from "lucide-react";
 import {
   Dialog,
