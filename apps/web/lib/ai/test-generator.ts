@@ -5,6 +5,7 @@
 
 import { generateJSON, isAIConfigured } from "./index";
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 
 export interface GeneratedTest {
   name: string;
@@ -235,7 +236,7 @@ export async function saveGeneratedTests(
           tags: test.tags,
           priority: test.priority,
           estimatedDuration: test.estimatedDuration,
-        },
+        } as Prisma.InputJsonValue,
         enabled: true,
       },
     });
