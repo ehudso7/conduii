@@ -451,21 +451,20 @@ async function getSlowestTests(
     where: {
       testRun: { projectId },
       createdAt: { gte: since },
-      duration: { not: null },
+      duration: { gt: 0 },
     },
     _avg: { duration: true },
     orderBy: { _avg: { duration: "desc" } },
     take: 5,
   });
 
-  type SlowestResult = { testId: string; _avg: { duration: number | null } };
+  const testIds = results.map((r) => r.testId);
   const tests = await db.test.findMany({
-    where: { id: { in: results.map((r: SlowestResult) => r.testId) } },
+    where: { id: { in: testIds } },
   });
 
-  type TestWithName = { id: string; name: string };
-  return results.map((r: SlowestResult) => ({
-    testName: tests.find((t: TestWithName) => t.id === r.testId)?.name || "Unknown",
+  return results.map((r) => ({
+    testName: tests.find((t) => t.id === r.testId)?.name || "Unknown",
     avgDuration: Math.round(r._avg?.duration || 0),
   }));
 }

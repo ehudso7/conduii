@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { z } from "zod";
-// Prisma types imported dynamically when client is generated
 
 export const dynamic = "force-dynamic";
 
@@ -45,8 +45,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
     const data = createEnvironmentSchema.parse(body);
 
     // Create environment in a transaction to prevent race conditions
-    const environment = await db.$transaction(async (tx) => {
-    const environment = await db.$transaction(async (tx: typeof db) => {
+    const environment = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       // If this is marked as production, unmark other production environments
       if (data.isProduction) {
         await tx.environment.updateMany({

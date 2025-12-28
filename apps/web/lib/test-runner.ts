@@ -8,6 +8,7 @@
  */
 
 import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 
 // JSON-compatible type for Prisma Json fields (excluding null at top level)
 type JsonValue = string | number | boolean | JsonValue[] | { [key: string]: JsonValue | null };
@@ -395,7 +396,7 @@ export async function executeTestRun(
     // If no tests were run, create default tests and run them
     if (results.length === 0 && project.productionUrl) {
       // Use transaction for atomic test suite and test creation
-      const { healthTest } = await db.$transaction(async (tx: typeof db) => {
+      const { healthTest } = await db.$transaction(async (tx: Prisma.TransactionClient) => {
         // Find or create a default test suite
         let defaultSuite = await tx.testSuite.findFirst({
           where: { projectId, isDefault: true },

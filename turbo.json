@@ -44,7 +44,11 @@
     "RESEND_USER",
     "FROM_EMAIL",
     "GOOGLE_CLIENT_ID",
-    "GOOGLE_CLIENT_SECRET"
+    "GOOGLE_CLIENT_SECRET",
+    "Frontend_API_URL",
+    "Backend_API_URL",
+    "JWKS_URL",
+    "PEM_Public_Key"
   ],
   "tasks": {
     "build": {
