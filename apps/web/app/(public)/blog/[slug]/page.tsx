@@ -24,7 +24,7 @@ const posts: Record<string, {
     author: {
       name: "Conduii Team",
       role: "Engineering",
-      avatar: "/team/default.png",
+      avatar: "/images/team/default.svg",
     },
     content: `
 Modern applications are complex. They rely on dozens of third-party services — databases, authentication providers, payment processors, email services, storage solutions, and more. Testing these integrations has always been challenging.
@@ -102,7 +102,7 @@ We're currently in public beta and we'd love your feedback. Sign up for free and
     author: {
       name: "Conduii Team",
       role: "Engineering",
-      avatar: "/team/default.png",
+      avatar: "/images/team/default.svg",
     },
     content: `
 End-to-end testing has been a cornerstone of software quality for decades. But as applications have evolved, traditional E2E testing approaches have struggled to keep up.
@@ -177,7 +177,7 @@ Traditional E2E testing served us well, but modern applications require modern t
     author: {
       name: "Conduii Team",
       role: "Engineering",
-      avatar: "/team/default.png",
+      avatar: "/images/team/default.svg",
     },
     content: `
 One of Conduii's most powerful features is automatic service discovery. In this guide, we'll explore how it works and how to get the most out of it.
@@ -301,7 +301,7 @@ Service discovery is just the first step. Once Conduii knows your stack, it can 
     author: {
       name: "Conduii Team",
       role: "Engineering",
-      avatar: "/team/default.png",
+      avatar: "/images/team/default.svg",
     },
     content: `
 Deployment validation is critical for maintaining application reliability. In this post, we'll cover best practices for ensuring your deployments work correctly.
