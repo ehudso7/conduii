@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavAuthButtons, HeroAuthButtons, CTAAuthButtons } from "@/components/auth-buttons";
 import { PricingButton } from "@/components/pricing-buttons";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   Zap,
   Globe,
@@ -146,7 +147,10 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <NavAuthButtons />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <NavAuthButtons />
+            </div>
           </div>
         </div>
       </nav>

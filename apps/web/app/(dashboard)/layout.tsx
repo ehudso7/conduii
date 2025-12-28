@@ -10,6 +10,7 @@ import {
   Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { db } from "@/lib/db";
 import { DashboardSearch } from "@/components/dashboard/search";
 import { NotificationDropdown } from "@/components/dashboard/notifications";
@@ -125,6 +126,7 @@ export default async function DashboardLayout({
 
               {/* Right Side */}
               <div className="flex items-center gap-2 md:gap-4">
+                <ThemeToggle />
                 <NotificationDropdown />
                 <UserButton
                   afterSignOutUrl="/"
