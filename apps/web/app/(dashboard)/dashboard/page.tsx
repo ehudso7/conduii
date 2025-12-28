@@ -18,61 +18,66 @@ import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
 
 async function getDashboardData(userId: string) {
-  const user = await db.user.findUnique({
-    where: { clerkId: userId },
-    include: {
-      organizations: {
-        include: {
-          organization: {
-            include: {
-              projects: {
-                include: {
-                  testRuns: {
-                    take: 10,
-                    orderBy: { createdAt: "desc" },
-                    include: {
-                      results: true,
+  try {
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+      include: {
+        organizations: {
+          include: {
+            organization: {
+              include: {
+                projects: {
+                  include: {
+                    testRuns: {
+                      take: 10,
+                      orderBy: { createdAt: "desc" },
+                      include: {
+                        results: true,
+                      },
                     },
+                    services: true,
                   },
-                  services: true,
                 },
               },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  if (!user || user.organizations.length === 0) {
-    return null;
+    if (!user || user.organizations.length === 0) {
+      return null;
+    }
+
+    const org = user.organizations[0].organization;
+    const projects = org.projects;
+
+    // Calculate stats
+    const totalProjects = projects.length;
+    const allTestRuns = projects.flatMap((p: { testRuns: Array<{ id: string; status: string; trigger: string; duration: number | null; createdAt: Date; results: Array<{ status: string }> }> }) => p.testRuns);
+    const recentRuns = allTestRuns.slice(0, 10);
+
+    const passedRuns = allTestRuns.filter((r: { status: string }) => r.status === "PASSED").length;
+    const failedRuns = allTestRuns.filter((r: { status: string }) => r.status === "FAILED").length;
+    const totalServices = projects.reduce((acc: number, p: { services: unknown[] }) => acc + p.services.length, 0);
+
+    return {
+      organization: org,
+      projects,
+      stats: {
+        totalProjects,
+        totalTestRuns: allTestRuns.length,
+        passedRuns,
+        failedRuns,
+        passRate: allTestRuns.length > 0 ? Math.round((passedRuns / allTestRuns.length) * 100) : 0,
+        totalServices,
+      },
+      recentRuns,
+    };
+  } catch (error) {
+    console.error("Database error in getDashboardData:", error);
+    return { error: "database_error" };
   }
-
-  const org = user.organizations[0].organization;
-  const projects = org.projects;
-
-  // Calculate stats
-  const totalProjects = projects.length;
-  const allTestRuns = projects.flatMap((p: { testRuns: Array<{ id: string; status: string; trigger: string; duration: number | null; createdAt: Date; results: Array<{ status: string }> }> }) => p.testRuns);
-  const recentRuns = allTestRuns.slice(0, 10);
-
-  const passedRuns = allTestRuns.filter((r: { status: string }) => r.status === "PASSED").length;
-  const failedRuns = allTestRuns.filter((r: { status: string }) => r.status === "FAILED").length;
-  const totalServices = projects.reduce((acc: number, p: { services: unknown[] }) => acc + p.services.length, 0);
-
-  return {
-    organization: org,
-    projects,
-    stats: {
-      totalProjects,
-      totalTestRuns: allTestRuns.length,
-      passedRuns,
-      failedRuns,
-      passRate: allTestRuns.length > 0 ? Math.round((passedRuns / allTestRuns.length) * 100) : 0,
-      totalServices,
-    },
-    recentRuns,
-  };
 }
 
 export default async function DashboardPage() {
@@ -83,6 +88,25 @@ export default async function DashboardPage() {
   }
 
   const data = await getDashboardData(userId);
+
+  // Handle database error
+  if (data && "error" in data) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <Server className="w-16 h-16 text-muted-foreground mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Database Setup Required</h2>
+        <p className="text-muted-foreground mb-6 max-w-md">
+          The database tables need to be initialized. Please run the database migration command to set up your database.
+        </p>
+        <code className="bg-muted px-4 py-2 rounded-lg text-sm mb-4">
+          npx prisma db push
+        </code>
+        <p className="text-sm text-muted-foreground">
+          Make sure your DATABASE_URL environment variable is configured correctly.
+        </p>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
