@@ -6,7 +6,7 @@
 import { db } from "@/lib/db";
 
 // Local type matching Prisma schema
-type InputJsonValue = string | number | boolean | null | { [key: string]: InputJsonValue } | InputJsonValue[];
+type InputJsonValue = string | number | boolean | { [key: string]: InputJsonValue } | InputJsonValue[];
 
 export interface FlakyTestResult {
   testId: string;

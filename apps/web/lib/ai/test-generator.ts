@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 
 // Local types matching Prisma schema
 type TestType = "HEALTH" | "INTEGRATION" | "API" | "E2E" | "PERFORMANCE" | "SECURITY" | "CUSTOM";
-type InputJsonValue = string | number | boolean | null | { [key: string]: InputJsonValue } | InputJsonValue[];
+type InputJsonValue = string | number | boolean | { [key: string]: InputJsonValue } | InputJsonValue[];
 
 export interface GeneratedTest {
   name: string;
