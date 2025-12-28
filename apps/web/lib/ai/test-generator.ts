@@ -5,11 +5,14 @@
 
 import { generateJSON, isAIConfigured } from "./index";
 import { db } from "@/lib/db";
-import type { Prisma } from "@prisma/client";
+
+// Local types matching Prisma schema
+type TestType = "HEALTH" | "INTEGRATION" | "API" | "E2E" | "PERFORMANCE" | "SECURITY" | "CUSTOM";
+type InputJsonValue = string | number | boolean | null | { [key: string]: InputJsonValue } | InputJsonValue[];
 
 export interface GeneratedTest {
   name: string;
-  type: "API" | "INTEGRATION" | "E2E" | "UNIT" | "HEALTH";
+  type: "API" | "INTEGRATION" | "E2E" | "HEALTH" | "PERFORMANCE";
   description: string;
   code: string;
   assertions: string[];
@@ -32,7 +35,7 @@ export interface TestGenerationRequest {
       description?: string;
     }>;
   };
-  testType?: "API" | "INTEGRATION" | "E2E" | "UNIT" | "HEALTH";
+  testType?: "API" | "INTEGRATION" | "E2E" | "HEALTH" | "PERFORMANCE";
   framework?: "jest" | "vitest" | "playwright" | "cypress";
   additionalContext?: string;
 }
@@ -41,7 +44,7 @@ const TEST_GENERATION_SCHEMA = `{
   "tests": [
     {
       "name": "string - descriptive test name",
-      "type": "API | INTEGRATION | E2E | UNIT | HEALTH",
+      "type": "API | INTEGRATION | E2E | HEALTH | PERFORMANCE",
       "description": "string - what this test verifies",
       "code": "string - complete test code",
       "assertions": ["array of assertion descriptions"],
@@ -83,12 +86,14 @@ export async function generateTestsFromPrompt(
   }
 
   // Build context for AI
+  type TestSuiteWithTests = { tests: Array<{ name: string }> };
   const existingTestNames = project.testSuites
-    .flatMap((suite) => suite.tests)
-    .map((t) => t.name);
+    .flatMap((suite: TestSuiteWithTests) => suite.tests)
+    .map((t: { name: string }) => t.name);
 
+  type EndpointInfo = { method: string; path: string; description: string | null };
   const endpointContext = project.endpoints
-    .map((e) => `${e.method} ${e.path} - ${e.description || "No description"}`)
+    .map((e: EndpointInfo) => `${e.method} ${e.path} - ${e.description || "No description"}`)
     .join("\n");
 
   const framework = request.framework || "vitest";
@@ -226,7 +231,7 @@ export async function saveGeneratedTests(
       data: {
         testSuiteId,
         name: test.name,
-        type: test.type,
+        type: test.type as TestType,
         description: test.description,
         config: {
           code: test.code,
@@ -236,7 +241,7 @@ export async function saveGeneratedTests(
           tags: test.tags,
           priority: test.priority,
           estimatedDuration: test.estimatedDuration,
-        } as Prisma.InputJsonValue,
+        } as InputJsonValue,
         enabled: true,
       },
     });

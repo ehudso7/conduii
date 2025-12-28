@@ -4,7 +4,9 @@
  */
 
 import { db } from "@/lib/db";
-import type { Prisma } from "@prisma/client";
+
+// Local type matching Prisma schema
+type InputJsonValue = string | number | boolean | null | { [key: string]: InputJsonValue } | InputJsonValue[];
 
 export interface FlakyTestResult {
   testId: string;
@@ -336,7 +338,7 @@ export async function quarantineTest(testId: string): Promise<void> {
       config: {
         quarantined: true,
         quarantinedAt: new Date().toISOString(),
-      } as Prisma.InputJsonValue,
+      } as InputJsonValue,
     },
   });
 }
@@ -356,7 +358,7 @@ export async function unquarantineTest(testId: string): Promise<void> {
     where: { id: testId },
     data: {
       enabled: true,
-      config: config as Prisma.InputJsonValue,
+      config: config as InputJsonValue,
     },
   });
 }

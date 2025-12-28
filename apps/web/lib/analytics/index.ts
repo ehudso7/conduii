@@ -105,7 +105,7 @@ export async function getDashboardMetrics(
     select: { id: true },
   });
 
-  const projectIds = projects.map((p) => p.id);
+  const projectIds = projects.map((p: { id: string }) => p.id);
 
   // Get test runs in time range
   const testRuns = await db.testRun.findMany({
@@ -120,10 +120,11 @@ export async function getDashboardMetrics(
   });
 
   // Calculate overview metrics
+  type RunWithResults = { results: Array<{ status: string }> };
   const totalRuns = testRuns.length;
-  const totalTests = testRuns.reduce((sum, r) => sum + r.results.length, 0);
+  const totalTests = testRuns.reduce((sum: number, r: RunWithResults) => sum + r.results.length, 0);
   const passedTests = testRuns.reduce(
-    (sum, r) => sum + r.results.filter((t) => t.status === "PASSED").length,
+    (sum: number, r: RunWithResults) => sum + r.results.filter((t: { status: string }) => t.status === "PASSED").length,
     0
   );
   const passRate = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
@@ -133,7 +134,8 @@ export async function getDashboardMetrics(
   const trends = calculateTrends(testRuns, timeRangeDays);
 
   // Get recent activity
-  const recentActivity = testRuns.slice(0, 10).map((run) => ({
+  type RunInfo = { id: string; trigger: string; createdAt: Date; status: string };
+  const recentActivity = testRuns.slice(0, 10).map((run: RunInfo) => ({
     id: run.id,
     type: "TEST_RUN",
     description: `${run.trigger} test run`,
@@ -197,12 +199,14 @@ export async function getProjectMetrics(
   });
 
   // Calculate summary
-  const allResults = testRuns.flatMap((r) => r.results);
+  type ProjectResult = { status: string; duration: number | null };
+  type ProjectRun = { results: ProjectResult[] };
+  const allResults = testRuns.flatMap((r: ProjectRun) => r.results);
   const summary = {
     totalTests: tests.length,
-    passedTests: allResults.filter((r) => r.status === "PASSED").length,
-    failedTests: allResults.filter((r) => r.status === "FAILED").length,
-    skippedTests: allResults.filter((r) => r.status === "SKIPPED").length,
+    passedTests: allResults.filter((r: ProjectResult) => r.status === "PASSED").length,
+    failedTests: allResults.filter((r: ProjectResult) => r.status === "FAILED").length,
+    skippedTests: allResults.filter((r: ProjectResult) => r.status === "SKIPPED").length,
     passRate: 0,
     avgDuration: 0,
     lastRun: testRuns[0]?.createdAt || null,
@@ -213,7 +217,7 @@ export async function getProjectMetrics(
   summary.avgDuration = calculateAvgDuration(testRuns);
 
   // Calculate coverage by type
-  const testsByType = tests.reduce((acc, t) => {
+  const testsByType = tests.reduce((acc: Record<string, number>, t: { type: string }) => {
     acc[t.type] = (acc[t.type] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -228,9 +232,9 @@ export async function getProjectMetrics(
 
   // Calculate performance metrics
   const durations = allResults
-    .map((r) => r.duration)
-    .filter((d): d is number => d !== null)
-    .sort((a, b) => a - b);
+    .map((r: ProjectResult) => r.duration)
+    .filter((d: number | null): d is number => d !== null)
+    .sort((a: number, b: number) => a - b);
 
   const performance = {
     p50Duration: calculatePercentile(durations, 50),
@@ -240,9 +244,10 @@ export async function getProjectMetrics(
   };
 
   // Calculate reliability metrics
-  const flakyTests = tests.filter((t) => {
+  type TestWithResults = { results: Array<{ status: string }> };
+  const flakyTests = tests.filter((t: TestWithResults) => {
     if (t.results.length < 3) return false;
-    const statuses = t.results.map((r) => r.status);
+    const statuses = t.results.map((r: { status: string }) => r.status);
     const hasPass = statuses.includes("PASSED");
     const hasFail = statuses.includes("FAILED");
     return hasPass && hasFail;
@@ -294,13 +299,14 @@ export async function getTestPerformanceMetrics(
     throw new Error("Test not found");
   }
 
+  type TestResultInfo = { status: string; duration: number | null; createdAt: Date };
   const results = test.results;
   const durations = results
-    .map((r) => r.duration)
-    .filter((d): d is number => d !== null)
-    .sort((a, b) => a - b);
+    .map((r: TestResultInfo) => r.duration)
+    .filter((d: number | null): d is number => d !== null)
+    .sort((a: number, b: number) => a - b);
 
-  const passedCount = results.filter((r) => r.status === "PASSED").length;
+  const passedCount = results.filter((r: TestResultInfo) => r.status === "PASSED").length;
 
   // Calculate flakiness
   let alternations = 0;
@@ -321,7 +327,7 @@ export async function getTestPerformanceMetrics(
       totalRuns: results.length,
       passRate: results.length > 0 ? Math.round((passedCount / results.length) * 1000) / 10 : 0,
       avgDuration: durations.length > 0
-        ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
+        ? Math.round(durations.reduce((a: number, b: number) => a + b, 0) / durations.length)
         : 0,
       minDuration: durations[0] || 0,
       maxDuration: durations[durations.length - 1] || 0,
@@ -330,7 +336,7 @@ export async function getTestPerformanceMetrics(
       p99Duration: calculatePercentile(durations, 99),
       flakinessScore,
     },
-    history: results.slice(0, 100).map((r) => ({
+    history: results.slice(0, 100).map((r: TestResultInfo) => ({
       date: r.createdAt.toISOString(),
       duration: r.duration || 0,
       status: r.status,
@@ -342,10 +348,10 @@ export async function getTestPerformanceMetrics(
 
 function calculateAvgDuration(testRuns: Array<{ duration: number | null }>): number {
   const durations = testRuns
-    .map((r) => r.duration)
+    .map((r: { duration: number | null }) => r.duration)
     .filter((d): d is number => d !== null);
   if (durations.length === 0) return 0;
-  return Math.round(durations.reduce((a, b) => a + b, 0) / durations.length);
+  return Math.round(durations.reduce((a: number, b: number) => a + b, 0) / durations.length);
 }
 
 function calculatePercentile(sortedValues: number[], percentile: number): number {
@@ -365,7 +371,7 @@ function calculateTrends(
     const existing = dailyData.get(date) || { passed: 0, total: 0, duration: 0, count: 0 };
 
     existing.total += run.results.length;
-    existing.passed += run.results.filter((r) => r.status === "PASSED").length;
+    existing.passed += run.results.filter((r: { status: string }) => r.status === "PASSED").length;
     existing.count += 1;
     dailyData.set(date, existing);
   }
@@ -413,7 +419,7 @@ async function getTopFailingTests(
   });
 
   const tests = await db.test.findMany({
-    where: { id: { in: failedResults.map((r) => r.testId) } },
+    where: { id: { in: failedResults.map((r: { testId: string }) => r.testId) } },
     include: {
       results: {
         where: { status: "FAILED" },
@@ -423,8 +429,10 @@ async function getTopFailingTests(
     },
   });
 
-  return failedResults.map((r) => {
-    const test = tests.find((t) => t.id === r.testId);
+  type FailedResult = { testId: string; _count: { id: number } };
+  type TestInfo = { id: string; name: string; results: Array<{ createdAt: Date }> };
+  return failedResults.map((r: FailedResult) => {
+    const test = tests.find((t: TestInfo) => t.id === r.testId);
     return {
       testId: r.testId,
       testName: test?.name || "Unknown",
@@ -450,13 +458,15 @@ async function getSlowestTests(
     take: 5,
   });
 
+  type SlowestResult = { testId: string; _avg: { duration: number | null } };
   const tests = await db.test.findMany({
-    where: { id: { in: results.map((r) => r.testId) } },
+    where: { id: { in: results.map((r: SlowestResult) => r.testId) } },
   });
 
-  return results.map((r) => ({
-    testName: tests.find((t) => t.id === r.testId)?.name || "Unknown",
-    avgDuration: Math.round(r._avg.duration || 0),
+  type TestWithName = { id: string; name: string };
+  return results.map((r: SlowestResult) => ({
+    testName: tests.find((t: TestWithName) => t.id === r.testId)?.name || "Unknown",
+    avgDuration: Math.round(r._avg?.duration || 0),
   }));
 }
 
@@ -502,7 +512,7 @@ function calculateMTTR(testRuns: Array<{ status: string; createdAt: Date }>): nu
 
 function calculateMTBF(testRuns: Array<{ status: string; createdAt: Date }>): number {
   // Mean Time Between Failures
-  const failures = testRuns.filter((r) => r.status === "FAILED");
+  const failures = testRuns.filter((r: { status: string; createdAt: Date }) => r.status === "FAILED");
   if (failures.length < 2) return 0;
 
   let totalTime = 0;
@@ -528,9 +538,10 @@ async function getPreviousPeriodMetrics(
     include: { results: true },
   });
 
-  const allResults = testRuns.flatMap((r) => r.results);
+  type PrevRun = { results: Array<{ status: string }> };
+  const allResults = testRuns.flatMap((r: PrevRun) => r.results);
   const passRate = allResults.length > 0
-    ? (allResults.filter((r) => r.status === "PASSED").length / allResults.length) * 100
+    ? (allResults.filter((r: { status: string }) => r.status === "PASSED").length / allResults.length) * 100
     : 0;
 
   return {

@@ -83,7 +83,7 @@ export async function sendWebhookNotification(
 
   // Send to each webhook
   const results = await Promise.allSettled(
-    webhooks.map((webhook) => sendToWebhook(webhook, payload))
+    webhooks.map((webhook: { id: string; name: string; url: string; secret: string | null; provider: string }) => sendToWebhook(webhook, payload))
   );
 
   for (let i = 0; i < results.length; i++) {
@@ -599,8 +599,8 @@ export async function notifyTestRunStatus(
 
   if (!testRun) return;
 
-  const passed = testRun.results.filter((r) => r.status === "PASSED").length;
-  const failed = testRun.results.filter((r) => r.status === "FAILED").length;
+  const passed = testRun.results.filter((r: { status: string }) => r.status === "PASSED").length;
+  const failed = testRun.results.filter((r: { status: string }) => r.status === "FAILED").length;
   const total = testRun.results.length;
   const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
 
@@ -625,8 +625,8 @@ export async function notifyTestRunStatus(
       duration: testRun.duration,
       trigger: testRun.trigger,
       failures: testRun.results
-        .filter((r) => r.status === "FAILED")
-        .map((r) => ({ name: r.test.name, error: r.error })),
+        .filter((r: { status: string }) => r.status === "FAILED")
+        .map((r: { test: { name: string }; error: string | null }) => ({ name: r.test.name, error: r.error })),
       runUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/projects/${projectId}/runs/${testRunId}`,
     },
     timestamp: new Date(),
@@ -709,16 +709,17 @@ export async function sendDailySummary(
     }),
   ]);
 
-  const todayResults = todayRuns.flatMap((r) => r.results);
-  const yesterdayResults = yesterdayRuns.flatMap((r) => r.results);
+  type RunWithResults = { results: Array<{ status: string }> };
+  const todayResults = todayRuns.flatMap((r: RunWithResults) => r.results);
+  const yesterdayResults = yesterdayRuns.flatMap((r: RunWithResults) => r.results);
 
-  const todayPassed = todayResults.filter((r) => r.status === "PASSED").length;
-  const todayFailed = todayResults.filter((r) => r.status === "FAILED").length;
+  const todayPassed = todayResults.filter((r: { status: string }) => r.status === "PASSED").length;
+  const todayFailed = todayResults.filter((r: { status: string }) => r.status === "FAILED").length;
   const todayPassRate = todayResults.length > 0
     ? Math.round((todayPassed / todayResults.length) * 100)
     : 0;
 
-  const yesterdayPassed = yesterdayResults.filter((r) => r.status === "PASSED").length;
+  const yesterdayPassed = yesterdayResults.filter((r: { status: string }) => r.status === "PASSED").length;
   const yesterdayPassRate = yesterdayResults.length > 0
     ? Math.round((yesterdayPassed / yesterdayResults.length) * 100)
     : 0;
@@ -726,11 +727,12 @@ export async function sendDailySummary(
   const trendDelta = todayPassRate - yesterdayPassRate;
   const trend = trendDelta > 1 ? "up" : trendDelta < -1 ? "down" : "stable";
 
+  type RunWithDuration = { duration: number | null };
   const durations = todayRuns
-    .map((r) => r.duration)
-    .filter((d): d is number => d !== null);
+    .map((r: RunWithDuration) => r.duration)
+    .filter((d: number | null): d is number => d !== null);
   const avgDuration = durations.length > 0
-    ? durations.reduce((a, b) => a + b, 0) / durations.length
+    ? durations.reduce((a: number, b: number) => a + b, 0) / durations.length
     : 0;
 
   await sendWebhookNotification({
