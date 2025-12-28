@@ -35,21 +35,25 @@ import {
 
 interface TestResult {
   id: string;
-  name: string;
-  type: string;
   status: string;
   duration: number | null;
   error: string | null;
-  assertions: { passed: number; failed: number } | null;
+  assertions: Record<string, unknown> | null;
   metadata: Record<string, unknown> | null;
+  test: {
+    id: string;
+    name: string;
+    type: string;
+  };
 }
 
 interface Diagnostic {
   id: string;
   severity: string;
   issue: string;
-  suggestion: string;
-  category: string;
+  component: string;
+  description: string;
+  suggestions: string[];
 }
 
 interface TestRun {
@@ -322,11 +326,21 @@ export default function TestRunDetailPage() {
                             {diagnostic.severity}
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            {diagnostic.category}
+                            {diagnostic.component}
                           </Badge>
                         </div>
                         <p className="font-medium">{diagnostic.issue}</p>
-                        <p className="text-sm mt-2 opacity-80">{diagnostic.suggestion}</p>
+                        <p className="text-sm mt-2 opacity-80">{diagnostic.description}</p>
+                        {diagnostic.suggestions && diagnostic.suggestions.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-xs font-medium mb-1">Suggestions:</p>
+                            <ul className="text-sm list-disc list-inside opacity-80 space-y-1">
+                              {diagnostic.suggestions.map((suggestion, idx) => (
+                                <li key={idx}>{suggestion}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -376,10 +390,10 @@ export default function TestRunDetailPage() {
                       <div className="flex items-center gap-3">
                         {getStatusIcon(result.status)}
                         <div>
-                          <p className="font-medium">{result.name}</p>
+                          <p className="font-medium">{result.test.name}</p>
                           <div className="flex items-center gap-2 mt-0.5">
                             <Badge variant="outline" className="text-xs">
-                              {result.type}
+                              {result.test.type}
                             </Badge>
                             {result.duration && (
                               <span className="text-xs text-muted-foreground">
@@ -390,9 +404,9 @@ export default function TestRunDetailPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        {result.assertions && (
+                        {result.assertions && typeof result.assertions === 'object' && 'passed' in result.assertions && 'failed' in result.assertions && (
                           <span className="text-sm text-muted-foreground">
-                            {result.assertions.passed}/{result.assertions.passed + result.assertions.failed} assertions
+                            {(result.assertions as { passed: number; failed: number }).passed}/{(result.assertions as { passed: number; failed: number }).passed + (result.assertions as { passed: number; failed: number }).failed} assertions
                           </span>
                         )}
                         <Badge
