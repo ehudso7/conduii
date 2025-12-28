@@ -24,8 +24,10 @@ export default authMiddleware({
     "/api/webhooks",
     "/api/webhooks/(.*)",
   ],
-  // Debug mode to help identify issues (remove in production after fixing)
-  debug: process.env.NODE_ENV === "development",
+  // Ignore these routes completely (no auth check at all)
+  ignoredRoutes: [
+    "/api/health",
+  ],
 });
 
 export const config = {

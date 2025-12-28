@@ -19,6 +19,10 @@ export default function SignInPage() {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center">
         <SignIn
+          routing="path"
+          path="/sign-in"
+          signUpUrl="/sign-up"
+          afterSignInUrl="/dashboard"
           appearance={{
             elements: {
               rootBox: "mx-auto",
