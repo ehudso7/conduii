@@ -3,6 +3,7 @@
  * Handles sending notifications to Slack, Discord, and custom webhooks
  */
 
+import crypto from "crypto";
 import { db } from "@/lib/db";
 import { chat, isAIConfigured } from "@/lib/ai/index";
 
@@ -541,7 +542,6 @@ function formatCustomWebhookPayload(
  * Generate HMAC signature for webhook payload
  */
 function generateSignature(payload: WebhookPayload, secret: string): string {
-  const crypto = require("crypto");
   const data = JSON.stringify({ event: payload.eventType, data: payload.data });
   return crypto.createHmac("sha256", secret).update(data).digest("hex");
 }
