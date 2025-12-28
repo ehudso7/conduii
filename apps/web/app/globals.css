@@ -96,9 +96,9 @@
     text-wrap: balance;
   }
 
-  /* Brand gradient - subtle and professional */
+  /* Brand gradient - vibrant teal for visibility */
   .gradient-text {
-    @apply bg-gradient-to-r from-teal-600 to-teal-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-teal-500 via-emerald-400 to-cyan-400 bg-clip-text text-transparent;
   }
 
   .gradient-bg {
