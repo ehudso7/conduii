@@ -30,6 +30,7 @@ function initializeClients() {
       anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     } catch {
       // Anthropic SDK not installed - this is fine
+      // eslint-disable-next-line no-console
       console.debug("Anthropic SDK not available");
     }
   }
@@ -42,6 +43,7 @@ function initializeClients() {
       openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     } catch {
       // OpenAI SDK not installed - this is fine
+      // eslint-disable-next-line no-console
       console.debug("OpenAI SDK not available");
     }
   }

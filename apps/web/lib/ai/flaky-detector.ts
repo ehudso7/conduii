@@ -4,6 +4,7 @@
  */
 
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 
 export interface FlakyTestResult {
   testId: string;
@@ -335,7 +336,7 @@ export async function quarantineTest(testId: string): Promise<void> {
       config: {
         quarantined: true,
         quarantinedAt: new Date().toISOString(),
-      },
+      } as Prisma.InputJsonValue,
     },
   });
 }
@@ -355,7 +356,7 @@ export async function unquarantineTest(testId: string): Promise<void> {
     where: { id: testId },
     data: {
       enabled: true,
-      config,
+      config: config as Prisma.InputJsonValue,
     },
   });
 }
