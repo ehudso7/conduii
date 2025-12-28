@@ -55,10 +55,12 @@ export async function GET(_req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    // Mask the keys for security
+    // Mask the keys for security (ensure key has enough characters)
     const maskedKeys = apiKeys.map((key: { id: string; name: string; key: string; lastUsedAt: Date | null; expiresAt: Date | null; createdAt: Date; user: { id: string; name: string | null; email: string } | null }) => ({
       ...key,
-      key: `${key.key.slice(0, 8)}...${key.key.slice(-4)}`,
+      key: key.key.length >= 12
+        ? `${key.key.slice(0, 8)}...${key.key.slice(-4)}`
+        : "****",
     }));
 
     return NextResponse.json({ apiKeys: maskedKeys });

@@ -33,32 +33,51 @@ export async function getAuthUser() {
     // Create user and default organization
     const slug = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
 
-    user = await db.user.create({
-      data: {
-        clerkId: userId,
-        email,
-        name: name || null,
-        imageUrl: clerkUser.imageUrl || null,
-        organizations: {
-          create: {
-            role: "OWNER",
-            organization: {
-              create: {
-                name: `${name || email}'s Workspace`,
-                slug: `${slug}-${Date.now().toString(36)}`,
+    try {
+      user = await db.user.create({
+        data: {
+          clerkId: userId,
+          email,
+          name: name || null,
+          imageUrl: clerkUser.imageUrl || null,
+          organizations: {
+            create: {
+              role: "OWNER",
+              organization: {
+                create: {
+                  name: `${name || email}'s Workspace`,
+                  slug: `${slug}-${Date.now().toString(36)}`,
+                },
               },
             },
           },
         },
-      },
-      include: {
-        organizations: {
-          include: {
-            organization: true,
+        include: {
+          organizations: {
+            include: {
+              organization: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error: unknown) {
+      // Handle race condition - user may have been created by webhook
+      const prismaError = error as { code?: string };
+      if (prismaError?.code === "P2002") {
+        user = await db.user.findUnique({
+          where: { clerkId: userId },
+          include: {
+            organizations: {
+              include: {
+                organization: true,
+              },
+            },
+          },
+        });
+      } else {
+        throw error;
+      }
+    }
   }
 
   return user;

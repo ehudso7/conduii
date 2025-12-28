@@ -14,7 +14,9 @@ export async function GET(
     await requireProjectAccess(params.projectId, user.id);
 
     const { searchParams } = req.nextUrl;
-    const limit = Math.min(parseInt(searchParams.get("limit") ?? "20"), 100);
+    const limitParam = searchParams.get("limit");
+    const parsedLimit = limitParam ? parseInt(limitParam, 10) : 20;
+    const limit = Number.isNaN(parsedLimit) ? 20 : Math.min(Math.max(parsedLimit, 1), 100);
     const cursor = searchParams.get("cursor");
 
     const runs = await db.testRun.findMany({
