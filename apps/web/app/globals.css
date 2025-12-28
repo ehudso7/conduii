@@ -286,3 +286,230 @@
 .feature-icon {
   @apply w-6 h-6 text-primary;
 }
+
+/* ============================================
+   FUTURISTIC DASHBOARD STYLES
+   ============================================ */
+
+/* Glowing accent line */
+.glow-line {
+  @apply h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent;
+}
+
+.glow-line-vertical {
+  @apply w-px bg-gradient-to-b from-transparent via-primary/50 to-transparent;
+}
+
+/* Futuristic sidebar */
+.sidebar-futuristic {
+  @apply bg-gradient-to-b from-background via-background to-background/95;
+  background-image:
+    linear-gradient(to bottom, hsl(var(--background)), hsl(var(--background))),
+    radial-gradient(ellipse at top left, hsl(var(--primary) / 0.03) 0%, transparent 50%);
+}
+
+/* Nav item with glow effect */
+.nav-item-futuristic {
+  @apply relative flex items-center gap-3 px-3 py-2.5 rounded-lg;
+  @apply text-muted-foreground transition-all duration-200;
+}
+
+.nav-item-futuristic:hover {
+  @apply text-foreground bg-primary/5;
+}
+
+.nav-item-futuristic.active {
+  @apply text-foreground bg-primary/10;
+}
+
+.nav-item-futuristic.active::before {
+  content: '';
+  @apply absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-primary;
+  box-shadow: 0 0 12px hsl(var(--primary) / 0.5);
+}
+
+/* Stat card with border glow */
+.stat-card {
+  @apply relative overflow-hidden rounded-xl border bg-card p-6;
+  @apply transition-all duration-300;
+}
+
+.stat-card::before {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    hsl(var(--primary) / 0.1) 0%,
+    transparent 50%);
+}
+
+.stat-card:hover::before {
+  @apply opacity-100;
+}
+
+.stat-card:hover {
+  @apply border-primary/30 shadow-lg;
+  box-shadow: 0 4px 20px hsl(var(--primary) / 0.1);
+}
+
+/* Large metric display */
+.metric-value {
+  @apply text-4xl font-bold tracking-tight;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-label {
+  @apply text-sm text-muted-foreground uppercase tracking-wider;
+}
+
+/* Activity pulse indicator */
+.pulse-indicator {
+  @apply relative w-3 h-3;
+}
+
+.pulse-indicator::before {
+  content: '';
+  @apply absolute inset-0 rounded-full bg-green-500 animate-ping;
+}
+
+.pulse-indicator::after {
+  content: '';
+  @apply absolute inset-0 rounded-full bg-green-500;
+}
+
+/* Status bar visualization */
+.status-bar {
+  @apply flex h-2 rounded-full overflow-hidden bg-muted;
+}
+
+.status-bar-segment {
+  @apply transition-all duration-500 ease-out;
+}
+
+/* Timeline visualization */
+.timeline-track {
+  @apply relative h-1 bg-muted rounded-full overflow-hidden;
+}
+
+.timeline-progress {
+  @apply absolute inset-y-0 left-0 bg-primary rounded-full;
+  @apply transition-all duration-700 ease-out;
+}
+
+/* Project card futuristic */
+.project-card-futuristic {
+  @apply relative rounded-2xl border bg-card overflow-hidden;
+  @apply transition-all duration-300;
+}
+
+.project-card-futuristic::before {
+  content: '';
+  @apply absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-teal-400 to-cyan-400;
+  @apply opacity-0 transition-opacity duration-300;
+}
+
+.project-card-futuristic:hover::before {
+  @apply opacity-100;
+}
+
+.project-card-futuristic:hover {
+  @apply border-primary/20 shadow-xl -translate-y-1;
+}
+
+/* Data grid pattern background */
+.grid-pattern {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Glowing orb decoration */
+.glow-orb {
+  @apply absolute rounded-full blur-3xl;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.2) 0%, transparent 70%);
+}
+
+/* Quick action button */
+.quick-action-btn {
+  @apply relative flex items-center gap-2 px-4 py-2 rounded-lg;
+  @apply bg-primary/5 border border-primary/20;
+  @apply text-sm font-medium text-foreground;
+  @apply transition-all duration-200;
+}
+
+.quick-action-btn:hover {
+  @apply bg-primary/10 border-primary/30;
+  box-shadow: 0 0 20px hsl(var(--primary) / 0.15);
+}
+
+/* Run status indicator */
+.run-status {
+  @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.run-status-passed {
+  @apply bg-green-500/10 text-green-600 dark:text-green-400;
+}
+
+.run-status-failed {
+  @apply bg-red-500/10 text-red-600 dark:text-red-400;
+}
+
+.run-status-running {
+  @apply bg-yellow-500/10 text-yellow-600 dark:text-yellow-400;
+}
+
+.run-status-pending {
+  @apply bg-slate-500/10 text-slate-600 dark:text-slate-400;
+}
+
+/* Animated border gradient */
+@keyframes border-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.border-glow {
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+/* Smooth count animation */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-count {
+  animation: count-up 0.5s ease-out forwards;
+}
+
+/* Dashboard header */
+.dashboard-header {
+  @apply relative overflow-hidden;
+}
+
+.dashboard-header::after {
+  content: '';
+  @apply absolute bottom-0 left-0 right-0;
+  @apply h-px bg-gradient-to-r from-transparent via-border to-transparent;
+}
+
+/* Empty state styling */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-16 text-center;
+}
+
+.empty-state-icon {
+  @apply w-20 h-20 rounded-2xl bg-muted/50 flex items-center justify-center mb-6;
+}
+
+.empty-state-icon svg {
+  @apply w-10 h-10 text-muted-foreground;
+}
+
+/* Keyboard shortcut badge */
+.kbd {
+  @apply inline-flex items-center justify-center px-2 py-0.5;
+  @apply text-xs font-mono text-muted-foreground;
+  @apply bg-muted border border-border rounded;
+}

@@ -84,9 +84,10 @@ export default async function BillingPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Billing</h1>
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-primary uppercase tracking-wider">Subscription</p>
+          <h1 className="text-4xl font-bold tracking-tight">Billing</h1>
           <p className="text-muted-foreground">
             Manage your subscription and billing information
           </p>

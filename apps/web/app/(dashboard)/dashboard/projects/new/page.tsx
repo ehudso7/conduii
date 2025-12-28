@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Github, Globe, Zap } from "lucide-react";
+import { ArrowLeft, Loader2, Github, Globe, Zap, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function NewProjectPage() {
@@ -59,30 +58,30 @@ export default function NewProjectPage() {
       <div className="mb-8">
         <Link
           href="/dashboard/projects"
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Projects
         </Link>
-        <h1 className="text-3xl font-bold">Create New Project</h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm font-medium text-primary uppercase tracking-wider mb-1">New Project</p>
+        <h1 className="text-4xl font-bold tracking-tight">Create Project</h1>
+        <p className="text-muted-foreground mt-2">
           Set up a new project to test your deployed application
         </p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Project Details</CardTitle>
-            <CardDescription>
-              Basic information about your project
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Name */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="stat-card">
+          <div className="p-6 space-y-6">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <h3 className="font-semibold text-lg mb-4">Project Details</h3>
+              <p className="text-sm text-muted-foreground mb-6">Basic information about your project</p>
+            </div>
+
+            {/* Name */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">
                 Project Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -92,14 +91,14 @@ export default function NewProjectPage() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 placeholder="My SaaS App"
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                className="w-full px-4 py-3 bg-background border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                 required
               />
             </div>
 
             {/* Description */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">
                 Description
               </label>
               <textarea
@@ -109,14 +108,14 @@ export default function NewProjectPage() {
                 }
                 placeholder="A brief description of your project..."
                 rows={3}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
+                className="w-full px-4 py-3 bg-background border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none transition-all"
               />
             </div>
 
             {/* Repository URL */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                <Github className="w-4 h-4 inline mr-1" />
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">
+                <Github className="w-4 h-4 inline mr-2" />
                 Repository URL
               </label>
               <input
@@ -126,17 +125,17 @@ export default function NewProjectPage() {
                   setFormData({ ...formData, repositoryUrl: e.target.value })
                 }
                 placeholder="https://github.com/username/repo"
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                className="w-full px-4 py-3 bg-background border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground">
                 Optional. Used for GitHub integration and auto-discovery.
               </p>
             </div>
 
             {/* Production URL */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                <Globe className="w-4 h-4 inline mr-1" />
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">
+                <Globe className="w-4 h-4 inline mr-2" />
                 Production URL
               </label>
               <input
@@ -146,47 +145,54 @@ export default function NewProjectPage() {
                   setFormData({ ...formData, productionUrl: e.target.value })
                 }
                 placeholder="https://myapp.com"
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                className="w-full px-4 py-3 bg-background border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground">
                 The URL of your deployed application.
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Auto-Discovery Info */}
-        <Card className="mt-6 bg-primary/5 border-primary/20">
-          <CardContent className="flex items-start gap-4 pt-6">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Zap className="w-5 h-5 text-primary" />
+        <div className="stat-card bg-gradient-to-br from-primary/5 to-transparent">
+          <div className="p-6 flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-medium mb-1">Automatic Discovery</h3>
+              <h3 className="font-semibold mb-1">Automatic Discovery</h3>
               <p className="text-sm text-muted-foreground">
                 After creating your project, Conduii will automatically discover
                 your services, integrations, and generate tests based on your
                 stack.
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-4 mt-6">
+        <div className="flex items-center justify-end gap-3">
           <Link href="/dashboard/projects">
-            <Button variant="outline" type="button">
+            <Button variant="outline" type="button" className="px-6">
               Cancel
             </Button>
           </Link>
-          <Button type="submit" disabled={loading || !formData.name}>
+          <Button
+            type="submit"
+            disabled={loading || !formData.name}
+            className="px-6 gap-2"
+          >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
                 Creating...
               </>
             ) : (
-              "Create Project"
+              <>
+                <Zap className="w-4 h-4" />
+                Create Project
+              </>
             )}
           </Button>
         </div>

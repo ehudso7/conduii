@@ -124,10 +124,11 @@ export default async function SettingsPage() {
   })) || [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-primary uppercase tracking-wider">Configuration</p>
+        <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">
           Manage your account and organization settings
         </p>
