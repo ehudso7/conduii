@@ -90,7 +90,7 @@ export async function chat(
       messages: chatMessages,
     });
 
-    const textContent = response.content.find((c) => c.type === "text");
+    const textContent = response.content.find((c: { type: string }) => c.type === "text");
     return {
       content: textContent?.type === "text" ? textContent.text : "",
       usage: {
