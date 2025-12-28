@@ -13,16 +13,12 @@ function NavAuthButtonsInner() {
   if (!isLoaded) {
     return (
       <div className="flex items-center gap-4">
-        <Link href="/sign-in">
-          <Button variant="ghost" size="sm">
-            Sign In
-          </Button>
-        </Link>
-        <Link href="/sign-up">
-          <Button size="sm">
-            Get Started
-          </Button>
-        </Link>
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/sign-in">Sign In</Link>
+        </Button>
+        <Button asChild size="sm">
+          <Link href="/sign-up">Get Started</Link>
+        </Button>
       </div>
     );
   }
@@ -30,9 +26,9 @@ function NavAuthButtonsInner() {
   if (isSignedIn) {
     return (
       <div className="flex items-center gap-4">
-        <Link href="/dashboard">
-          <Button size="sm">Dashboard</Button>
-        </Link>
+        <Button asChild size="sm">
+          <Link href="/dashboard">Dashboard</Link>
+        </Button>
         <UserButton afterSignOutUrl="/" />
       </div>
     );
@@ -65,16 +61,12 @@ export function NavAuthButtons() {
   if (!mounted) {
     return (
       <div className="flex items-center gap-4">
-        <Link href="/sign-in">
-          <Button variant="ghost" size="sm">
-            Sign In
-          </Button>
-        </Link>
-        <Link href="/sign-up">
-          <Button size="sm">
-            Get Started
-          </Button>
-        </Link>
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/sign-in">Sign In</Link>
+        </Button>
+        <Button asChild size="sm">
+          <Link href="/sign-up">Get Started</Link>
+        </Button>
       </div>
     );
   }
@@ -89,23 +81,23 @@ function HeroAuthButtonsInner() {
 
   if (!isLoaded) {
     return (
-      <Link href="/sign-up">
-        <Button size="xl" variant="gradient" className="group">
+      <Button asChild size="xl" variant="gradient" className="group">
+        <Link href="/sign-up">
           Start Testing Free
           <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     );
   }
 
   if (isSignedIn) {
     return (
-      <Link href="/dashboard">
-        <Button size="xl" variant="gradient" className="group">
+      <Button asChild size="xl" variant="gradient" className="group">
+        <Link href="/dashboard">
           Go to Dashboard
           <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     );
   }
 
@@ -129,12 +121,12 @@ export function HeroAuthButtons() {
   return (
     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
       {!mounted ? (
-        <Link href="/sign-up">
-          <Button size="xl" variant="gradient" className="group">
+        <Button asChild size="xl" variant="gradient" className="group">
+          <Link href="/sign-up">
             Start Testing Free
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       ) : (
         <HeroAuthButtonsInner />
       )}
@@ -153,23 +145,23 @@ function CTAAuthButtonsInner() {
 
   if (!isLoaded) {
     return (
-      <Link href="/sign-up">
-        <Button size="xl" variant="gradient" className="group">
+      <Button asChild size="xl" variant="gradient" className="group">
+        <Link href="/sign-up">
           Get Started for Free
           <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     );
   }
 
   if (isSignedIn) {
     return (
-      <Link href="/dashboard">
-        <Button size="xl" variant="gradient" className="group">
+      <Button asChild size="xl" variant="gradient" className="group">
+        <Link href="/dashboard">
           Go to Dashboard
           <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     );
   }
 
@@ -193,12 +185,12 @@ export function CTAAuthButtons() {
   // SSR: Always show a working link
   if (!mounted) {
     return (
-      <Link href="/sign-up">
-        <Button size="xl" variant="gradient" className="group">
+      <Button asChild size="xl" variant="gradient" className="group">
+        <Link href="/sign-up">
           Get Started for Free
           <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     );
   }
 
