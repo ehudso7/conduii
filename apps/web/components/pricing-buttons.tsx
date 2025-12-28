@@ -6,26 +6,26 @@ interface PricingButtonProps {
   popular?: boolean;
 }
 
-// Simple server-rendered pricing button - no client-side JavaScript needed
-// This guarantees the button will always render
+// Simple server-rendered pricing button using proper asChild pattern
+// This creates valid HTML (no button inside anchor) and guarantees rendering
 export function PricingButton({ cta, popular }: PricingButtonProps) {
   // Contact Sales links to mailto
   if (cta === "Contact Sales") {
     return (
-      <Link href="mailto:sales@conduii.com?subject=Enterprise%20Inquiry" className="w-full">
-        <Button className="w-full" variant="outline">
+      <Button asChild className="w-full" variant="outline">
+        <Link href="mailto:sales@conduii.com?subject=Enterprise%20Inquiry">
           {cta}
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     );
   }
 
   // All other CTAs link to sign-up
   return (
-    <Link href="/sign-up" className="w-full">
-      <Button className="w-full" variant={popular ? "gradient" : "outline"}>
+    <Button asChild className="w-full" variant={popular ? "gradient" : "outline"}>
+      <Link href="/sign-up">
         {cta}
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   );
 }
