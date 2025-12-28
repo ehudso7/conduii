@@ -361,6 +361,587 @@ program
   });
 
 // =============================================================================
+// GENERATE COMMAND - AI Test Generation
+// =============================================================================
+
+program
+  .command("generate")
+  .description("Generate tests using AI")
+  .option("-p, --prompt <prompt>", "Natural language description of tests to generate")
+  .option("-t, --type <type>", "Test type (API, E2E, INTEGRATION)", "API")
+  .option("-o, --output <path>", "Output file path")
+  .option("--openapi <path>", "Generate tests from OpenAPI spec file")
+  .option("--json", "Output as JSON")
+  .action(async (options) => {
+    const spinner = ora("Generating tests with AI...").start();
+
+    try {
+      const config = loadConfig();
+      if (!config?.token) {
+        throw new Error("Not authenticated. Run 'conduii auth <token>' first.");
+      }
+
+      const apiUrl = config.apiUrl || "https://conduii.com";
+      let requestBody: Record<string, unknown>;
+
+      if (options.openapi) {
+        // Generate from OpenAPI spec
+        const specPath = resolve(options.openapi);
+        if (!existsSync(specPath)) {
+          throw new Error(`OpenAPI spec file not found: ${specPath}`);
+        }
+        const specContent = readFileSync(specPath, "utf-8");
+        const spec = JSON.parse(specContent);
+
+        requestBody = {
+          type: "openapi",
+          projectId: await getProjectId(config),
+          spec,
+        };
+      } else if (options.prompt) {
+        // Generate from natural language prompt
+        requestBody = {
+          type: "prompt",
+          projectId: await getProjectId(config),
+          prompt: options.prompt,
+          testType: options.type,
+        };
+      } else {
+        throw new Error("Either --prompt or --openapi is required");
+      }
+
+      const response = await fetch(`${apiUrl}/api/ai/generate-tests`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${config.token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || `API error: ${response.statusText}`);
+      }
+
+      const { tests } = await response.json();
+      spinner.succeed(`Generated ${tests.length} test(s)!`);
+
+      if (options.json) {
+        console.log(JSON.stringify(tests, null, 2));
+        return;
+      }
+
+      // Display generated tests
+      console.log();
+      for (const test of tests) {
+        console.log(chalk.bold(`📝 ${test.name}`));
+        console.log(chalk.dim(`   Type: ${test.type}`));
+        console.log(chalk.dim(`   Description: ${test.description}`));
+        console.log();
+        console.log(chalk.cyan("   Code:"));
+        console.log(test.code.split("\n").map((line: string) => `   ${line}`).join("\n"));
+        console.log();
+      }
+
+      // Write to file if output specified
+      if (options.output) {
+        const outputPath = resolve(options.output);
+        const outputContent = tests.map((t: { code: string }) => t.code).join("\n\n");
+        writeFileSync(outputPath, outputContent);
+        console.log(chalk.green(`✓ Tests written to ${outputPath}`));
+      }
+    } catch (error) {
+      spinner.fail("Test generation failed");
+      console.error(chalk.red(error instanceof Error ? error.message : "Unknown error"));
+      process.exit(1);
+    }
+  });
+
+// =============================================================================
+// ASK COMMAND - Natural Language Queries
+// =============================================================================
+
+program
+  .command("ask <query>")
+  .alias("chat")
+  .description("Ask questions about your tests in natural language")
+  .option("--json", "Output as JSON")
+  .action(async (query, options) => {
+    const spinner = ora("Processing query...").start();
+
+    try {
+      const config = loadConfig();
+      if (!config?.token) {
+        throw new Error("Not authenticated. Run 'conduii auth <token>' first.");
+      }
+
+      const apiUrl = config.apiUrl || "https://conduii.com";
+
+      const response = await fetch(`${apiUrl}/api/ai/query`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${config.token}`,
+        },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || `API error: ${response.statusText}`);
+      }
+
+      const { result } = await response.json();
+      spinner.stop();
+
+      if (options.json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      console.log();
+      console.log(boxen(result.answer, {
+        padding: 1,
+        borderColor: result.type === "ERROR" ? "red" : "cyan",
+        borderStyle: "round",
+        title: "Answer",
+        titleAlignment: "center",
+      }));
+
+      if (result.data) {
+        console.log();
+        console.log(chalk.bold("Data:"));
+        console.log(JSON.stringify(result.data, null, 2));
+      }
+
+      if (result.suggestedActions && result.suggestedActions.length > 0) {
+        console.log();
+        console.log(chalk.bold("Suggested Actions:"));
+        for (const action of result.suggestedActions) {
+          console.log(`  • ${action.label}`);
+        }
+      }
+
+      if (result.relatedQueries && result.relatedQueries.length > 0) {
+        console.log();
+        console.log(chalk.dim("Related queries:"));
+        for (const q of result.relatedQueries) {
+          console.log(chalk.dim(`  - "${q}"`));
+        }
+      }
+    } catch (error) {
+      spinner.fail("Query failed");
+      console.error(chalk.red(error instanceof Error ? error.message : "Unknown error"));
+      process.exit(1);
+    }
+  });
+
+// =============================================================================
+// ANALYZE COMMAND - AI Failure Analysis
+// =============================================================================
+
+program
+  .command("analyze")
+  .description("Analyze test failures with AI")
+  .option("-r, --run <runId>", "Test run ID to analyze")
+  .option("--patterns", "Detect failure patterns across project")
+  .option("--flaky", "Detect flaky tests")
+  .option("--json", "Output as JSON")
+  .action(async (options) => {
+    const spinner = ora("Analyzing...").start();
+
+    try {
+      const config = loadConfig();
+      if (!config?.token) {
+        throw new Error("Not authenticated. Run 'conduii auth <token>' first.");
+      }
+
+      const apiUrl = config.apiUrl || "https://conduii.com";
+      const projectId = await getProjectId(config);
+
+      if (options.flaky) {
+        // Flaky test detection
+        const response = await fetch(`${apiUrl}/api/ai/flaky-tests`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${config.token}`,
+          },
+          body: JSON.stringify({
+            action: "analyze",
+            projectId,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(error.error || `API error: ${response.statusText}`);
+        }
+
+        const { analysis } = await response.json();
+        spinner.succeed("Flaky test analysis complete!");
+
+        if (options.json) {
+          console.log(JSON.stringify(analysis, null, 2));
+          return;
+        }
+
+        console.log();
+        console.log(chalk.bold("Flaky Test Analysis"));
+        console.log();
+        console.log(`Total tests analyzed: ${analysis.totalTests}`);
+        console.log(`Flaky tests found: ${chalk.yellow(analysis.flakyTests.length)}`);
+
+        if (analysis.flakyTests.length > 0) {
+          console.log();
+          const table = new Table({
+            head: ["Test", "Flakiness", "Pass Rate", "Runs"],
+            style: { head: ["cyan"] },
+          });
+
+          for (const test of analysis.flakyTests) {
+            table.push([
+              test.testName,
+              `${test.flakinessScore}%`,
+              `${test.passRate}%`,
+              test.totalRuns.toString(),
+            ]);
+          }
+          console.log(table.toString());
+        }
+      } else if (options.patterns) {
+        // Failure pattern detection
+        const response = await fetch(`${apiUrl}/api/ai/analyze-failure`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${config.token}`,
+          },
+          body: JSON.stringify({
+            type: "patterns",
+            projectId,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(error.error || `API error: ${response.statusText}`);
+        }
+
+        const { patterns } = await response.json();
+        spinner.succeed("Pattern analysis complete!");
+
+        if (options.json) {
+          console.log(JSON.stringify(patterns, null, 2));
+          return;
+        }
+
+        console.log();
+        if (patterns.length === 0) {
+          console.log(chalk.green("No failure patterns detected. Great job!"));
+        } else {
+          console.log(chalk.bold(`Found ${patterns.length} failure pattern(s):`));
+          console.log();
+
+          for (const pattern of patterns) {
+            console.log(boxen(
+              `${chalk.bold(pattern.category)}\n\n` +
+              `Occurrences: ${pattern.occurrences}\n` +
+              `Affected tests: ${pattern.affectedTests.length}\n\n` +
+              `${pattern.description}`,
+              {
+                padding: 1,
+                borderColor: pattern.severity === "high" ? "red" : "yellow",
+                borderStyle: "round",
+              }
+            ));
+            console.log();
+          }
+        }
+      } else if (options.run) {
+        // Analyze specific run
+        const response = await fetch(`${apiUrl}/api/ai/analyze-failure`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${config.token}`,
+          },
+          body: JSON.stringify({
+            type: "analyze",
+            testRunId: options.run,
+            testResultId: options.run, // Will be enhanced
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(error.error || `API error: ${response.statusText}`);
+        }
+
+        const { analysis } = await response.json();
+        spinner.succeed("Analysis complete!");
+
+        if (options.json) {
+          console.log(JSON.stringify(analysis, null, 2));
+          return;
+        }
+
+        console.log();
+        console.log(chalk.bold("Root Cause Analysis"));
+        console.log();
+        console.log(analysis.rootCause);
+
+        if (analysis.suggestedFixes && analysis.suggestedFixes.length > 0) {
+          console.log();
+          console.log(chalk.bold("Suggested Fixes:"));
+          for (const fix of analysis.suggestedFixes) {
+            console.log(`  ${fix.priority === "high" ? "🔴" : "🟡"} ${fix.description}`);
+            if (fix.code) {
+              console.log(chalk.cyan(fix.code.split("\n").map((l: string) => `     ${l}`).join("\n")));
+            }
+          }
+        }
+      } else {
+        throw new Error("Specify --run <runId>, --patterns, or --flaky");
+      }
+    } catch (error) {
+      spinner.fail("Analysis failed");
+      console.error(chalk.red(error instanceof Error ? error.message : "Unknown error"));
+      process.exit(1);
+    }
+  });
+
+// =============================================================================
+// IMPACT COMMAND - Code Change Impact Analysis
+// =============================================================================
+
+program
+  .command("impact")
+  .description("Analyze impact of code changes on tests")
+  .option("--diff <diff>", "Git diff to analyze")
+  .option("--risk", "Calculate deployment risk score")
+  .option("--json", "Output as JSON")
+  .action(async (options) => {
+    const spinner = ora("Analyzing impact...").start();
+
+    try {
+      const config = loadConfig();
+      if (!config?.token) {
+        throw new Error("Not authenticated. Run 'conduii auth <token>' first.");
+      }
+
+      const apiUrl = config.apiUrl || "https://conduii.com";
+      const projectId = await getProjectId(config);
+
+      // Get git diff if not provided
+      let diff = options.diff;
+      if (!diff) {
+        try {
+          const { execSync } = require("child_process");
+          diff = execSync("git diff HEAD~1", { encoding: "utf-8" });
+        } catch {
+          throw new Error("Could not get git diff. Provide --diff manually.");
+        }
+      }
+
+      // Parse diff to get changed files
+      const changedFiles = diff.split("\n")
+        .filter((line: string) => line.startsWith("diff --git"))
+        .map((line: string) => {
+          const match = line.match(/b\/(.+)$/);
+          return match ? match[1] : "";
+        })
+        .filter(Boolean);
+
+      const changes = changedFiles.map((file: string) => ({
+        file,
+        additions: 0,
+        deletions: 0,
+        diff: "",
+      }));
+
+      const action = options.risk ? "risk" : "analyze";
+
+      const response = await fetch(`${apiUrl}/api/ai/impact-analysis`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${config.token}`,
+        },
+        body: JSON.stringify({
+          action,
+          projectId,
+          changes,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || `API error: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      spinner.succeed("Impact analysis complete!");
+
+      if (options.json) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      if (options.risk) {
+        const risk = result.risk;
+        const riskColor = risk.level === "HIGH" ? "red" : risk.level === "MEDIUM" ? "yellow" : "green";
+
+        console.log();
+        console.log(boxen(
+          `Risk Level: ${chalk[riskColor].bold(risk.level)}\n` +
+          `Score: ${risk.score}%\n\n` +
+          `${risk.summary}`,
+          {
+            padding: 1,
+            borderColor: riskColor,
+            borderStyle: "round",
+            title: "Deployment Risk",
+            titleAlignment: "center",
+          }
+        ));
+
+        if (risk.recommendations && risk.recommendations.length > 0) {
+          console.log();
+          console.log(chalk.bold("Recommendations:"));
+          for (const rec of risk.recommendations) {
+            console.log(`  • ${rec}`);
+          }
+        }
+      } else {
+        const impact = result.impact;
+
+        console.log();
+        console.log(chalk.bold("Impact Analysis"));
+        console.log();
+        console.log(`Changed files: ${impact.changedFiles}`);
+        console.log(`Affected tests: ${impact.affectedTests.length}`);
+        console.log(`Suggested to run: ${impact.suggestedTests.length} tests`);
+
+        if (impact.affectedTests.length > 0) {
+          console.log();
+          console.log(chalk.bold("Affected Tests:"));
+          const table = new Table({
+            head: ["Test", "Impact", "Priority"],
+            style: { head: ["cyan"] },
+          });
+
+          for (const test of impact.affectedTests.slice(0, 10)) {
+            table.push([
+              test.testName,
+              test.impactLevel,
+              test.priority,
+            ]);
+          }
+          console.log(table.toString());
+        }
+      }
+    } catch (error) {
+      spinner.fail("Impact analysis failed");
+      console.error(chalk.red(error instanceof Error ? error.message : "Unknown error"));
+      process.exit(1);
+    }
+  });
+
+// =============================================================================
+// METRICS COMMAND - Analytics Dashboard
+// =============================================================================
+
+program
+  .command("metrics")
+  .description("View test metrics and analytics")
+  .option("-d, --days <days>", "Time range in days", "7")
+  .option("--json", "Output as JSON")
+  .action(async (options) => {
+    const spinner = ora("Fetching metrics...").start();
+
+    try {
+      const config = loadConfig();
+      if (!config?.token) {
+        throw new Error("Not authenticated. Run 'conduii auth <token>' first.");
+      }
+
+      const apiUrl = config.apiUrl || "https://conduii.com";
+
+      const response = await fetch(`${apiUrl}/api/analytics`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${config.token}`,
+        },
+        body: JSON.stringify({
+          type: "dashboard",
+          timeRangeDays: parseInt(options.days),
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || `API error: ${response.statusText}`);
+      }
+
+      const { metrics } = await response.json();
+      spinner.succeed("Metrics loaded!");
+
+      if (options.json) {
+        console.log(JSON.stringify(metrics, null, 2));
+        return;
+      }
+
+      console.log();
+      console.log(boxen(
+        `📊 Dashboard Metrics (Last ${options.days} days)\n\n` +
+        `Pass Rate: ${chalk.bold(metrics.passRate + "%")}\n` +
+        `Total Runs: ${metrics.totalRuns}\n` +
+        `Tests Executed: ${metrics.totalTests}\n` +
+        `Avg Duration: ${(metrics.avgDuration / 1000).toFixed(1)}s`,
+        {
+          padding: 1,
+          borderColor: metrics.passRate >= 90 ? "green" : metrics.passRate >= 70 ? "yellow" : "red",
+          borderStyle: "round",
+        }
+      ));
+
+      if (metrics.topFailingTests && metrics.topFailingTests.length > 0) {
+        console.log();
+        console.log(chalk.bold("Top Failing Tests:"));
+        const table = new Table({
+          head: ["Test", "Failures", "Pass Rate"],
+          style: { head: ["cyan"] },
+        });
+
+        for (const test of metrics.topFailingTests) {
+          table.push([
+            test.name,
+            test.failures.toString(),
+            `${test.passRate}%`,
+          ]);
+        }
+        console.log(table.toString());
+      }
+
+      if (metrics.trend) {
+        console.log();
+        console.log(chalk.bold("Trend:"),
+          metrics.trend === "improving" ? chalk.green("📈 Improving") :
+          metrics.trend === "declining" ? chalk.red("📉 Declining") :
+          chalk.yellow("➡️ Stable")
+        );
+      }
+    } catch (error) {
+      spinner.fail("Failed to fetch metrics");
+      console.error(chalk.red(error instanceof Error ? error.message : "Unknown error"));
+      process.exit(1);
+    }
+  });
+
+// =============================================================================
 // AUTH COMMAND
 // =============================================================================
 
@@ -514,6 +1095,70 @@ async function runTests(dir: string, type: string, _env: string): Promise<TestRe
     duration: r.duration,
     error: r.error?.message,
   }));
+}
+
+interface CLIConfig {
+  token: string;
+  apiUrl: string;
+  projectId?: string;
+  createdAt?: string;
+}
+
+function loadConfig(): CLIConfig | null {
+  const configDir = join(process.env.HOME || process.env.USERPROFILE || "~", ".conduii");
+  const configPath = join(configDir, "config.json");
+
+  if (!existsSync(configPath)) {
+    return null;
+  }
+
+  try {
+    const content = readFileSync(configPath, "utf-8");
+    return JSON.parse(content);
+  } catch {
+    return null;
+  }
+}
+
+async function getProjectId(config: CLIConfig): Promise<string> {
+  // Check local conduii.config.json first
+  const localConfigPath = join(process.cwd(), "conduii.config.json");
+  if (existsSync(localConfigPath)) {
+    try {
+      const content = readFileSync(localConfigPath, "utf-8");
+      const localConfig = JSON.parse(content);
+      if (localConfig.projectId) {
+        return localConfig.projectId;
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }
+
+  // Check stored project ID
+  if (config.projectId) {
+    return config.projectId;
+  }
+
+  // Fetch from API
+  const apiUrl = config.apiUrl || "https://conduii.com";
+  const response = await fetch(`${apiUrl}/api/projects`, {
+    headers: {
+      "Authorization": `Bearer ${config.token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch projects. Run 'conduii init' in a project directory.");
+  }
+
+  const { projects } = await response.json();
+  if (!projects || projects.length === 0) {
+    throw new Error("No projects found. Create a project in the Conduii dashboard first.");
+  }
+
+  // Return first project (could enhance with selection)
+  return projects[0].id;
 }
 
 // =============================================================================
