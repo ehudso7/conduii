@@ -40,17 +40,30 @@ export async function POST(req: Request) {
         session.subscription as string
       );
 
-      const priceId = subscription.items.data[0].price.id;
+      const priceItem = subscription.items.data[0];
+      if (!priceItem?.price?.id) {
+        console.error("Missing price data in subscription:", subscription.id);
+        return new NextResponse("Invalid subscription data", { status: 400 });
+      }
+      const priceId = priceItem.price.id;
       const planInfo = getPlanFromPriceId(priceId);
 
       // Default to PRO if we can't determine the plan
       const planType = planInfo?.plan || "PRO";
       const planData = PLANS[planType];
 
+      // Find organization first to avoid RecordNotFound error
+      const org = await db.organization.findFirst({
+        where: { stripeCustomerId: session.customer as string },
+      });
+
+      if (!org) {
+        console.error("No organization found for stripeCustomerId:", session.customer);
+        return new NextResponse("Organization not found", { status: 400 });
+      }
+
       await db.organization.update({
-        where: {
-          stripeCustomerId: session.customer as string,
-        },
+        where: { id: org.id },
         data: {
           stripeSubscriptionId: subscription.id,
           stripePriceId: priceId,
@@ -114,8 +127,8 @@ export async function POST(req: Request) {
             stripePriceId: null,
             stripeCurrentPeriodEnd: null,
             plan: "FREE",
-            projectLimit: 3,
-            testRunLimit: 100,
+            projectLimit: PLANS.FREE.projectLimit,
+            testRunLimit: PLANS.FREE.testRunLimit,
           },
         });
       }

@@ -4,21 +4,25 @@ import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { canRunTests } from "@/lib/stripe";
 import { notifyTestRunStatus } from "@/lib/notifications";
 
+interface RouteContext {
+  params: Promise<{ projectId: string }>;
+}
+
 // GET /api/projects/[projectId]/runs - List test runs
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function GET(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    await requireProjectAccess(params.projectId, user.id);
+    const { projectId } = await context.params;
+    await requireProjectAccess(projectId, user.id);
 
     const { searchParams } = req.nextUrl;
-    const limit = Math.min(parseInt(searchParams.get("limit") ?? "20"), 100);
+    const limitParam = searchParams.get("limit");
+    const parsedLimit = limitParam ? parseInt(limitParam, 10) : 20;
+    const limit = Number.isNaN(parsedLimit) ? 20 : Math.min(Math.max(parsedLimit, 1), 100);
     const cursor = searchParams.get("cursor");
 
     const runs = await db.testRun.findMany({
-      where: { projectId: params.projectId },
+      where: { projectId },
       take: limit + 1,
       cursor: cursor ? { id: cursor } : undefined,
       orderBy: { createdAt: "desc" },
@@ -51,13 +55,11 @@ export async function GET(
 }
 
 // POST /api/projects/[projectId]/runs - Start a new test run
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function POST(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    const project = await requireProjectAccess(params.projectId, user.id);
+    const { projectId } = await context.params;
+    const project = await requireProjectAccess(projectId, user.id);
 
     const body = await req.json();
     const { testSuiteId, environmentId, testType } = body;
@@ -78,7 +80,7 @@ export async function POST(
     let suiteId = testSuiteId;
     if (!suiteId) {
       const defaultSuite = await db.testSuite.findFirst({
-        where: { projectId: params.projectId, isDefault: true },
+        where: { projectId, isDefault: true },
       });
       suiteId = defaultSuite?.id;
     }
@@ -86,7 +88,7 @@ export async function POST(
     // Create test run
     const testRun = await db.testRun.create({
       data: {
-        projectId: params.projectId,
+        projectId,
         testSuiteId: suiteId,
         environmentId,
         triggeredById: user.id,

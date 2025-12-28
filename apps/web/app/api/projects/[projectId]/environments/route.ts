@@ -10,17 +10,19 @@ const createEnvironmentSchema = z.object({
   isProduction: z.boolean().default(false),
 });
 
+interface RouteContext {
+  params: Promise<{ projectId: string }>;
+}
+
 // GET /api/projects/[projectId]/environments - List environments
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function GET(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    await requireProjectAccess(params.projectId, user.id);
+    const { projectId } = await context.params;
+    await requireProjectAccess(projectId, user.id);
 
     const environments = await db.environment.findMany({
-      where: { projectId: params.projectId },
+      where: { projectId },
       orderBy: { name: "asc" },
     });
 
@@ -31,13 +33,11 @@ export async function GET(
 }
 
 // POST /api/projects/[projectId]/environments - Create environment
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function POST(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    await requireProjectAccess(params.projectId, user.id);
+    const { projectId } = await context.params;
+    await requireProjectAccess(projectId, user.id);
 
     const body = await req.json();
     const data = createEnvironmentSchema.parse(body);
@@ -47,14 +47,14 @@ export async function POST(
       // If this is marked as production, unmark other production environments
       if (data.isProduction) {
         await tx.environment.updateMany({
-          where: { projectId: params.projectId, isProduction: true },
+          where: { projectId, isProduction: true },
           data: { isProduction: false },
         });
       }
 
       return tx.environment.create({
         data: {
-          projectId: params.projectId,
+          projectId,
           name: data.name,
           url: data.url || null,
           isProduction: data.isProduction,

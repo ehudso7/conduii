@@ -16,7 +16,9 @@ export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth();
     const projectId = req.nextUrl.searchParams.get("projectId");
-    const limit = parseInt(req.nextUrl.searchParams.get("limit") || "20");
+    const limitParam = req.nextUrl.searchParams.get("limit");
+    const parsedLimit = limitParam ? parseInt(limitParam, 10) : 20;
+    const limit = Number.isNaN(parsedLimit) ? 20 : Math.min(Math.max(parsedLimit, 1), 100);
 
     if (!projectId) {
       return NextResponse.json(
@@ -84,32 +86,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create the test run
-    const testRun = await db.testRun.create({
-      data: {
-        projectId,
-        environmentId,
-        testSuiteId,
-        triggeredById: user.id,
-        trigger: "MANUAL",
-        status: "PENDING",
-        metadata: { testType },
-      },
-      include: {
-        environment: true,
-        testSuite: true,
-      },
-    });
+    // Create test run and increment usage in a transaction
+    const testRun = await db.$transaction(async (tx) => {
+      const run = await tx.testRun.create({
+        data: {
+          projectId,
+          environmentId,
+          testSuiteId,
+          triggeredById: user.id,
+          trigger: "MANUAL",
+          status: "PENDING",
+          metadata: { testType },
+        },
+        include: {
+          environment: true,
+          testSuite: true,
+        },
+      });
 
-    // Increment usage counter
-    await db.organization.update({
-      where: { id: org.id },
-      data: { testRunsUsed: { increment: 1 } },
+      await tx.organization.update({
+        where: { id: org.id },
+        data: { testRunsUsed: { increment: 1 } },
+      });
+
+      return run;
     });
 
     // Execute tests in background (non-blocking)
     executeTestRun(testRun.id, projectId, { testType, testSuiteId }).catch(
-      (error) => console.error("Test execution error:", error)
+      async (error) => {
+        console.error("Test execution error:", error);
+        // Update test run status to FAILED on error
+        await db.testRun.update({
+          where: { id: testRun.id },
+          data: { status: "FAILED", completedAt: new Date() },
+        }).catch((e) => console.error("Failed to update test run status:", e));
+      }
     );
 
     return NextResponse.json({ testRun }, { status: 201 });

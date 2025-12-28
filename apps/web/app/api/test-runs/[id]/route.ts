@@ -7,14 +7,15 @@ const updateTestRunSchema = z.object({
   status: z.enum(["CANCELLED"]),
 });
 
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 // GET /api/test-runs/[id] - Get test run details
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    const testRunId = params.id;
+    const { id: testRunId } = await context.params;
 
     const testRun = await db.testRun.findUnique({
       where: { id: testRunId },
@@ -84,13 +85,10 @@ export async function GET(
 }
 
 // PATCH /api/test-runs/[id] - Update test run (cancel, etc.)
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    const testRunId = params.id;
+    const { id: testRunId } = await context.params;
     const body = await req.json();
 
     // Validate that only allowed status values can be set

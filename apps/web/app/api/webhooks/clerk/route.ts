@@ -95,20 +95,46 @@ export async function POST(req: Request) {
 
       const name = [first_name, last_name].filter(Boolean).join(" ");
 
-      await db.user.upsert({
+      // Check if user exists first
+      const existingUser = await db.user.findUnique({
         where: { clerkId: id },
-        update: {
-          email,
-          name: name || null,
-          imageUrl: image_url || null,
-        },
-        create: {
-          clerkId: id,
-          email,
-          name: name || null,
-          imageUrl: image_url || null,
-        },
       });
+
+      if (existingUser) {
+        // Update existing user
+        await db.user.update({
+          where: { clerkId: id },
+          data: {
+            email,
+            name: name || null,
+            imageUrl: image_url || null,
+          },
+        });
+      } else {
+        // Create new user with organization (consistent with user.created)
+        const slug = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
+        const user = await db.user.create({
+          data: {
+            clerkId: id,
+            email,
+            name: name || null,
+            imageUrl: image_url || null,
+          },
+        });
+
+        await db.organization.create({
+          data: {
+            name: `${name || email}'s Workspace`,
+            slug: `${slug}-${Date.now().toString(36)}`,
+            members: {
+              create: {
+                userId: user.id,
+                role: "OWNER",
+              },
+            },
+          },
+        });
+      }
     }
 
     if (eventType === "user.deleted") {

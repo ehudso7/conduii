@@ -10,17 +10,19 @@ const updateProjectSchema = z.object({
   config: z.record(z.unknown()).optional(),
 });
 
+interface RouteContext {
+  params: Promise<{ projectId: string }>;
+}
+
 // GET /api/projects/[projectId]
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function GET(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    await requireProjectAccess(params.projectId, user.id);
+    const { projectId } = await context.params;
+    await requireProjectAccess(projectId, user.id);
 
     const project = await db.project.findUnique({
-      where: { id: params.projectId },
+      where: { id: projectId },
       include: {
         organization: {
           select: {
@@ -85,13 +87,11 @@ export async function GET(
 }
 
 // PATCH /api/projects/[projectId]
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function PATCH(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    await requireProjectAccess(params.projectId, user.id);
+    const { projectId } = await context.params;
+    await requireProjectAccess(projectId, user.id);
 
     const body = await req.json();
     const data = updateProjectSchema.parse(body);
@@ -109,7 +109,7 @@ export async function PATCH(
     if (data.config !== undefined) updateData.config = data.config;
 
     const project = await db.project.update({
-      where: { id: params.projectId },
+      where: { id: projectId },
       data: updateData,
     });
 
@@ -126,16 +126,14 @@ export async function PATCH(
 }
 
 // DELETE /api/projects/[projectId]
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function DELETE(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    await requireProjectAccess(params.projectId, user.id);
+    const { projectId } = await context.params;
+    await requireProjectAccess(projectId, user.id);
 
     await db.project.delete({
-      where: { id: params.projectId },
+      where: { id: projectId },
     });
 
     return NextResponse.json({ success: true });
