@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  TrendingUp,
   ArrowRight,
   Play,
   Zap,

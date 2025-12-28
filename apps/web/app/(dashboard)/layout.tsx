@@ -9,9 +9,7 @@ import {
   Zap,
   Plus,
   Command,
-  Activity,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { db } from "@/lib/db";
 import { DashboardSearch } from "@/components/dashboard/search";
