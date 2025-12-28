@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
@@ -9,7 +9,7 @@ export async function getAuthUser() {
     return null;
   }
 
-  const user = await db.user.findUnique({
+  let user = await db.user.findUnique({
     where: { clerkId: userId },
     include: {
       organizations: {
@@ -19,6 +19,47 @@ export async function getAuthUser() {
       },
     },
   });
+
+  // Auto-create user if they don't exist (handles case where webhook didn't fire)
+  if (!user) {
+    const clerkUser = await currentUser();
+    if (!clerkUser) return null;
+
+    const email = clerkUser.emailAddresses[0]?.emailAddress;
+    if (!email) return null;
+
+    const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ");
+
+    // Create user and default organization
+    const slug = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
+
+    user = await db.user.create({
+      data: {
+        clerkId: userId,
+        email,
+        name: name || null,
+        imageUrl: clerkUser.imageUrl || null,
+        organizations: {
+          create: {
+            role: "OWNER",
+            organization: {
+              create: {
+                name: `${name || email}'s Workspace`,
+                slug: `${slug}-${Date.now().toString(36)}`,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        organizations: {
+          include: {
+            organization: true,
+          },
+        },
+      },
+    });
+  }
 
   return user;
 }
