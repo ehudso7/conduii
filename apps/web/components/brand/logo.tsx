@@ -1,8 +1,4 @@
-"use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -30,8 +26,6 @@ export function Logo({
   showText = true,
   linkToHome = true,
 }: LogoProps) {
-  const { resolvedTheme } = useTheme();
-
   const content = (
     <div className={cn("flex items-center gap-2", className)}>
       <div

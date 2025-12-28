@@ -397,8 +397,8 @@ export default function HomePage() {
               <h3 className="font-semibold mb-4 text-base">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/docs" className="hover:text-foreground transition">Documentation</Link></li>
-                <li><Link href="/docs#cli" className="hover:text-foreground transition">CLI Reference</Link></li>
-                <li><Link href="/docs#api" className="hover:text-foreground transition">API</Link></li>
+                <li><Link href="/docs#cli-discover" className="hover:text-foreground transition">CLI Reference</Link></li>
+                <li><Link href="/docs#api-auth" className="hover:text-foreground transition">API</Link></li>
                 <li><Link href="/blog" className="hover:text-foreground transition">Blog</Link></li>
               </ul>
             </div>
