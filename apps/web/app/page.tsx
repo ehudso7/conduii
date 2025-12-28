@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { NavAuthButtons, HeroAuthButtons, CTAAuthButtons, PricingButton } from "@/components/auth-buttons";
+import { NavAuthButtons, HeroAuthButtons, CTAAuthButtons } from "@/components/auth-buttons";
+import { PricingButton } from "@/components/pricing-buttons";
 import {
   Zap,
   Globe,
