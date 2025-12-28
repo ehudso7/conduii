@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { discoverServices } from "@/lib/test-runner";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+interface RouteContext {
+  params: Promise<{ projectId: string }>;
+}
+
+export async function POST(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    const { projectId } = params;
+    const { projectId } = await context.params;
 
     await requireProjectAccess(projectId, user.id);
 

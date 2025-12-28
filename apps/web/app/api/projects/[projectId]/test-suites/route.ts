@@ -8,17 +8,19 @@ const createTestSuiteSchema = z.object({
   description: z.string().max(500).optional(),
 });
 
+interface RouteContext {
+  params: Promise<{ projectId: string }>;
+}
+
 // GET /api/projects/[projectId]/test-suites - List test suites
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function GET(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    await requireProjectAccess(params.projectId, user.id);
+    const { projectId } = await context.params;
+    await requireProjectAccess(projectId, user.id);
 
     const testSuites = await db.testSuite.findMany({
-      where: { projectId: params.projectId },
+      where: { projectId },
       include: {
         _count: {
           select: { tests: true },
@@ -34,13 +36,11 @@ export async function GET(
 }
 
 // POST /api/projects/[projectId]/test-suites - Create test suite
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function POST(req: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth();
-    await requireProjectAccess(params.projectId, user.id);
+    const { projectId } = await context.params;
+    await requireProjectAccess(projectId, user.id);
 
     const body = await req.json();
     const data = createTestSuiteSchema.parse(body);
@@ -49,7 +49,7 @@ export async function POST(
       data: {
         name: data.name,
         description: data.description,
-        projectId: params.projectId,
+        projectId,
         isDefault: false,
       },
     });
