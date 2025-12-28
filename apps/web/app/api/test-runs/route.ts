@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
         // Update test run status to FAILED on error
         await db.testRun.update({
           where: { id: testRun.id },
-          data: { status: "FAILED", completedAt: new Date() },
+          data: { status: "FAILED", finishedAt: new Date() },
         }).catch((e) => console.error("Failed to update test run status:", e));
       }
     );
