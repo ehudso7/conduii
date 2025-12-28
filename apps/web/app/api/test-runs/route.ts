@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
 
     // Create test run and increment usage in a transaction
     const testRun = await db.$transaction(async (tx) => {
+    const testRun = await db.$transaction(async (tx: typeof db) => {
       const run = await tx.testRun.create({
         data: {
           projectId,
