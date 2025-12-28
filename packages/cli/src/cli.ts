@@ -791,6 +791,9 @@ program
 
       if (options.risk) {
         const risk = result.risk;
+        if (!risk) {
+          throw new Error("API did not return risk analysis data");
+        }
         const riskColor = risk.level === "HIGH" ? "red" : risk.level === "MEDIUM" ? "yellow" : "green";
 
         console.log();
@@ -816,6 +819,9 @@ program
         }
       } else {
         const impact = result.impact;
+        if (!impact) {
+          throw new Error("API did not return impact analysis data");
+        }
 
         console.log();
         console.log(chalk.bold("Impact Analysis"));
