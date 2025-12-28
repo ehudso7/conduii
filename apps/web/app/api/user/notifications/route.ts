@@ -3,6 +3,8 @@ import { requireAuth, handleApiError } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const notificationsSchema = z.object({
   testFailures: z.boolean().optional(),
   serviceHealth: z.boolean().optional(),

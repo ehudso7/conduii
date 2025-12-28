@@ -4,6 +4,8 @@ import { requireAuth, handleApiError } from "@/lib/auth";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 
+export const dynamic = "force-dynamic";
+
 const createKeySchema = z.object({
   name: z.string().min(1).max(100),
   expiresIn: z.enum(["30d", "90d", "365d", "never"]).optional(),

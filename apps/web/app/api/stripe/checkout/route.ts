@@ -4,6 +4,8 @@ import { stripe, PLANS, PlanType, BillingInterval } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const checkoutSchema = z.object({
   planId: z.enum(["BASIC", "PRO", "ENTERPRISE"]),
   interval: z.enum(["monthly", "yearly"]),

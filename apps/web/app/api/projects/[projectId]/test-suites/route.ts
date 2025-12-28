@@ -3,6 +3,8 @@ import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const createTestSuiteSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),

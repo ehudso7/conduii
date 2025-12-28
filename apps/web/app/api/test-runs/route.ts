@@ -4,6 +4,8 @@ import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { executeTestRun } from "@/lib/test-runner";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const createTestRunSchema = z.object({
   projectId: z.string(),
   environmentId: z.string().optional(),
