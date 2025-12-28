@@ -5,7 +5,7 @@
 
 import { chat, generateJSON, isAIConfigured } from "./index";
 import { db } from "@/lib/db";
-import type { TestType } from "@prisma/client";
+import type { TestType, TestRunStatus } from "@prisma/client";
 
 export interface QueryResult {
   type: "DATA" | "INSIGHT" | "ACTION" | "ERROR";
@@ -219,7 +219,7 @@ async function handleListRuns(
     where: {
       projectId: { in: projects.map((p) => p.id) },
       createdAt: { gte: since },
-      ...(query.entities.status && { status: query.entities.status }),
+      ...(query.entities.status && { status: query.entities.status as TestRunStatus }),
     },
     take: query.entities.limit || 10,
     include: {

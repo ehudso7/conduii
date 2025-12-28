@@ -456,7 +456,7 @@ async function getSlowestTests(
 
   return results.map((r) => ({
     testName: tests.find((t) => t.id === r.testId)?.name || "Unknown",
-    avgDuration: Math.round(r._avg.duration || 0),
+    avgDuration: Math.round(r._avg?.duration || 0),
   }));
 }
 
