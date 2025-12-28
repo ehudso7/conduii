@@ -395,7 +395,7 @@ export async function executeTestRun(
     // If no tests were run, create default tests and run them
     if (results.length === 0 && project.productionUrl) {
       // Use transaction for atomic test suite and test creation
-      const { defaultSuite, healthTest } = await db.$transaction(async (tx) => {
+      const { healthTest } = await db.$transaction(async (tx) => {
         // Find or create a default test suite
         let defaultSuite = await tx.testSuite.findFirst({
           where: { projectId, isDefault: true },

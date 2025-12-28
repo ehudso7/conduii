@@ -1,11 +1,15 @@
 /**
  * AI Service for Conduii
  * Handles all AI-powered features including test generation, analysis, and predictions
+ *
+ * Note: AI SDKs (@anthropic-ai/sdk, openai) are optional dependencies.
+ * The service gracefully degrades when they're not installed.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 type AnthropicClient = any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type OpenAIClient = any;
 
 // Lazy-load AI clients to avoid build errors when SDKs aren't installed
@@ -13,25 +17,32 @@ let anthropic: AnthropicClient | null = null;
 let openai: OpenAIClient | null = null;
 let clientsInitialized = false;
 
-async function initializeClients() {
+function initializeClients() {
   if (clientsInitialized) return;
   clientsInitialized = true;
 
+  // Use require with try-catch to make SDKs truly optional at runtime
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      const { default: Anthropic } = await import("@anthropic-ai/sdk");
+      // Dynamic require to avoid build-time resolution
+      const modulePath = "@anthropic-ai/sdk";
+      const Anthropic = require(modulePath).default || require(modulePath);
       anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     } catch {
-      // Anthropic SDK not installed
+      // Anthropic SDK not installed - this is fine
+      console.debug("Anthropic SDK not available");
     }
   }
 
   if (process.env.OPENAI_API_KEY) {
     try {
-      const { default: OpenAI } = await import("openai");
+      // Dynamic require to avoid build-time resolution
+      const modulePath = "openai";
+      const OpenAI = require(modulePath).default || require(modulePath);
       openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     } catch {
-      // OpenAI SDK not installed
+      // OpenAI SDK not installed - this is fine
+      console.debug("OpenAI SDK not available");
     }
   }
 }
@@ -57,7 +68,7 @@ export async function chat(
     temperature?: number;
   } = {}
 ): Promise<AIResponse> {
-  await initializeClients();
+  initializeClients();
   const { provider = "anthropic", maxTokens = 4096, temperature = 0.7 } = options;
 
   if (provider === "anthropic" && anthropic) {

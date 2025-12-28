@@ -3,7 +3,7 @@
  * Provides intelligent root cause analysis and fix suggestions
  */
 
-import { chat, generateJSON, isAIConfigured } from "./index";
+import { generateJSON, isAIConfigured } from "./index";
 import { db } from "@/lib/db";
 
 export interface FailureAnalysis {
@@ -227,7 +227,7 @@ function normalizeError(error: string): string {
  */
 async function inferCausesForPattern(
   pattern: string,
-  failures: Array<{ error: string | null; test: { name: string; type: string } }>
+  _failures: Array<{ error: string | null; test: { name: string; type: string } }>
 ): Promise<string[]> {
   // Use heuristics for common patterns
   const causes: string[] = [];

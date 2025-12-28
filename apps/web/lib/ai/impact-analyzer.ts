@@ -4,7 +4,6 @@
  */
 
 import { db } from "@/lib/db";
-import { generateJSON, isAIConfigured } from "./index";
 
 export interface ImpactAnalysis {
   affectedTests: Array<{
@@ -116,7 +115,7 @@ function calculateTestImpact(
     results: Array<{ status: string; duration: number | null }>;
   },
   changes: CodeChange[],
-  endpoints: Array<{ path: string; method: string }>
+  _endpoints: Array<{ path: string; method: string }>
 ): { score: number; reason: string } {
   let score = 0;
   const reasons: string[] = [];

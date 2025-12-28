@@ -348,3 +348,12 @@ export function getConnectionStats(): {
 
   return stats;
 }
+
+/**
+ * Verify if a user owns a specific client connection
+ */
+export function verifyClientOwnership(clientId: string, userId: string): boolean {
+  const client = clients.get(clientId);
+  if (!client) return false;
+  return client.userId === userId;
+}

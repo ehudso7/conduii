@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, handleApiError } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { createSSEConnection, closeConnection, pingClient } from "@/lib/realtime/index";
+import { createSSEConnection, closeConnection, pingClient, verifyClientOwnership } from "@/lib/realtime/index";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
 // DELETE /api/realtime - Close SSE connection
 export async function DELETE(req: NextRequest) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
 
     const url = new URL(req.url);
     const clientId = url.searchParams.get("clientId");
@@ -108,6 +108,14 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json(
         { error: "clientId is required" },
         { status: 400 }
+      );
+    }
+
+    // Verify the user owns this connection
+    if (!verifyClientOwnership(clientId, user.id)) {
+      return NextResponse.json(
+        { error: "Connection not found or access denied" },
+        { status: 403 }
       );
     }
 

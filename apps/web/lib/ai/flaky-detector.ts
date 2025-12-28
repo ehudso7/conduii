@@ -4,7 +4,6 @@
  */
 
 import { db } from "@/lib/db";
-import { generateJSON, isAIConfigured } from "./index";
 
 export interface FlakyTestResult {
   testId: string;
