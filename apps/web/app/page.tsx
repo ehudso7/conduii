@@ -131,13 +131,13 @@ export default function HomePage() {
             <Logo size="md" />
 
             <div className="hidden md:flex items-center gap-8">
-              <Link href="#features" className="nav-link">
+              <Link href="/features" className="nav-link">
                 Features
               </Link>
-              <Link href="#integrations" className="nav-link">
+              <Link href="/integrations" className="nav-link">
                 Integrations
               </Link>
-              <Link href="#pricing" className="nav-link">
+              <Link href="/pricing" className="nav-link">
                 Pricing
               </Link>
               <Link href="/docs" className="nav-link">
@@ -386,9 +386,9 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4 text-base">Product</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#features" className="hover:text-foreground transition">Features</Link></li>
-                <li><Link href="#integrations" className="hover:text-foreground transition">Integrations</Link></li>
-                <li><Link href="#pricing" className="hover:text-foreground transition">Pricing</Link></li>
+                <li><Link href="/features" className="hover:text-foreground transition">Features</Link></li>
+                <li><Link href="/integrations" className="hover:text-foreground transition">Integrations</Link></li>
+                <li><Link href="/pricing" className="hover:text-foreground transition">Pricing</Link></li>
                 <li><Link href="/changelog" className="hover:text-foreground transition">Changelog</Link></li>
               </ul>
             </div>
