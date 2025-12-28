@@ -51,6 +51,15 @@ export async function GET(req: NextRequest, context: RouteContext) {
         },
         results: {
           orderBy: { createdAt: "asc" },
+          include: {
+            test: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
+          },
         },
         diagnostics: {
           orderBy: { severity: "asc" },

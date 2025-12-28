@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { canRunTests } from "@/lib/stripe";
 import { notifyTestRunStatus } from "@/lib/notifications";
+import { executeTestRun } from "@/lib/test-runner";
 
 export const dynamic = "force-dynamic";
 
@@ -106,16 +107,6 @@ export async function POST(req: NextRequest, context: RouteContext) {
       data: { testRunsUsed: { increment: 1 } },
     });
 
-    // In a real app, you would trigger the actual test execution here
-    // For now, we'll simulate starting the run
-    await db.testRun.update({
-      where: { id: testRun.id },
-      data: {
-        status: "RUNNING",
-        startedAt: new Date(),
-      },
-    });
-
     // Create notification for test run started
     await notifyTestRunStatus(
       testRun.id,
@@ -124,6 +115,32 @@ export async function POST(req: NextRequest, context: RouteContext) {
       project.id,
       user.id
     );
+
+    // Execute tests asynchronously (fire and forget)
+    // This allows the API to return immediately while tests run in the background
+    executeTestRun(testRun.id, projectId, {
+      testType: testType,
+      testSuiteId: suiteId,
+    })
+      .then(async () => {
+        // Get final status and notify
+        const completedRun = await db.testRun.findUnique({
+          where: { id: testRun.id },
+          select: { status: true },
+        });
+        if (completedRun) {
+          await notifyTestRunStatus(
+            testRun.id,
+            completedRun.status,
+            project.name,
+            project.id,
+            user.id
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Test execution failed:", error);
+      });
 
     return NextResponse.json({ testRun }, { status: 201 });
   } catch (error) {

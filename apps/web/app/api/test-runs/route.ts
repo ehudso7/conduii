@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { executeTestRun } from "@/lib/test-runner";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create test run and increment usage in a transaction
-    const testRun = await db.$transaction(async (tx) => {
+    const testRun = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       const run = await tx.testRun.create({
         data: {
           projectId,
@@ -122,7 +123,7 @@ export async function POST(req: NextRequest) {
         await db.testRun.update({
           where: { id: testRun.id },
           data: { status: "FAILED", finishedAt: new Date() },
-        }).catch((e) => console.error("Failed to update test run status:", e));
+        }).catch((e: unknown) => console.error("Failed to update test run status:", e));
       }
     );
 
