@@ -1,0 +1,22 @@
+{
+  "name": "Conduii",
+  "short_name": "Conduii",
+  "description": "Deployment Testing Platform - Automatically discover, validate, and test your deployed applications",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0D9488",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/images/logo/conduii-icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

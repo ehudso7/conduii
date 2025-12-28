@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Zap, Plus, LucideIcon } from "lucide-react";
+import { Menu, Plus, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/brand/logo";
 import {
   Sheet,
   SheetContent,
@@ -38,11 +39,8 @@ export function MobileNav({ navigation }: MobileNavProps) {
       </SheetTrigger>
       <SheetContent side="left" className="w-64 p-0">
         <SheetHeader className="px-6 py-4 border-b">
-          <SheetTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-xl">Conduii</span>
+          <SheetTitle>
+            <Logo size="md" linkToHome={false} />
           </SheetTitle>
         </SheetHeader>
         <nav className="p-4 space-y-1">

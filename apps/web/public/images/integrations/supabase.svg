@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <circle cx="24" cy="24" r="22" fill="#1C1C1C"/>
+  <defs>
+    <linearGradient id="supabaseGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3ECF8E"/>
+      <stop offset="100%" stop-color="#3ECF8E"/>
+    </linearGradient>
+    <linearGradient id="supabaseGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3ECF8E" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#3ECF8E"/>
+    </linearGradient>
+  </defs>
+  <path d="M26.5 36.5c-.5 1.5-2.5 1.5-3 0l-8-24c-.3-1 .5-2 1.5-2h19c1 0 1.8 1 1.5 2l-8 24z" fill="url(#supabaseGrad1)"/>
+  <path d="M21.5 11.5c.5-1.5 2.5-1.5 3 0l8 24c.3 1-.5 2-1.5 2h-19c-1 0-1.8-1-1.5-2l8-24z" fill="url(#supabaseGrad2)" transform="rotate(180 24 24)"/>
+</svg>

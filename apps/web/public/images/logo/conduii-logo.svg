@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0D9488"/>
+      <stop offset="100%" stop-color="#14B8A6"/>
+    </linearGradient>
+  </defs>
+  <!-- Conduit Icon - Abstract C with flow lines -->
+  <g>
+    <!-- Main C shape representing conduit -->
+    <path d="M25 8C14.5 8 6 16.5 6 27s8.5 19 19 19c6.5 0 12.2-3.3 15.6-8.3"
+          stroke="url(#logoGradient)" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <!-- Flow lines through the conduit -->
+    <circle cx="18" cy="20" r="2.5" fill="#0D9488"/>
+    <circle cx="25" cy="27" r="2.5" fill="#0F766E"/>
+    <circle cx="32" cy="34" r="2.5" fill="#14B8A6"/>
+    <!-- Connection dots -->
+    <path d="M18 20L32 34" stroke="#14B8A6" stroke-width="1.5" stroke-dasharray="2 2"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="52" y="34" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+        font-size="26" font-weight="700" fill="#0F172A">
+    Conduii
+  </text>
+</svg>
