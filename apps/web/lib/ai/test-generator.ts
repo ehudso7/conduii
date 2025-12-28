@@ -5,7 +5,10 @@
 
 import { generateJSON, isAIConfigured } from "./index";
 import { db } from "@/lib/db";
-import type { Prisma, TestType } from "@prisma/client";
+
+// Local types matching Prisma schema
+type TestType = "HEALTH" | "INTEGRATION" | "API" | "E2E" | "PERFORMANCE" | "SECURITY" | "CUSTOM";
+type InputJsonValue = string | number | boolean | null | { [key: string]: InputJsonValue } | InputJsonValue[];
 
 export interface GeneratedTest {
   name: string;
@@ -83,12 +86,14 @@ export async function generateTestsFromPrompt(
   }
 
   // Build context for AI
+  type TestSuiteWithTests = { tests: Array<{ name: string }> };
   const existingTestNames = project.testSuites
-    .flatMap((suite) => suite.tests)
-    .map((t) => t.name);
+    .flatMap((suite: TestSuiteWithTests) => suite.tests)
+    .map((t: { name: string }) => t.name);
 
+  type EndpointInfo = { method: string; path: string; description: string | null };
   const endpointContext = project.endpoints
-    .map((e) => `${e.method} ${e.path} - ${e.description || "No description"}`)
+    .map((e: EndpointInfo) => `${e.method} ${e.path} - ${e.description || "No description"}`)
     .join("\n");
 
   const framework = request.framework || "vitest";
@@ -236,7 +241,7 @@ export async function saveGeneratedTests(
           tags: test.tags,
           priority: test.priority,
           estimatedDuration: test.estimatedDuration,
-        } as Prisma.InputJsonValue,
+        } as InputJsonValue,
         enabled: true,
       },
     });

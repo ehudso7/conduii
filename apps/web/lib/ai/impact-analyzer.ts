@@ -330,11 +330,13 @@ export async function calculateDeploymentRisk(
   });
 
   // Calculate test coverage score (based on recent pass rate)
+  type RunWithResults = { results: Array<{ status: string }> };
+  type RunWithStatus = { status: string };
   let testCoverage = 100;
   if (recentRuns.length > 0) {
-    const totalTests = recentRuns.reduce((sum, r) => sum + r.results.length, 0);
+    const totalTests = recentRuns.reduce((sum: number, r: RunWithResults) => sum + r.results.length, 0);
     const passedTests = recentRuns.reduce(
-      (sum, r) => sum + r.results.filter((t) => t.status === "PASSED").length,
+      (sum: number, r: RunWithResults) => sum + r.results.filter((t: { status: string }) => t.status === "PASSED").length,
       0
     );
     testCoverage = totalTests > 0 ? (passedTests / totalTests) * 100 : 50;
@@ -343,7 +345,7 @@ export async function calculateDeploymentRisk(
   // Calculate historical failures score
   let historicalFailures = 0;
   if (recentRuns.length > 0) {
-    const failedRuns = recentRuns.filter((r) => r.status === "FAILED").length;
+    const failedRuns = recentRuns.filter((r: RunWithStatus) => r.status === "FAILED").length;
     historicalFailures = (failedRuns / recentRuns.length) * 100;
   }
 

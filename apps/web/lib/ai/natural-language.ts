@@ -5,7 +5,11 @@
 
 import { chat, generateJSON, isAIConfigured } from "./index";
 import { db } from "@/lib/db";
-import type { TestType, TestRunStatus } from "@prisma/client";
+
+// Local types matching Prisma schema
+type TestType = "HEALTH" | "INTEGRATION" | "API" | "E2E" | "PERFORMANCE" | "SECURITY" | "CUSTOM";
+type TestRunStatus = "PENDING" | "RUNNING" | "PASSED" | "FAILED" | "CANCELLED" | "TIMEOUT";
+type TestStatus = "PENDING" | "RUNNING" | "PASSED" | "FAILED" | "SKIPPED" | "TIMEOUT" | "ERROR";
 
 export interface QueryResult {
   type: "DATA" | "INSIGHT" | "ACTION" | "ERROR";
@@ -167,7 +171,7 @@ async function handleListTests(
 
   const tests = await db.test.findMany({
     where: {
-      testSuite: { projectId: { in: projects.map((p) => p.id) } },
+      testSuite: { projectId: { in: projects.map((p: { id: string }) => p.id) } },
       ...(query.entities.testType && { type: query.entities.testType as TestType }),
     },
     take: query.entities.limit || 20,
@@ -178,7 +182,7 @@ async function handleListTests(
     orderBy: { createdAt: "desc" },
   });
 
-  const testList = tests.map((t) => ({
+  const testList = tests.map((t: { name: string; type: TestType; testSuite?: { name: string; project?: { name: string } } | null; _count: { results: number } }) => ({
     name: t.name,
     type: t.type,
     suite: t.testSuite?.name,
@@ -217,7 +221,7 @@ async function handleListRuns(
 
   const runs = await db.testRun.findMany({
     where: {
-      projectId: { in: projects.map((p) => p.id) },
+      projectId: { in: projects.map((p: { id: string }) => p.id) },
       createdAt: { gte: since },
       ...(query.entities.status && { status: query.entities.status as TestRunStatus }),
     },
@@ -229,7 +233,7 @@ async function handleListRuns(
     orderBy: { createdAt: "desc" },
   });
 
-  const runList = runs.map((r) => ({
+  const runList = runs.map((r: { id: string; project?: { name: string } | null; status: TestRunStatus; trigger: string; _count: { results: number }; duration: number | null; createdAt: Date }) => ({
     id: r.id,
     project: r.project?.name,
     status: r.status,
@@ -270,7 +274,7 @@ async function handleGetFailures(
 
   const failures = await db.testResult.findMany({
     where: {
-      testRun: { projectId: { in: projects.map((p) => p.id) } },
+      testRun: { projectId: { in: projects.map((p: { id: string }) => p.id) } },
       status: "FAILED",
       createdAt: { gte: since },
     },
@@ -282,7 +286,7 @@ async function handleGetFailures(
     orderBy: { createdAt: "desc" },
   });
 
-  const failureList = failures.map((f) => ({
+  const failureList = failures.map((f: { test: { name: string; type: TestType }; testRun: { project?: { name: string } | null }; error: string | null; createdAt: Date }) => ({
     testName: f.test.name,
     testType: f.test.type,
     project: f.testRun.project?.name,
@@ -324,7 +328,7 @@ async function handleGetFlaky(
   // Get all tests with their recent results
   const tests = await db.test.findMany({
     where: {
-      testSuite: { projectId: { in: projects.map((p) => p.id) } },
+      testSuite: { projectId: { in: projects.map((p: { id: string }) => p.id) } },
     },
     include: {
       results: {
@@ -337,11 +341,12 @@ async function handleGetFlaky(
   });
 
   // Identify flaky tests
+  type FlakyTestInput = { name: string; type: TestType; results: Array<{ status: TestStatus }>; testSuite?: { project?: { name: string } | null } | null };
   const flakyTests = tests
-    .map((t) => {
+    .map((t: FlakyTestInput) => {
       if (t.results.length < 5) return null;
 
-      const statuses = t.results.map((r) => r.status);
+      const statuses = t.results.map((r: { status: TestStatus }) => r.status);
       const hasPass = statuses.includes("PASSED");
       const hasFail = statuses.includes("FAILED");
 
@@ -362,13 +367,13 @@ async function handleGetFlaky(
         project: t.testSuite?.project?.name,
         flakinessScore: Math.round(flakinessScore),
         passRate: Math.round(
-          (statuses.filter((s) => s === "PASSED").length / statuses.length) * 100
+          (statuses.filter((s: TestStatus) => s === "PASSED").length / statuses.length) * 100
         ),
         runs: statuses.length,
       };
     })
-    .filter((t): t is NonNullable<typeof t> => t !== null)
-    .sort((a, b) => b.flakinessScore - a.flakinessScore);
+    .filter((t: { name: string; type: TestType; project?: string; flakinessScore: number; passRate: number; runs: number } | null): t is NonNullable<typeof t> => t !== null)
+    .sort((a: { flakinessScore: number }, b: { flakinessScore: number }) => b.flakinessScore - a.flakinessScore);
 
   return {
     type: "DATA",
@@ -405,21 +410,22 @@ async function handleGetMetrics(
 
   const runs = await db.testRun.findMany({
     where: {
-      projectId: { in: projects.map((p) => p.id) },
+      projectId: { in: projects.map((p: { id: string }) => p.id) },
       createdAt: { gte: since },
     },
     include: { results: true },
   });
 
-  const allResults = runs.flatMap((r) => r.results);
+  type RunWithResults = { results: Array<{ status: TestStatus }>; duration: number | null };
+  const allResults = runs.flatMap((r: RunWithResults) => r.results);
   const totalTests = allResults.length;
-  const passedTests = allResults.filter((r) => r.status === "PASSED").length;
-  const failedTests = allResults.filter((r) => r.status === "FAILED").length;
+  const passedTests = allResults.filter((r: { status: TestStatus }) => r.status === "PASSED").length;
+  const failedTests = allResults.filter((r: { status: TestStatus }) => r.status === "FAILED").length;
   const passRate = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
 
-  const durations = runs.map((r) => r.duration).filter((d): d is number => d !== null);
+  const durations = runs.map((r: RunWithResults) => r.duration).filter((d: number | null): d is number => d !== null);
   const avgDuration = durations.length > 0
-    ? durations.reduce((a, b) => a + b, 0) / durations.length
+    ? durations.reduce((a: number, b: number) => a + b, 0) / durations.length
     : 0;
 
   const metrics = {
@@ -463,7 +469,7 @@ async function handleExplainFailure(
 
   const recentFailures = await db.testResult.findMany({
     where: {
-      testRun: { projectId: { in: projects.map((p) => p.id) } },
+      testRun: { projectId: { in: projects.map((p: { id: string }) => p.id) } },
       status: "FAILED",
     },
     take: 5,
@@ -494,7 +500,7 @@ async function handleExplainFailure(
 Recent failures:
 ${recentFailures
   .map(
-    (f) => `- ${f.test.name}: ${f.error || "No error message"}`
+    (f: { test: { name: string }; error: string | null }) => `- ${f.test.name}: ${f.error || "No error message"}`
   )
   .join("\n")}
 
@@ -505,7 +511,7 @@ Provide a clear explanation of what's likely causing these failures and suggest 
   return {
     type: "INSIGHT",
     answer: response.content,
-    data: recentFailures.map((f) => ({
+    data: recentFailures.map((f: { test: { name: string }; error: string | null }) => ({
       test: f.test.name,
       error: f.error?.slice(0, 200),
     })),
@@ -538,30 +544,31 @@ async function handleCompare(
   const [currentRuns, previousRuns] = await Promise.all([
     db.testRun.findMany({
       where: {
-        projectId: { in: projects.map((p) => p.id) },
+        projectId: { in: projects.map((p: { id: string }) => p.id) },
         createdAt: { gte: thisWeek },
       },
       include: { results: true },
     }),
     db.testRun.findMany({
       where: {
-        projectId: { in: projects.map((p) => p.id) },
+        projectId: { in: projects.map((p: { id: string }) => p.id) },
         createdAt: { gte: lastWeek, lt: thisWeek },
       },
       include: { results: true },
     }),
   ]);
 
-  const currentResults = currentRuns.flatMap((r) => r.results);
-  const previousResults = previousRuns.flatMap((r) => r.results);
+  type CompareRun = { results: Array<{ status: TestStatus }> };
+  const currentResults = currentRuns.flatMap((r: CompareRun) => r.results);
+  const previousResults = previousRuns.flatMap((r: CompareRun) => r.results);
 
   const currentPassRate =
     currentResults.length > 0
-      ? (currentResults.filter((r) => r.status === "PASSED").length / currentResults.length) * 100
+      ? (currentResults.filter((r: { status: TestStatus }) => r.status === "PASSED").length / currentResults.length) * 100
       : 0;
   const previousPassRate =
     previousResults.length > 0
-      ? (previousResults.filter((r) => r.status === "PASSED").length / previousResults.length) * 100
+      ? (previousResults.filter((r: { status: TestStatus }) => r.status === "PASSED").length / previousResults.length) * 100
       : 0;
 
   const passRateDiff = currentPassRate - previousPassRate;
@@ -614,7 +621,7 @@ async function handleTrend(
 
   const runs = await db.testRun.findMany({
     where: {
-      projectId: { in: projects.map((p) => p.id) },
+      projectId: { in: projects.map((p: { id: string }) => p.id) },
       createdAt: { gte: since },
     },
     include: { results: true },
@@ -628,7 +635,7 @@ async function handleTrend(
     const date = run.createdAt.toISOString().split("T")[0];
     const existing = dailyData.get(date) || { passed: 0, total: 0 };
     existing.total += run.results.length;
-    existing.passed += run.results.filter((r) => r.status === "PASSED").length;
+    existing.passed += run.results.filter((r: { status: TestStatus }) => r.status === "PASSED").length;
     dailyData.set(date, existing);
   }
 
@@ -643,14 +650,14 @@ async function handleTrend(
   if (trendData.length >= 2) {
     const firstHalf = trendData.slice(0, Math.floor(trendData.length / 2));
     const secondHalf = trendData.slice(Math.floor(trendData.length / 2));
-    const firstAvg = firstHalf.reduce((sum, d) => sum + d.passRate, 0) / firstHalf.length;
-    const secondAvg = secondHalf.reduce((sum, d) => sum + d.passRate, 0) / secondHalf.length;
+    const firstAvg = firstHalf.reduce((sum: number, d: { passRate: number }) => sum + d.passRate, 0) / firstHalf.length;
+    const secondAvg = secondHalf.reduce((sum: number, d: { passRate: number }) => sum + d.passRate, 0) / secondHalf.length;
     trendDirection = secondAvg > firstAvg + 2 ? "improving" : secondAvg < firstAvg - 2 ? "declining" : "stable";
   }
 
   return {
     type: "DATA",
-    answer: `Pass rate trend over ${days} days is ${trendDirection}. Average: ${(trendData.reduce((sum, d) => sum + d.passRate, 0) / trendData.length || 0).toFixed(1)}%`,
+    answer: `Pass rate trend over ${days} days is ${trendDirection}. Average: ${(trendData.reduce((sum: number, d: { passRate: number }) => sum + d.passRate, 0) / trendData.length || 0).toFixed(1)}%`,
     data: {
       trend: trendDirection,
       history: trendData,
@@ -676,7 +683,7 @@ async function handleGeneralQuery(
   });
 
   const recentRuns = await db.testRun.findMany({
-    where: { projectId: { in: projects.map((p) => p.id) } },
+    where: { projectId: { in: projects.map((p: { id: string }) => p.id) } },
     take: 5,
     orderBy: { createdAt: "desc" },
     include: { results: true },
@@ -688,9 +695,9 @@ async function handleGeneralQuery(
       content: `You are a helpful assistant for a test automation platform called Conduii. Help users understand their test results and provide actionable insights.
 
 Context:
-- Projects: ${projects.map((p) => p.name).join(", ")}
+- Projects: ${projects.map((p: { name: string }) => p.name).join(", ")}
 - Recent runs: ${recentRuns.length}
-- Recent status: ${recentRuns.map((r) => r.status).join(", ")}`,
+- Recent status: ${recentRuns.map((r: { status: TestRunStatus }) => r.status).join(", ")}`,
     },
     {
       role: "user",
