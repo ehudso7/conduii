@@ -203,6 +203,10 @@ export default function TestRunDetailPage() {
   const summary = testRun.summary || { total: 0, passed: 0, failed: 0, skipped: 0 };
   const passRate = summary.total > 0 ? Math.round((summary.passed / summary.total) * 100) : 0;
 
+  function hasAssertions(assertions: Record<string, unknown> | null): assertions is { passed: number; failed: number } {
+    return assertions !== null && typeof assertions === 'object' && 'passed' in assertions && 'failed' in assertions;
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -404,9 +408,9 @@ export default function TestRunDetailPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        {result.assertions && typeof result.assertions === 'object' && 'passed' in result.assertions && 'failed' in result.assertions && (
+                        {hasAssertions(result.assertions) && (
                           <span className="text-sm text-muted-foreground">
-                            {(result.assertions as { passed: number; failed: number }).passed}/{(result.assertions as { passed: number; failed: number }).passed + (result.assertions as { passed: number; failed: number }).failed} assertions
+                            {result.assertions.passed}/{result.assertions.passed + result.assertions.failed} assertions
                           </span>
                         )}
                         <Badge

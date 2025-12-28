@@ -128,7 +128,8 @@ export async function POST(req: NextRequest, context: RouteContext) {
           where: { id: testRun.id },
           select: { status: true },
         });
-        if (completedRun) {
+        // Only notify for terminal statuses that the notification system accepts
+        if (completedRun && (completedRun.status === "PASSED" || completedRun.status === "FAILED" || completedRun.status === "RUNNING")) {
           await notifyTestRunStatus(
             testRun.id,
             completedRun.status,
