@@ -162,8 +162,8 @@ export async function sendTestRunUpdate(
 
   if (!testRun) return 0;
 
-  const passed = testRun.results.filter((r) => r.status === "PASSED").length;
-  const failed = testRun.results.filter((r) => r.status === "FAILED").length;
+  const passed = testRun.results.filter((r: { status: string }) => r.status === "PASSED").length;
+  const failed = testRun.results.filter((r: { status: string }) => r.status === "FAILED").length;
   const total = testRun.results.length;
 
   return broadcastToOrganization(

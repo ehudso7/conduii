@@ -122,13 +122,13 @@ Result Metadata:
 ${JSON.stringify(result.metadata, null, 2)}
 
 Historical Failures (same test):
-${historicalFailures.map((f) => `- ${f.createdAt}: ${f.error}`).join("\n") || "None"}
+${historicalFailures.map((f: { createdAt: Date; error: string | null }) => `- ${f.createdAt}: ${f.error}`).join("\n") || "None"}
 
 Recent Diagnostics in Project:
-${recentDiagnostics.map((d) => `- ${d.severity}: ${d.issue}`).join("\n") || "None"}
+${recentDiagnostics.map((d: { severity: string; issue: string }) => `- ${d.severity}: ${d.issue}`).join("\n") || "None"}
 
 Project Services:
-${result.testRun.project.services.map((s) => `- ${s.name} (${s.type}): ${s.status}`).join("\n") || "None"}
+${result.testRun.project.services.map((s: { name: string; type: string; status: string }) => `- ${s.name} (${s.type}): ${s.status}`).join("\n") || "None"}
 
 Analyze this failure considering:
 1. Is this a recurring issue or new?
@@ -301,8 +301,9 @@ export async function getCorrelatedFailures(
   // - Same error pattern
   // - Same time window
   // - Related test types
+  type CorrelatedResult = { createdAt: Date; error: string | null; testId: string; test: { name: string; type: string } };
   return correlatedResults
-    .map((r) => {
+    .map((r: CorrelatedResult) => {
       let correlation = 0;
 
       // Time proximity
@@ -326,8 +327,8 @@ export async function getCorrelatedFailures(
         correlation: Math.min(100, Math.round(correlation)),
       };
     })
-    .filter((r) => r.correlation > 30)
-    .sort((a, b) => b.correlation - a.correlation);
+    .filter((r: { correlation: number }) => r.correlation > 30)
+    .sort((a: { correlation: number }, b: { correlation: number }) => b.correlation - a.correlation);
 }
 
 /**
