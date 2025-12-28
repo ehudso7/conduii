@@ -392,16 +392,73 @@ export async function executeTestRun(
       }
     }
 
-    // If no tests were run, create a sample health check
+    // If no tests were run, create a default health check test and run it
     if (results.length === 0 && project.productionUrl) {
-      const result = await executeHealthCheck(project.productionUrl);
-      results.push({
-        testId: "default-health",
-        status: result.healthy ? "PASSED" : "FAILED",
-        duration: result.latency,
-        error: result.error,
+      // Find or create a default test suite
+      let defaultSuite = await db.testSuite.findFirst({
+        where: { projectId, isDefault: true },
       });
-      if (result.healthy) passed++;
+
+      if (!defaultSuite) {
+        defaultSuite = await db.testSuite.create({
+          data: {
+            projectId,
+            name: "Default Suite",
+            description: "Auto-generated test suite",
+            isDefault: true,
+          },
+        });
+      }
+
+      // Find or create a default health check test
+      let healthTest = await db.test.findFirst({
+        where: {
+          testSuiteId: defaultSuite.id,
+          type: "HEALTH",
+          name: "Production Health Check",
+        },
+      });
+
+      if (!healthTest) {
+        healthTest = await db.test.create({
+          data: {
+            testSuiteId: defaultSuite.id,
+            name: "Production Health Check",
+            type: "HEALTH",
+            description: `Health check for ${project.productionUrl}`,
+            config: { url: project.productionUrl },
+            enabled: true,
+          },
+        });
+      }
+
+      // Execute the health check
+      const healthResult = await executeHealthCheck(project.productionUrl);
+      const testStatus = healthResult.healthy ? "PASSED" : "FAILED";
+
+      // Create TestResult record
+      await db.testResult.create({
+        data: {
+          testRunId,
+          testId: healthTest.id,
+          status: testStatus,
+          duration: healthResult.latency,
+          error: healthResult.error,
+          metadata: {
+            url: project.productionUrl,
+            statusCode: healthResult.statusCode,
+          } as JsonValue,
+        },
+      });
+
+      results.push({
+        testId: healthTest.id,
+        status: testStatus,
+        duration: healthResult.latency,
+        error: healthResult.error,
+      });
+
+      if (healthResult.healthy) passed++;
       else failed++;
     }
 
