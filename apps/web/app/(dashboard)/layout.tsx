@@ -48,7 +48,8 @@ async function getUserProjects(userId: string) {
 
     if (!user?.organizations[0]) return [];
     return user.organizations[0].organization.projects;
-  } catch {
+  } catch (error) {
+    console.error("Database error in getUserProjects:", error);
     return [];
   }
 }
