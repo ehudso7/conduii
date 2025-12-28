@@ -39,72 +39,88 @@ export async function POST(req: Request) {
 
   const eventType = evt.type;
 
-  if (eventType === "user.created") {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+  try {
+    if (eventType === "user.created") {
+      const { id, email_addresses, first_name, last_name, image_url } = evt.data;
 
-    const email = email_addresses[0]?.email_address;
-    if (!email) {
-      console.error("No email address found for user.created event");
-      return new NextResponse("Missing email address", { status: 400 });
-    }
+      const email = email_addresses[0]?.email_address;
+      if (!email) {
+        console.error("No email address found for user.created event");
+        return new NextResponse("Missing email address", { status: 400 });
+      }
 
-    const name = [first_name, last_name].filter(Boolean).join(" ");
+      const name = [first_name, last_name].filter(Boolean).join(" ");
 
-    // Create user
-    const user = await db.user.create({
-      data: {
-        clerkId: id,
-        email,
-        name: name || null,
-        imageUrl: image_url || null,
-      },
-    });
+      // Check if user already exists (idempotency)
+      const existingUser = await db.user.findUnique({
+        where: { clerkId: id },
+      });
 
-    // Create personal organization
-    const slug = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
-    const org = await db.organization.create({
-      data: {
-        name: `${name || email}'s Workspace`,
-        slug: `${slug}-${Date.now().toString(36)}`,
-        members: {
-          create: {
-            userId: user.id,
-            role: "OWNER",
+      if (!existingUser) {
+        // Create user
+        const user = await db.user.create({
+          data: {
+            clerkId: id,
+            email,
+            name: name || null,
+            imageUrl: image_url || null,
           },
-        },
-      },
-    });
+        });
 
-    console.log(`Created user ${user.id} with org ${org.id}`);
-  }
-
-  if (eventType === "user.updated") {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
-
-    const email = email_addresses[0]?.email_address;
-    if (!email) {
-      console.error("No email address found for user.updated event");
-      return new NextResponse("Missing email address", { status: 400 });
+        // Create personal organization
+        const slug = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "-");
+        await db.organization.create({
+          data: {
+            name: `${name || email}'s Workspace`,
+            slug: `${slug}-${Date.now().toString(36)}`,
+            members: {
+              create: {
+                userId: user.id,
+                role: "OWNER",
+              },
+            },
+          },
+        });
+      }
     }
 
-    const name = [first_name, last_name].filter(Boolean).join(" ");
+    if (eventType === "user.updated") {
+      const { id, email_addresses, first_name, last_name, image_url } = evt.data;
 
-    await db.user.update({
-      where: { clerkId: id },
-      data: {
-        email,
-        name: name || null,
-        imageUrl: image_url || null,
-      },
-    });
-  }
+      const email = email_addresses[0]?.email_address;
+      if (!email) {
+        console.error("No email address found for user.updated event");
+        return new NextResponse("Missing email address", { status: 400 });
+      }
 
-  if (eventType === "user.deleted") {
-    const { id } = evt.data;
+      const name = [first_name, last_name].filter(Boolean).join(" ");
 
-    await db.user.delete({
-      where: { clerkId: id },
-    });
+      await db.user.upsert({
+        where: { clerkId: id },
+        update: {
+          email,
+          name: name || null,
+          imageUrl: image_url || null,
+        },
+        create: {
+          clerkId: id,
+          email,
+          name: name || null,
+          imageUrl: image_url || null,
+        },
+      });
+    }
+
+    if (eventType === "user.deleted") {
+      const { id } = evt.data;
+
+      await db.user.deleteMany({
+        where: { clerkId: id },
+      });
+    }
+  } catch (error) {
+    console.error("Database error in Clerk webhook:", error);
+    return new NextResponse("Database error", { status: 500 });
   }
 
   return new NextResponse("OK", { status: 200 });
