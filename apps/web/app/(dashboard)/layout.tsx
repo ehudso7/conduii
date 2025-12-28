@@ -117,7 +117,7 @@ export default async function DashboardLayout({
             <div className="flex items-center justify-between h-full px-4 md:px-6">
               {/* Mobile menu button */}
               <div className="md:hidden">
-                <MobileNav navigation={navigation} />
+                <MobileNav />
               </div>
 
               {/* Search */}
