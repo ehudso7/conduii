@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
     const data = createEnvironmentSchema.parse(body);
 
     // Create environment in a transaction to prevent race conditions
-    const environment = await db.$transaction(async (tx: typeof db) => {
+    const environment = await db.$transaction(async (tx) => {
       // If this is marked as production, unmark other production environments
       if (data.isProduction) {
         await tx.environment.updateMany({
