@@ -5,6 +5,7 @@
 
 import { chat, generateJSON, isAIConfigured } from "./index";
 import { db } from "@/lib/db";
+import type { TestType } from "@prisma/client";
 
 export interface QueryResult {
   type: "DATA" | "INSIGHT" | "ACTION" | "ERROR";
@@ -167,7 +168,7 @@ async function handleListTests(
   const tests = await db.test.findMany({
     where: {
       testSuite: { projectId: { in: projects.map((p) => p.id) } },
-      ...(query.entities.testType && { type: query.entities.testType }),
+      ...(query.entities.testType && { type: query.entities.testType as TestType }),
     },
     take: query.entities.limit || 20,
     include: {
