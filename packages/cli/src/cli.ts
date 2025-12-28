@@ -420,8 +420,8 @@ program
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error || `API error: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(errorData.error || `API error: ${response.statusText}`);
       }
 
       const { tests } = await response.json();
@@ -488,8 +488,8 @@ program
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error || `API error: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(errorData.error || `API error: ${response.statusText}`);
       }
 
       const { result } = await response.json();
@@ -575,8 +575,8 @@ program
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(error.error || `API error: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({})) as { error?: string };
+          throw new Error(errorData.error || `API error: ${response.statusText}`);
         }
 
         const { analysis } = await response.json();
@@ -625,8 +625,8 @@ program
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(error.error || `API error: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({})) as { error?: string };
+          throw new Error(errorData.error || `API error: ${response.statusText}`);
         }
 
         const { patterns } = await response.json();
@@ -675,8 +675,8 @@ program
         });
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
-          throw new Error(error.error || `API error: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({})) as { error?: string };
+          throw new Error(errorData.error || `API error: ${response.statusText}`);
         }
 
         const { analysis } = await response.json();
@@ -777,8 +777,8 @@ program
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error || `API error: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(errorData.error || `API error: ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -882,8 +882,8 @@ program
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error || `API error: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({})) as { error?: string };
+        throw new Error(errorData.error || `API error: ${response.statusText}`);
       }
 
       const { metrics } = await response.json();

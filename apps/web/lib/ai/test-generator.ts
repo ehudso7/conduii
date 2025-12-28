@@ -3,7 +3,7 @@
  * Generates tests from natural language, code analysis, and API specs
  */
 
-import { chat, generateJSON, isAIConfigured } from "./index";
+import { generateJSON, isAIConfigured } from "./index";
 import { db } from "@/lib/db";
 
 export interface GeneratedTest {
@@ -91,9 +91,7 @@ export async function generateTestsFromPrompt(
 
   const framework = request.framework || "vitest";
 
-  const systemPrompt = `You are an expert test engineer. Generate comprehensive, production-ready tests based on the user's requirements.
-
-Project Context:
+  const projectContext = `Project Context:
 - Name: ${project.name}
 - Production URL: ${project.productionUrl || "Not set"}
 - Existing tests: ${existingTestNames.slice(0, 20).join(", ") || "None"}
@@ -111,7 +109,7 @@ Guidelines:
 8. Generate at least 3 tests unless specifically asked for fewer`;
 
   const result = await generateJSON<{ tests: GeneratedTest[] }>(
-    `Generate tests for the following requirement:\n\n${request.prompt}\n\n${
+    `${projectContext}\n\nGenerate tests for the following requirement:\n\n${request.prompt}\n\n${
       request.context?.codeSnippets
         ? `\nRelevant code:\n${request.context.codeSnippets.join("\n\n")}`
         : ""

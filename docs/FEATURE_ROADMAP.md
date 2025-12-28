@@ -161,7 +161,7 @@ conduii chat              # Interactive AI assistant
 ## Technical Architecture
 
 ### AI Infrastructure
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    Conduii AI Layer                      │
 ├─────────────────────────────────────────────────────────┤
@@ -179,7 +179,7 @@ conduii chat              # Interactive AI assistant
 ```
 
 ### Data Flow
-```
+```text
 Code Change → Impact Analysis → Risk Scoring → Test Selection
      ↓              ↓               ↓              ↓
   AI Review → Failure Predict → Priority Run → Smart Report
