@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { executeTestRun } from "@/lib/test-runner";
 import { z } from "zod";
-// Prisma types imported dynamically when client is generated
 
 export const dynamic = "force-dynamic";
 
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create test run and increment usage in a transaction
-    const testRun = await db.$transaction(async (tx) => {
+    const testRun = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       const run = await tx.testRun.create({
         data: {
           projectId,
