@@ -17,7 +17,10 @@ import {
   Bug,
   Timer,
   Activity,
+  Square,
+  Trash2,
 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -125,6 +128,7 @@ function getSeverityColor(severity: string) {
 export default function TestRunDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const projectId = params.projectId as string;
   const runId = params.runId as string;
 
@@ -132,6 +136,7 @@ export default function TestRunDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedResults, setExpandedResults] = useState<Set<string>>(new Set());
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -175,6 +180,71 @@ export default function TestRunDetailPage() {
       newExpanded.add(resultId);
     }
     setExpandedResults(newExpanded);
+  }
+
+  async function cancelTestRun() {
+    setCancelling(true);
+    try {
+      const res = await fetch(`/api/test-runs/${runId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Test Run Cancelled",
+          description: "The test run has been cancelled.",
+        });
+        await fetchData();
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Error",
+          description: data.error || "Failed to cancel test run",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to cancel test run:", error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel test run",
+        variant: "destructive",
+      });
+    } finally {
+      setCancelling(false);
+    }
+  }
+
+  async function deleteTestRun() {
+    try {
+      const res = await fetch(`/api/test-runs/${runId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Test Run Deleted",
+          description: "The test run has been permanently deleted.",
+        });
+        router.push(`/dashboard/projects/${projectId}/runs`);
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Error",
+          description: data.error || "Failed to delete test run",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete test run:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete test run",
+        variant: "destructive",
+      });
+    }
   }
 
   if (loading) {
@@ -251,15 +321,34 @@ export default function TestRunDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {testRun.status === "RUNNING" && (
-            <Badge variant="secondary" className="animate-pulse">
-              <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-              Running...
-            </Badge>
+          {(testRun.status === "RUNNING" || testRun.status === "PENDING") && (
+            <>
+              <Badge variant="secondary" className="animate-pulse">
+                <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                {testRun.status === "RUNNING" ? "Running..." : "Pending..."}
+              </Badge>
+              <Button
+                variant="outline"
+                onClick={cancelTestRun}
+                disabled={cancelling}
+                className="text-yellow-600 hover:text-yellow-700"
+              >
+                <Square className="w-4 h-4 mr-2" />
+                {cancelling ? "Cancelling..." : "Cancel"}
+              </Button>
+            </>
           )}
           <Button variant="outline" onClick={fetchData}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
+          </Button>
+          <Button
+            variant="outline"
+            onClick={deleteTestRun}
+            className="text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete
           </Button>
         </div>
       </div>

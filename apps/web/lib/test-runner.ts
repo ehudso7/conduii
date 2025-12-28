@@ -392,45 +392,50 @@ export async function executeTestRun(
       }
     }
 
-    // If no tests were run, create a default health check test and run it
+    // If no tests were run, create default tests and run them
     if (results.length === 0 && project.productionUrl) {
-      // Find or create a default test suite
-      let defaultSuite = await db.testSuite.findFirst({
-        where: { projectId, isDefault: true },
-      });
-
-      if (!defaultSuite) {
-        defaultSuite = await db.testSuite.create({
-          data: {
-            projectId,
-            name: "Default Suite",
-            description: "Auto-generated test suite",
-            isDefault: true,
-          },
+      // Use transaction for atomic test suite and test creation
+      const { defaultSuite, healthTest } = await db.$transaction(async (tx) => {
+        // Find or create a default test suite
+        let defaultSuite = await tx.testSuite.findFirst({
+          where: { projectId, isDefault: true },
         });
-      }
 
-      // Find or create a default health check test
-      let healthTest = await db.test.findFirst({
-        where: {
-          testSuiteId: defaultSuite.id,
-          type: "HEALTH",
-          name: "Production Health Check",
-        },
-      });
+        if (!defaultSuite) {
+          defaultSuite = await tx.testSuite.create({
+            data: {
+              projectId,
+              name: "Default Suite",
+              description: "Auto-generated test suite",
+              isDefault: true,
+            },
+          });
+        }
 
-      if (!healthTest) {
-        healthTest = await db.test.create({
-          data: {
+        // Find or create a default health check test
+        let healthTest = await tx.test.findFirst({
+          where: {
             testSuiteId: defaultSuite.id,
-            name: "Production Health Check",
             type: "HEALTH",
-            description: `Health check for ${project.productionUrl}`,
-            config: { url: project.productionUrl },
-            enabled: true,
+            name: "Production Health Check",
           },
         });
-      }
+
+        if (!healthTest) {
+          healthTest = await tx.test.create({
+            data: {
+              testSuiteId: defaultSuite.id,
+              name: "Production Health Check",
+              type: "HEALTH",
+              description: `Health check for ${project.productionUrl}`,
+              config: { url: project.productionUrl },
+              enabled: true,
+            },
+          });
+        }
+
+        return { defaultSuite, healthTest };
+      });
 
       // Execute the health check
       const healthResult = await executeHealthCheck(project.productionUrl);
