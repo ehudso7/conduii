@@ -5,11 +5,11 @@
 
 import { generateJSON, isAIConfigured } from "./index";
 import { db } from "@/lib/db";
-import type { Prisma } from "@prisma/client";
+import type { Prisma, TestType } from "@prisma/client";
 
 export interface GeneratedTest {
   name: string;
-  type: "API" | "INTEGRATION" | "E2E" | "UNIT" | "HEALTH";
+  type: "API" | "INTEGRATION" | "E2E" | "HEALTH" | "PERFORMANCE";
   description: string;
   code: string;
   assertions: string[];
@@ -32,7 +32,7 @@ export interface TestGenerationRequest {
       description?: string;
     }>;
   };
-  testType?: "API" | "INTEGRATION" | "E2E" | "UNIT" | "HEALTH";
+  testType?: "API" | "INTEGRATION" | "E2E" | "HEALTH" | "PERFORMANCE";
   framework?: "jest" | "vitest" | "playwright" | "cypress";
   additionalContext?: string;
 }
@@ -41,7 +41,7 @@ const TEST_GENERATION_SCHEMA = `{
   "tests": [
     {
       "name": "string - descriptive test name",
-      "type": "API | INTEGRATION | E2E | UNIT | HEALTH",
+      "type": "API | INTEGRATION | E2E | HEALTH | PERFORMANCE",
       "description": "string - what this test verifies",
       "code": "string - complete test code",
       "assertions": ["array of assertion descriptions"],
@@ -226,7 +226,7 @@ export async function saveGeneratedTests(
       data: {
         testSuiteId,
         name: test.name,
-        type: test.type,
+        type: test.type as TestType,
         description: test.description,
         config: {
           code: test.code,
