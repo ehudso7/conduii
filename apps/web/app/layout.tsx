@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     siteName: "Conduii",
     images: [
       {
-        url: "/og-image.svg",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Conduii - Deployment Testing Platform",
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     title: "Conduii - Deployment Testing Platform",
     description:
       "Automatically discover, validate, and test your deployed applications.",
-    images: ["/og-image.svg"],
+    images: ["/og-image.png"],
     creator: "@conduii",
   },
   robots: {
@@ -92,10 +92,6 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <head>
-          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-          <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
-        </head>
         <body className="font-sans antialiased">
           <ThemeProvider
             attribute="class"
