@@ -4,6 +4,8 @@ import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 const createEnvironmentSchema = z.object({
   name: z.string().min(1, "Name is required"),
   url: z.string().url().optional().or(z.literal("")),

@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { requireAuth, handleApiError } from "@/lib/auth";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const updateOrgSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   imageUrl: z.string().url().optional().nullable(),

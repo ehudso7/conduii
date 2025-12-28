@@ -4,6 +4,8 @@ import { requireAuth, handleApiError } from "@/lib/auth";
 import { sendInvitationEmail } from "@/lib/email";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const inviteMemberSchema = z.object({
   email: z.string().email(),
   role: z.enum(["ADMIN", "MEMBER"]).default("MEMBER"),

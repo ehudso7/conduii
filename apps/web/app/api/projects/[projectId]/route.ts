@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const updateProjectSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),

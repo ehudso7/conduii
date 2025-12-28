@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { requireAuth, handleApiError } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // POST /api/user/notifications/read-all - Mark all notifications as read
 export async function POST() {
   try {

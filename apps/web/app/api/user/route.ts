@@ -3,6 +3,8 @@ import { requireAuth, handleApiError } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { clerkClient } from "@clerk/nextjs";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/user - Get current user
 export async function GET() {
   try {

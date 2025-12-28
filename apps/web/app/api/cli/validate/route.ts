@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // POST /api/cli/validate - Validate CLI token
 export async function POST(req: NextRequest) {
   try {

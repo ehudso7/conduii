@@ -4,6 +4,8 @@ import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { canRunTests } from "@/lib/stripe";
 import { notifyTestRunStatus } from "@/lib/notifications";
 
+export const dynamic = "force-dynamic";
+
 interface RouteContext {
   params: Promise<{ projectId: string }>;
 }

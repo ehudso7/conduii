@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { requireAuth, handleApiError } from "@/lib/auth";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const updateTestRunSchema = z.object({
   status: z.enum(["CANCELLED"]),
 });

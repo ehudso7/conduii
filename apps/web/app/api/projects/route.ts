@@ -4,6 +4,8 @@ import { requireAuth, getDefaultOrg, handleApiError } from "@/lib/auth";
 import { canCreateProject } from "@/lib/stripe";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const createProjectSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
