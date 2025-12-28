@@ -33,6 +33,7 @@ export interface TestGenerationRequest {
   };
   testType?: "API" | "INTEGRATION" | "E2E" | "UNIT" | "HEALTH";
   framework?: "jest" | "vitest" | "playwright" | "cypress";
+  additionalContext?: string;
 }
 
 const TEST_GENERATION_SCHEMA = `{

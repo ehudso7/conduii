@@ -424,7 +424,7 @@ program
         throw new Error(errorData.error || `API error: ${response.statusText}`);
       }
 
-      const { tests } = await response.json();
+      const { tests } = await response.json() as { tests: Array<{ name: string; type: string; description: string; code: string }> };
       spinner.succeed(`Generated ${tests.length} test(s)!`);
 
       if (options.json) {
@@ -492,7 +492,7 @@ program
         throw new Error(errorData.error || `API error: ${response.statusText}`);
       }
 
-      const { result } = await response.json();
+      const { result } = await response.json() as { result: { answer: string; type: string; data?: unknown; suggestedActions?: Array<{ label: string }>; relatedQueries?: string[] } };
       spinner.stop();
 
       if (options.json) {
@@ -579,7 +579,7 @@ program
           throw new Error(errorData.error || `API error: ${response.statusText}`);
         }
 
-        const { analysis } = await response.json();
+        const { analysis } = await response.json() as { analysis: { totalTests: number; flakyTests: Array<{ testName: string; flakinessScore: number; passRate: number; totalRuns: number }> } };
         spinner.succeed("Flaky test analysis complete!");
 
         if (options.json) {
@@ -629,7 +629,7 @@ program
           throw new Error(errorData.error || `API error: ${response.statusText}`);
         }
 
-        const { patterns } = await response.json();
+        const { patterns } = await response.json() as { patterns: Array<{ category: string; occurrences: number; affectedTests: string[]; description: string; severity: string }> };
         spinner.succeed("Pattern analysis complete!");
 
         if (options.json) {
@@ -679,7 +679,7 @@ program
           throw new Error(errorData.error || `API error: ${response.statusText}`);
         }
 
-        const { analysis } = await response.json();
+        const { analysis } = await response.json() as { analysis: { rootCause: string; suggestedFixes?: Array<{ priority: string; description: string; code?: string }> } };
         spinner.succeed("Analysis complete!");
 
         if (options.json) {
@@ -781,7 +781,7 @@ program
         throw new Error(errorData.error || `API error: ${response.statusText}`);
       }
 
-      const result = await response.json();
+      const result = await response.json() as { impact?: { changedFiles: number; affectedTests: Array<{ testName: string; impactLevel: string; priority: string }>; suggestedTests: string[] }; risk?: { level: string; score: number; summary: string; recommendations?: string[] } };
       spinner.succeed("Impact analysis complete!");
 
       if (options.json) {
@@ -886,7 +886,7 @@ program
         throw new Error(errorData.error || `API error: ${response.statusText}`);
       }
 
-      const { metrics } = await response.json();
+      const { metrics } = await response.json() as { metrics: { passRate: number; totalRuns: number; totalTests: number; avgDuration: number; topFailingTests?: Array<{ name: string; failures: number; passRate: number }>; trend?: string } };
       spinner.succeed("Metrics loaded!");
 
       if (options.json) {
@@ -1152,7 +1152,7 @@ async function getProjectId(config: CLIConfig): Promise<string> {
     throw new Error("Failed to fetch projects. Run 'conduii init' in a project directory.");
   }
 
-  const { projects } = await response.json();
+  const { projects } = await response.json() as { projects: Array<{ id: string }> };
   if (!projects || projects.length === 0) {
     throw new Error("No projects found. Create a project in the Conduii dashboard first.");
   }
