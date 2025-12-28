@@ -372,7 +372,7 @@ async function handleGetFlaky(
         runs: statuses.length,
       };
     })
-    .filter((t: { name: string; type: TestType; project?: string; flakinessScore: number; passRate: number; runs: number } | null): t is NonNullable<typeof t> => t !== null)
+    .filter((t): t is { name: string; type: TestType; project?: string; flakinessScore: number; passRate: number; runs: number } => t !== null)
     .sort((a, b) => b.flakinessScore - a.flakinessScore);
 
   return {
