@@ -151,7 +151,7 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      <main>
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-4xl mx-auto">
@@ -179,23 +179,23 @@ export default function HomePage() {
                   <div className="w-3 h-3 rounded-full bg-red-500" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500" />
                   <div className="w-3 h-3 rounded-full bg-green-500" />
-                  <span className="ml-2 text-xs text-zinc-500 font-mono">Terminal</span>
+                  <span className="ml-2 text-xs text-zinc-400 font-mono">Terminal</span>
                 </div>
                 <div className="p-4 font-mono text-sm">
-                  <p className="text-zinc-500"># Install Conduii CLI</p>
+                  <p className="text-zinc-400"># Install Conduii CLI</p>
                   <p className="text-green-400">$ npm install -g @conduii/cli</p>
                   <br />
-                  <p className="text-zinc-500"># Discover your project</p>
+                  <p className="text-zinc-400"># Discover your project</p>
                   <p className="text-green-400">$ conduii discover</p>
-                  <p className="text-zinc-400">
+                  <p className="text-zinc-300">
                     ✓ Found Next.js project<br />
                     ✓ Detected: Vercel, Supabase, Stripe, Clerk<br />
                     ✓ Generated 24 tests
                   </p>
                   <br />
-                  <p className="text-zinc-500"># Run tests</p>
+                  <p className="text-zinc-400"># Run tests</p>
                   <p className="text-green-400">$ conduii run</p>
-                  <p className="text-zinc-400">
+                  <p className="text-zinc-300">
                     ✓ All 24 tests passed in 12.4s
                   </p>
                 </div>
@@ -336,6 +336,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="border-t py-12 px-4 sm:px-6 lg:px-8">
@@ -354,7 +355,7 @@ export default function HomePage() {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Product</h4>
+              <h3 className="font-semibold mb-4 text-base">Product</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="#features" className="hover:text-foreground transition">Features</Link></li>
                 <li><Link href="#integrations" className="hover:text-foreground transition">Integrations</Link></li>
@@ -362,9 +363,9 @@ export default function HomePage() {
                 <li><Link href="/changelog" className="hover:text-foreground transition">Changelog</Link></li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
+              <h3 className="font-semibold mb-4 text-base">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/docs" className="hover:text-foreground transition">Documentation</Link></li>
                 <li><Link href="/docs/cli" className="hover:text-foreground transition">CLI Reference</Link></li>
@@ -372,9 +373,9 @@ export default function HomePage() {
                 <li><Link href="/blog" className="hover:text-foreground transition">Blog</Link></li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="font-semibold mb-4">Company</h4>
+              <h3 className="font-semibold mb-4 text-base">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/about" className="hover:text-foreground transition">About</Link></li>
                 <li><Link href="/privacy" className="hover:text-foreground transition">Privacy</Link></li>
