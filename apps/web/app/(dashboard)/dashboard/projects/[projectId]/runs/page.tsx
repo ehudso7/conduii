@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -14,6 +14,9 @@ import {
   Calendar,
   Zap,
   AlertTriangle,
+  Square,
+  Trash2,
+  MoreVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +34,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 interface TestRun {
   id: string;
@@ -73,6 +93,7 @@ interface Project {
 export default function TestRunsPage() {
   const params = useParams();
   const projectId = params.projectId as string;
+  const { toast } = useToast();
 
   const [project, setProject] = useState<Project | null>(null);
   const [testRuns, setTestRuns] = useState<TestRun[]>([]);
@@ -81,12 +102,10 @@ export default function TestRunsPage() {
   const [selectedEnvironment, setSelectedEnvironment] = useState<string>("");
   const [selectedTestType, setSelectedTestType] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [runToDelete, setRunToDelete] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchData();
-  }, [projectId]);
-
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     try {
       const [projectRes, runsRes] = await Promise.all([
         fetch(`/api/projects/${projectId}`),
@@ -110,7 +129,23 @@ export default function TestRunsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [projectId, selectedEnvironment]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Auto-refresh when there are running tests
+  useEffect(() => {
+    const hasRunningTests = testRuns.some(
+      (run) => run.status === "RUNNING" || run.status === "PENDING"
+    );
+
+    if (hasRunningTests) {
+      const interval = setInterval(fetchData, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [testRuns, fetchData]);
 
   async function startTestRun() {
     if (!selectedEnvironment) return;
@@ -127,19 +162,116 @@ export default function TestRunsPage() {
       });
 
       if (res.ok) {
+        toast({
+          title: "Test Run Started",
+          description: "Tests are now running...",
+        });
         await fetchData();
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Error",
+          description: data.error || "Failed to start test run",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Failed to start test run:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start test run",
+        variant: "destructive",
+      });
     } finally {
       setRunning(false);
     }
+  }
+
+  async function cancelTestRun(runId: string, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const res = await fetch(`/api/test-runs/${runId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Test Run Cancelled",
+          description: "The test run has been cancelled.",
+        });
+        await fetchData();
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Error",
+          description: data.error || "Failed to cancel test run",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to cancel test run:", error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel test run",
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function deleteTestRun() {
+    if (!runToDelete) return;
+
+    try {
+      const res = await fetch(`/api/test-runs/${runToDelete}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Test Run Deleted",
+          description: "The test run has been permanently deleted.",
+        });
+        await fetchData();
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Error",
+          description: data.error || "Failed to delete test run",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete test run:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete test run",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setRunToDelete(null);
+    }
+  }
+
+  function openDeleteDialog(runId: string, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setRunToDelete(runId);
+    setDeleteDialogOpen(true);
   }
 
   const filteredRuns =
     statusFilter === "all"
       ? testRuns
       : testRuns.filter((run) => run.status === statusFilter);
+
+  const runningCount = testRuns.filter(
+    (run) => run.status === "RUNNING" || run.status === "PENDING"
+  ).length;
 
   if (loading) {
     return (
@@ -166,6 +298,12 @@ export default function TestRunsPage() {
             </p>
           </div>
         </div>
+        {runningCount > 0 && (
+          <Badge variant="secondary" className="animate-pulse">
+            <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+            {runningCount} running
+          </Badge>
+        )}
       </div>
 
       {/* Run Test Card */}
@@ -227,7 +365,7 @@ export default function TestRunsPage() {
               {running ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Running...
+                  Starting...
                 </>
               ) : (
                 <>
@@ -262,6 +400,7 @@ export default function TestRunsPage() {
                   <SelectItem value="FAILED">Failed</SelectItem>
                   <SelectItem value="RUNNING">Running</SelectItem>
                   <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" size="icon" onClick={fetchData}>
@@ -288,20 +427,25 @@ export default function TestRunsPage() {
                   failed: 0,
                   skipped: 0,
                 };
+                const isRunning = run.status === "RUNNING" || run.status === "PENDING";
 
                 return (
-                  <Link
+                  <div
                     key={run.id}
-                    href={`/dashboard/projects/${projectId}/runs/${run.id}`}
                     className="flex items-center justify-between p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
                   >
-                    <div className="flex items-center gap-4">
+                    <Link
+                      href={`/dashboard/projects/${projectId}/runs/${run.id}`}
+                      className="flex items-center gap-4 flex-1"
+                    >
                       {run.status === "PASSED" ? (
                         <CheckCircle2 className="w-6 h-6 text-green-500" />
                       ) : run.status === "FAILED" ? (
                         <XCircle className="w-6 h-6 text-red-500" />
                       ) : run.status === "RUNNING" ? (
                         <RefreshCw className="w-6 h-6 text-blue-500 animate-spin" />
+                      ) : run.status === "CANCELLED" ? (
+                        <Square className="w-6 h-6 text-gray-500" />
                       ) : (
                         <Clock className="w-6 h-6 text-gray-400" />
                       )}
@@ -329,9 +473,9 @@ export default function TestRunsPage() {
                           )}
                         </div>
                       </div>
-                    </div>
+                    </Link>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
                       {/* Test Summary */}
                       <div className="flex items-center gap-3 text-sm">
                         <span className="flex items-center gap-1 text-green-600">
@@ -364,14 +508,68 @@ export default function TestRunsPage() {
                       >
                         {run.status}
                       </Badge>
+
+                      {/* Actions Menu */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {isRunning && (
+                            <DropdownMenuItem
+                              onClick={(e) => cancelTestRun(run.id, e as unknown as React.MouseEvent)}
+                              className="text-yellow-600"
+                            >
+                              <Square className="w-4 h-4 mr-2" />
+                              Cancel Run
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem
+                            onClick={(e) => openDeleteDialog(run.id, e as unknown as React.MouseEvent)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Run
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Test Run</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this test run? This action cannot
+              be undone and all associated test results will be permanently
+              deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteTestRun}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

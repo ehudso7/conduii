@@ -167,3 +167,53 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     return handleApiError(error);
   }
 }
+
+// DELETE /api/test-runs/[id] - Delete a test run
+export async function DELETE(req: NextRequest, context: RouteContext) {
+  try {
+    const user = await requireAuth();
+    const { id: testRunId } = await context.params;
+
+    const testRun = await db.testRun.findUnique({
+      where: { id: testRunId },
+      include: {
+        project: {
+          select: {
+            organizationId: true,
+          },
+        },
+      },
+    });
+
+    if (!testRun) {
+      return NextResponse.json(
+        { error: "Test run not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify user has access
+    const membership = await db.organizationMember.findFirst({
+      where: {
+        userId: user.id,
+        organizationId: testRun.project.organizationId,
+      },
+    });
+
+    if (!membership) {
+      return NextResponse.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
+
+    // Delete the test run (cascade will delete related results and diagnostics)
+    await db.testRun.delete({
+      where: { id: testRunId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
