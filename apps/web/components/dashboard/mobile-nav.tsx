@@ -3,7 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Plus, LucideIcon } from "lucide-react";
+import {
+  Menu,
+  Plus,
+  LayoutDashboard,
+  FolderKanban,
+  Settings,
+  CreditCard,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/logo";
 import {
@@ -15,17 +22,14 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-interface NavItem {
-  name: string;
-  href: string;
-  icon: LucideIcon;
-}
+const navigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Projects", href: "/dashboard/projects", icon: FolderKanban },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
+];
 
-interface MobileNavProps {
-  navigation: NavItem[];
-}
-
-export function MobileNav({ navigation }: MobileNavProps) {
+export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
