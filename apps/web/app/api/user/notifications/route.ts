@@ -58,7 +58,8 @@ export async function GET() {
       type: mapNotificationType(n.type),
       title: n.title,
       description: n.description,
-      timestamp: n.createdAt,
+      // ✅ Step 5: always return a JSON-safe timestamp string
+      timestamp: n.createdAt.toISOString(),
       read: n.read,
       link: n.link,
     }));
