@@ -74,43 +74,51 @@ Claude will analyze the failure and provide:
 - "Is my production deployment healthy?"
 - "Check the status of all my services"
 
-## Available Commands
+## Available Tools
 
 The MCP server exposes these tools to Claude:
 
 | Tool | Description |
 |------|-------------|
-| `conduii_discover` | Discover services in a project |
-| `conduii_health` | Check health of all services |
-| `conduii_run` | Run tests |
-| `conduii_status` | Get current status |
-| `conduii_diagnose` | Analyze test failures |
+| `conduii_list_projects` | List all projects accessible to the current user |
+| `conduii_create_project` | Create a new project with name, description, and URLs |
+| `conduii_discover` | Run service discovery on a project or URL |
+| `conduii_run_tests` | Run tests against a deployment or project |
+| `conduii_get_results` | Get results from a test run |
+| `conduii_get_diagnostics` | Get diagnostics and remediation suggestions for failures |
 
 ## Configuration
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `CONDUII_API_KEY` | Your Conduii API key | Yes |
-| `CONDUII_PROJECT_DIR` | Project directory | No |
-| `CONDUII_ENVIRONMENT` | Default environment | No |
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `CONDUII_API_KEY` | Your Conduii API key | Yes | - |
+| `CONDUII_API_URL` | Conduii API URL | No | https://conduii.com |
 
 ### Server Options
+
+The MCP server runs via stdio and requires no additional arguments:
 
 ```json
 {
   "mcpServers": {
     "conduii": {
       "command": "npx",
-      "args": [
-        "@conduii/mcp-server",
-        "--project-dir", "/path/to/project",
-        "--environment", "production"
-      ]
+      "args": ["@conduii/mcp-server"],
+      "env": {
+        "CONDUII_API_KEY": "your-api-key",
+        "CONDUII_API_URL": "https://conduii.com"
+      }
     }
   }
 }
+```
+
+Or run directly:
+
+```bash
+CONDUII_API_KEY=your-api-key npx @conduii/mcp-server
 ```
 
 ## Example Conversations
