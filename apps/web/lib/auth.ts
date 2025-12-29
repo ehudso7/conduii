@@ -2,12 +2,39 @@ import { auth, currentUser } from "@clerk/nextjs";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
+/**
+ * Standard API error with HTTP status + machine code
+ */
+export class ApiError extends Error {
+  status: number;
+  code: string;
+  details?: unknown;
+
+  constructor(status: number, code: string, message: string, details?: unknown) {
+    super(message);
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+}
+
+function jsonError(status: number, code: string, message: string, details?: unknown) {
+  return NextResponse.json(
+    {
+      error: {
+        code,
+        message,
+        ...(details !== undefined ? { details } : {}),
+      },
+    },
+    { status }
+  );
+}
+
 export async function getAuthUser() {
   const { userId } = auth();
 
-  if (!userId) {
-    return null;
-  }
+  if (!userId) return null;
 
   let user = await db.user.findUnique({
     where: { clerkId: userId },
@@ -87,7 +114,7 @@ export async function requireAuth() {
   const user = await getAuthUser();
 
   if (!user) {
-    throw new NextResponse("Unauthorized", { status: 401 });
+    throw new ApiError(401, "UNAUTHORIZED", "Unauthorized");
   }
 
   return user;
@@ -115,7 +142,7 @@ export async function requireOrgAccess(orgId: string, userId: string) {
   });
 
   if (!membership) {
-    throw new NextResponse("Forbidden", { status: 403 });
+    throw new ApiError(403, "FORBIDDEN", "Forbidden");
   }
 
   return membership;
@@ -136,7 +163,7 @@ export async function requireProjectAccess(projectId: string, userId: string) {
   });
 
   if (!project || project.organization.members.length === 0) {
-    throw new NextResponse("Forbidden", { status: 403 });
+    throw new ApiError(403, "FORBIDDEN", "Forbidden");
   }
 
   return project;
@@ -145,19 +172,20 @@ export async function requireProjectAccess(projectId: string, userId: string) {
 export function handleApiError(error: unknown) {
   console.error("API Error:", error);
 
+  // If a route intentionally returns a NextResponse, preserve it
   if (error instanceof NextResponse) {
     return error;
   }
 
-  if (error instanceof Error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
+  // Our standardized error type
+  if (error instanceof ApiError) {
+    return jsonError(error.status, error.code, error.message, error.details);
   }
 
-  return NextResponse.json(
-    { error: "Internal server error" },
-    { status: 500 }
-  );
+  // Generic errors
+  if (error instanceof Error) {
+    return jsonError(500, "INTERNAL_ERROR", error.message);
+  }
+
+  return jsonError(500, "INTERNAL_ERROR", "Internal server error");
 }
