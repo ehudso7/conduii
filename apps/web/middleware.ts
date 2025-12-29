@@ -1,6 +1,21 @@
 import { authMiddleware } from "@clerk/nextjs";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export default authMiddleware({
+  // Run BEFORE Clerk auth checks
+  beforeAuth: (req: NextRequest) => {
+    const host = req.headers.get("host") || "";
+    // Force apex -> www so auth cookies are consistently sent
+    if (host === "conduii.com") {
+      const url = req.nextUrl.clone();
+      url.hostname = "www.conduii.com";
+      url.protocol = "https:";
+      return NextResponse.redirect(url, 308);
+    }
+    return NextResponse.next();
+  },
+
   // Routes that can be accessed while signed out
   publicRoutes: [
     "/",
@@ -23,10 +38,9 @@ export default authMiddleware({
     "/api/webhooks",
     "/api/webhooks/(.*)",
   ],
+
   // Ignore these routes completely (no auth check at all)
-  ignoredRoutes: [
-    "/api/health",
-  ],
+  ignoredRoutes: ["/api/health"],
 });
 
 export const config = {
