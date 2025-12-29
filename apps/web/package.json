@@ -67,6 +67,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/coverage-v8": "^2.0.0",
     "autoprefixer": "^10.4.16",
+    "dotenv": "^17.2.3",
     "jsdom": "^23.0.1",
     "postcss": "^8.4.32",
     "prisma": "5.22.0",
