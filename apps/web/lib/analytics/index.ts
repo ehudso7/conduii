@@ -458,13 +458,13 @@ async function getSlowestTests(
     take: 5,
   });
 
-  const testIds = results.map((r) => r.testId);
+  const testIds = results.map((r: { testId: string }) => r.testId);
   const tests = await db.test.findMany({
     where: { id: { in: testIds } },
   });
 
-  return results.map((r) => ({
-    testName: tests.find((t) => t.id === r.testId)?.name || "Unknown",
+  return results.map((r: { testId: string; _avg: { duration: number | null } | null }) => ({
+    testName: tests.find((t: { id: string; name: string }) => t.id === r.testId)?.name || "Unknown",
     avgDuration: Math.round(r._avg?.duration || 0),
   }));
 }

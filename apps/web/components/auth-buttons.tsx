@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 // Check if Clerk is configured via environment variable
+// Valid Clerk keys start with "pk_test_" or "pk_live_" followed by alphanumeric chars
 const isClerkConfigured = !!(
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== "pk_test_placeholder"
+  /^pk_(test|live)_[a-zA-Z0-9]+$/.test(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 );
 
 // Simple link-based buttons that always work

@@ -342,8 +342,16 @@ async function handleGetFlaky(
 
   // Identify flaky tests
   type FlakyTestInput = { name: string; type: TestType; results: Array<{ status: TestStatus }>; testSuite?: { project?: { name: string } | null } | null };
-  const flakyTests = tests
-    .map((t: FlakyTestInput) => {
+  type FlakyTestResult = {
+    name: string;
+    type: TestType;
+    project: string | undefined;
+    flakinessScore: number;
+    passRate: number;
+    runs: number;
+  };
+  const flakyTests: FlakyTestResult[] = tests
+    .map((t: FlakyTestInput): FlakyTestResult | null => {
       if (t.results.length < 5) return null;
 
       const statuses = t.results.map((r: { status: TestStatus }) => r.status);
@@ -372,8 +380,8 @@ async function handleGetFlaky(
         runs: statuses.length,
       };
     })
-    .filter((t) => t !== null)
-    .sort((a, b) => b.flakinessScore - a.flakinessScore);
+    .filter((t: FlakyTestResult | null): t is FlakyTestResult => t !== null)
+    .sort((a: FlakyTestResult, b: FlakyTestResult) => b.flakinessScore - a.flakinessScore);
 
   return {
     type: "DATA",

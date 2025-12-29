@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
+import { createConduii } from "@conduii/core";
 
 // =============================================================================
 // TYPES
@@ -80,90 +81,90 @@ function setupEnvironment(inputs: ActionInputs): void {
 }
 
 // =============================================================================
-// TEST EXECUTION (Simplified - real implementation uses @conduii/core)
+// TEST EXECUTION (Uses @conduii/core for real testing)
 // =============================================================================
 
 async function runTests(inputs: ActionInputs): Promise<TestSummary> {
-  const results: TestResult[] = [];
   const start = Date.now();
 
-  // Health checks
-  if (inputs.testType === "all" || inputs.testType === "health") {
-    if (inputs.vercelToken) {
-      results.push({
-        name: "Health Check: Vercel",
-        type: "health",
-        status: "passed",
-        duration: 150,
-      });
+  try {
+    // Create Conduii instance with environment config
+    const conduii = await createConduii({
+      projectDir: inputs.workingDirectory,
+      environment: inputs.environment,
+      environments: inputs.deploymentUrl
+        ? {
+            [inputs.environment]: {
+              name: inputs.environment,
+              url: inputs.deploymentUrl,
+              isProduction: inputs.environment === "production",
+            },
+          }
+        : undefined,
+    });
+
+    // Initialize (runs discovery)
+    await conduii.initialize();
+
+    // Run appropriate tests based on type
+    let coreResult;
+    switch (inputs.testType) {
+      case "health":
+        coreResult = await conduii.runHealthChecks();
+        break;
+      case "integration":
+        coreResult = await conduii.runIntegrationTests();
+        break;
+      case "api":
+        coreResult = await conduii.runApiTests();
+        break;
+      case "e2e":
+        coreResult = await conduii.runE2ETests();
+        break;
+      default:
+        coreResult = await conduii.runAll();
     }
-    if (inputs.supabaseUrl) {
-      results.push({
-        name: "Health Check: Supabase",
-        type: "health",
-        status: "passed",
-        duration: 89,
-      });
-    }
-    if (inputs.stripeKey) {
-      results.push({
-        name: "Health Check: Stripe",
-        type: "health",
-        status: "passed",
-        duration: 203,
-      });
-    }
+
+    // Map core results to action results
+    const results: TestResult[] = coreResult.tests.map((r: { name: string; type?: string; status: string; duration: number; error?: { message: string } }) => ({
+      name: r.name,
+      type: r.type || "test",
+      status: r.status as "passed" | "failed" | "skipped",
+      duration: r.duration,
+      error: r.error?.message,
+    }));
+
+    const passed = results.filter((r) => r.status === "passed").length;
+    const failed = results.filter((r) => r.status === "failed").length;
+    const skipped = results.filter((r) => r.status === "skipped").length;
+
+    return {
+      status: failed === 0 ? "passed" : "failed",
+      total: results.length,
+      passed,
+      failed,
+      skipped,
+      duration: Date.now() - start,
+      results,
+    };
+  } catch (error) {
+    // Return a failed summary if core engine fails to initialize
+    return {
+      status: "failed",
+      total: 1,
+      passed: 0,
+      failed: 1,
+      skipped: 0,
+      duration: Date.now() - start,
+      results: [{
+        name: "Conduii Engine Initialization",
+        type: "setup",
+        status: "failed",
+        duration: Date.now() - start,
+        error: error instanceof Error ? error.message : "Unknown error",
+      }],
+    };
   }
-
-  // Integration tests
-  if (inputs.testType === "all" || inputs.testType === "integration") {
-    if (inputs.supabaseUrl && inputs.supabaseKey) {
-      results.push({
-        name: "Integration: Supabase Connection",
-        type: "integration",
-        status: "passed",
-        duration: 456,
-      });
-    }
-  }
-
-  // API tests
-  if (inputs.testType === "all" || inputs.testType === "api") {
-    if (inputs.deploymentUrl) {
-      try {
-        const response = await fetch(`${inputs.deploymentUrl}/api/health`);
-        results.push({
-          name: "API: GET /api/health",
-          type: "api",
-          status: response.ok ? "passed" : "failed",
-          duration: 234,
-          error: response.ok ? undefined : `Status: ${response.status}`,
-        });
-      } catch (error) {
-        results.push({
-          name: "API: GET /api/health",
-          type: "api",
-          status: "failed",
-          duration: 0,
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
-      }
-    }
-  }
-
-  const passed = results.filter((r) => r.status === "passed").length;
-  const failed = results.filter((r) => r.status === "failed").length;
-  const skipped = results.filter((r) => r.status === "skipped").length;
-
-  return {
-    status: failed === 0 ? "passed" : "failed",
-    total: results.length,
-    passed,
-    failed,
-    skipped,
-    duration: Date.now() - start,
-    results,
-  };
 }
 
 // =============================================================================

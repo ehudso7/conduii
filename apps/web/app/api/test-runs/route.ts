@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { requireAuth, requireProjectAccess, handleApiError } from "@/lib/auth";
 import { executeTestRun } from "@/lib/test-runner";
+import { rateLimit, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +63,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth();
+
+    // Rate limit by user ID
+    const rateLimitResult = rateLimit(`test-run:${user.id}`, RATE_LIMITS.testRuns);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Please wait before running more tests." },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+      );
+    }
+
     const body = await req.json();
     const { projectId, environmentId, testSuiteId, testType } =
       createTestRunSchema.parse(body);
