@@ -1,13 +1,16 @@
 // Conduii Database Schema
-// Using Prisma with PostgreSQL (Supabase/Neon compatible)
+// Using Prisma with PostgreSQL (Neon compatible)
+// Runtime uses pooled connection (POSTGRES_PRISMA_URL)
+// Migrations use direct/unpooled connection (DIRECT_URL)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================================================
