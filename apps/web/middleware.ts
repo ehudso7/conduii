@@ -1,51 +1,40 @@
-import { authMiddleware } from "@clerk/nextjs";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default authMiddleware({
-  // Run BEFORE Clerk auth checks
-  beforeAuth: (req: NextRequest) => {
-    const host = req.headers.get("host") || "";
-    // Force apex -> www so auth cookies are consistently sent
-    if (host === "conduii.com") {
-      const url = req.nextUrl.clone();
-      url.hostname = "www.conduii.com";
-      url.protocol = "https:";
-      return NextResponse.redirect(url, 308);
-    }
-    return NextResponse.next();
-  },
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/features",
+  "/integrations",
+  "/pricing",
+  "/docs",
+  "/docs(.*)",
+  "/blog",
+  "/blog(.*)",
+  "/changelog",
+  "/about",
+  "/privacy",
+  "/terms",
+  "/sign-in",
+  "/sign-in(.*)",
+  "/sign-up",
+  "/sign-up(.*)",
+  "/forgot-password",
 
-  // Routes that can be accessed while signed out
-  publicRoutes: [
-    "/",
-    "/features",
-    "/integrations",
-    "/pricing",
-    "/docs",
-    "/docs/(.*)",
-    "/blog",
-    "/blog/(.*)",
-    "/changelog",
-    "/about",
-    "/privacy",
-    "/terms",
-    "/sign-in",
-    "/sign-in/(.*)",
-    "/sign-up",
-    "/sign-up/(.*)",
-    "/forgot-password",
-    "/api/webhooks",
-    "/api/webhooks/(.*)",
-  ],
+  // Webhooks should be callable without a user session
+  "/api/webhooks",
+  "/api/webhooks(.*)",
 
-  // Ignore these routes completely (no auth check at all)
-  ignoredRoutes: ["/api/health"],
+  // Health must be callable without auth
+  "/api/health",
+]);
+
+export default clerkMiddleware((auth, req) => {
+  if (isPublicRoute(req)) return;
+  auth().protect();
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files
+    // Skip Next.js internals and static files
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     // Always run for API routes
     "/(api|trpc)(.*)",
