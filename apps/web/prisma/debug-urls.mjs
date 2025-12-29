@@ -1,3 +1,14 @@
+import { config as dotenvConfig } from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+// Resolve apps/web/.env reliably even when run from repo root
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// prisma/ is inside apps/web/prisma, so ../.env is apps/web/.env
+dotenvConfig({ path: path.resolve(__dirname, "../.env") });
+
 function safeParse(name) {
   const raw = process.env[name];
   if (!raw) {
