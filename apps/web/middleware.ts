@@ -22,10 +22,13 @@ export default authMiddleware({
     "/forgot-password",
     "/api/webhooks",
     "/api/webhooks/(.*)",
+
+    // Health should always be public
+    "/api/health",
   ],
 
-  // Ignore these routes completely (no auth check at all)
-  ignoredRoutes: ["/api/health"],
+  // Keep this empty unless you have a *very specific* reason to bypass Clerk entirely
+  ignoredRoutes: [],
 });
 
 export const config = {
