@@ -1,35 +1,40 @@
 import { authMiddleware } from "@clerk/nextjs";
+import { NextResponse } from "next/server";
 
-export default authMiddleware({
-  // Routes that can be accessed while signed out
-  publicRoutes: [
-    "/",
-    "/features",
-    "/integrations",
-    "/pricing",
-    "/docs",
-    "/docs/(.*)",
-    "/blog",
-    "/blog/(.*)",
-    "/changelog",
-    "/about",
-    "/privacy",
-    "/terms",
-    "/sign-in",
-    "/sign-in/(.*)",
-    "/sign-up",
-    "/sign-up/(.*)",
-    "/forgot-password",
-    "/api/webhooks",
-    "/api/webhooks/(.*)",
+const isClerkConfigured = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-    // Health should always be public
-    "/api/health",
-  ],
+export default isClerkConfigured
+  ? authMiddleware({
+      // Routes that can be accessed while signed out
+      publicRoutes: [
+        "/",
+        "/features",
+        "/integrations",
+        "/pricing",
+        "/docs",
+        "/docs/(.*)",
+        "/blog",
+        "/blog/(.*)",
+        "/changelog",
+        "/about",
+        "/privacy",
+        "/terms",
+        "/sign-in",
+        "/sign-in/(.*)",
+        "/sign-up",
+        "/sign-up/(.*)",
+        "/forgot-password",
+        "/api/webhooks",
+        "/api/webhooks/(.*)",
 
-  // Keep this empty unless you have a *very specific* reason to bypass Clerk entirely
-  ignoredRoutes: [],
-});
+        // Health should always be public
+        "/api/health",
+      ],
+
+      // Keep this empty unless you have a *very specific* reason to bypass Clerk entirely
+      ignoredRoutes: [],
+    })
+  : () => NextResponse.next();
 
 export const config = {
   matcher: [
