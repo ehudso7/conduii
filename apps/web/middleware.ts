@@ -1,6 +1,19 @@
 import { authMiddleware } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+function isClerkConfigured() {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const secretKey = process.env.CLERK_SECRET_KEY;
+  // Match Clerk's base64url-ish key format (typically includes '-' and '_')
+  const hasValidPublishable =
+    !!publishableKey && /^pk_(test|live)_[a-zA-Z0-9_-]+$/.test(publishableKey);
+  const hasValidSecret = !!secretKey && /^sk_(test|live)_[a-zA-Z0-9_-]+$/.test(secretKey);
+  return hasValidPublishable && hasValidSecret;
+}
+
+const clerkConfigured = isClerkConfigured();
+
+export default clerkConfigured
 const isClerkConfigured = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 export default isClerkConfigured
@@ -34,6 +47,10 @@ export default isClerkConfigured
       // Keep this empty unless you have a *very specific* reason to bypass Clerk entirely
       ignoredRoutes: [],
     })
+  : function middleware() {
+      // If Clerk isn't configured (common in local/dev), don't block navigation.
+      return NextResponse.next();
+    };
   : () => NextResponse.next();
 
 export const config = {

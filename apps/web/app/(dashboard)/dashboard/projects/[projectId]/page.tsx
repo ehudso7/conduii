@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -26,6 +25,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
+import { getAuthUser } from "@/lib/auth";
 import {
   ProjectActionsDropdown,
   CheckHealthButton,
@@ -129,13 +129,10 @@ export default async function ProjectDetailPage({
 }: {
   params: { projectId: string };
 }) {
-  const { userId } = auth();
+  const authUser = await getAuthUser();
+  if (!authUser) redirect("/sign-in");
 
-  if (!userId) {
-    redirect("/sign-in");
-  }
-
-  const project = await getProject(params.projectId, userId);
+  const project = await getProject(params.projectId, authUser.clerkId);
 
   if (!project) {
     notFound();

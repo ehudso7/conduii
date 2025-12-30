@@ -4,17 +4,11 @@ test.describe("Main Navigation", () => {
   test("logo should link to homepage", async ({ page }) => {
     await page.goto("/about");
 
-    // Find logo/brand and click
-    const logo = page.getByText("Conduii").first();
-    if (await logo.isVisible()) {
-      // The logo might be in the about page header too
-      // Navigate back via Back to Home link
-      const backLink = page.getByRole("link", { name: /Back to Home/i });
-      if (await backLink.isVisible()) {
-        await backLink.click();
-        await expect(page).toHaveURL("/");
-      }
-    }
+    // Header brand should return to home
+    const brandLink = page.getByRole("banner").getByRole("link", { name: "Conduii" }).first();
+    await expect(brandLink).toBeVisible();
+    await brandLink.click();
+    await expect(page).toHaveURL("/");
   });
 
   test("features link should scroll to features section", async ({ page }) => {
@@ -63,10 +57,11 @@ test.describe("Footer Navigation", () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(500);
 
-    await expect(page.getByRole("link", { name: "Features" }).last()).toBeVisible();
-    await expect(page.getByRole("link", { name: "Integrations" }).last()).toBeVisible();
-    await expect(page.getByRole("link", { name: "Pricing" }).last()).toBeVisible();
-    await expect(page.getByRole("link", { name: "Changelog" })).toBeVisible();
+    const footer = page.getByRole("contentinfo");
+    await expect(footer.getByRole("link", { name: "Features" })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Integrations" })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Pricing" })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Changelog" })).toBeVisible();
   });
 
   test("footer should contain resources links", async ({ page }) => {
@@ -75,8 +70,9 @@ test.describe("Footer Navigation", () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(500);
 
-    await expect(page.getByRole("link", { name: "Documentation" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Blog" })).toBeVisible();
+    const footer = page.getByRole("contentinfo");
+    await expect(footer.getByRole("link", { name: "Documentation", exact: true })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Blog", exact: true })).toBeVisible();
   });
 
   test("footer should contain company links", async ({ page }) => {
@@ -85,9 +81,10 @@ test.describe("Footer Navigation", () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(500);
 
-    await expect(page.getByRole("link", { name: "About" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Privacy" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Terms" })).toBeVisible();
+    const footer = page.getByRole("contentinfo");
+    await expect(footer.getByRole("link", { name: "About", exact: true })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Privacy", exact: true })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Terms", exact: true })).toBeVisible();
   });
 
   test("changelog link should navigate to changelog page", async ({ page }) => {
@@ -120,7 +117,7 @@ test.describe("Footer Navigation", () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(500);
 
-    const docsLink = page.getByRole("link", { name: "Documentation" });
+    const docsLink = page.getByRole("contentinfo").getByRole("link", { name: "Documentation", exact: true });
     await docsLink.click();
 
     await expect(page).toHaveURL("/docs");
@@ -138,7 +135,7 @@ test.describe("Cross-Page Navigation", () => {
     await expect(page).toHaveURL("/about");
 
     // Go back to home
-    await page.getByRole("link", { name: /Back to Home/i }).click();
+    await page.getByRole("banner").getByRole("link", { name: "Conduii" }).first().click();
     await expect(page).toHaveURL("/");
   });
 
@@ -150,7 +147,7 @@ test.describe("Cross-Page Navigation", () => {
     await page.getByRole("link", { name: "Privacy" }).click();
     await expect(page).toHaveURL("/privacy");
 
-    await page.getByRole("link", { name: /Back to Home/i }).click();
+    await page.getByRole("banner").getByRole("link", { name: "Conduii" }).first().click();
     await expect(page).toHaveURL("/");
   });
 
@@ -162,7 +159,7 @@ test.describe("Cross-Page Navigation", () => {
     await page.getByRole("link", { name: "Terms" }).click();
     await expect(page).toHaveURL("/terms");
 
-    await page.getByRole("link", { name: /Back to Home/i }).click();
+    await page.getByRole("banner").getByRole("link", { name: "Conduii" }).first().click();
     await expect(page).toHaveURL("/");
   });
 
