@@ -76,6 +76,16 @@ function NavAuthButtonsInner() {
       <Button asChild size="sm">
         <Link href="/sign-up">Get Started</Link>
       </Button>
+      <SignInButton mode="redirect" redirectUrl="/dashboard">
+        <Button variant="ghost" size="sm">
+          Sign In
+        </Button>
+      </SignInButton>
+      <SignUpButton mode="redirect" redirectUrl="/dashboard">
+        <Button size="sm">
+          Get Started
+        </Button>
+      </SignUpButton>
     </div>
   );
 }
@@ -151,6 +161,14 @@ function HeroAuthButtonsInner() {
 
   // Use link instead of modal to avoid stuck states
   return <SimpleHeroButton />;
+  return (
+    <SignUpButton mode="redirect" redirectUrl="/dashboard">
+      <Button size="xl" variant="gradient" className="group">
+        Start Testing Free
+        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+      </Button>
+    </SignUpButton>
+  );
 }
 
 export function HeroAuthButtons() {
@@ -226,6 +244,14 @@ function CTAAuthButtonsInner() {
 
   // Use link instead of modal to avoid stuck states
   return <SimpleCTAButton />;
+  return (
+    <SignUpButton mode="redirect" redirectUrl="/dashboard">
+      <Button size="xl" variant="gradient" className="group">
+        Get Started for Free
+        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+      </Button>
+    </SignUpButton>
+  );
 }
 
 export function CTAAuthButtons() {
