@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { User, Building2, Key, Bell, Shield } from "lucide-react";
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
+import { getAuthUser } from "@/lib/auth";
 import {
   ProfileForm,
   OrganizationForm,
@@ -64,13 +64,10 @@ async function getUserSettings(userId: string) {
 }
 
 export default async function SettingsPage() {
-  const { userId } = auth();
+  const authUser = await getAuthUser();
+  if (!authUser) redirect("/sign-in");
 
-  if (!userId) {
-    redirect("/sign-in");
-  }
-
-  const user = await getUserSettings(userId);
+  const user = await getUserSettings(authUser.clerkId);
 
   if (!user) {
     redirect("/sign-in");

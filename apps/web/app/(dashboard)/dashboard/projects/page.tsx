@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
+import { getAuthUser } from "@/lib/auth";
 
 async function getProjects(userId: string) {
   const user = await db.user.findUnique({
@@ -57,13 +57,10 @@ async function getProjects(userId: string) {
 }
 
 export default async function ProjectsPage() {
-  const { userId } = auth();
+  const authUser = await getAuthUser();
+  if (!authUser) redirect("/sign-in");
 
-  if (!userId) {
-    redirect("/sign-in");
-  }
-
-  const projects = await getProjects(userId);
+  const projects = await getProjects(authUser.clerkId);
 
   return (
     <div className="space-y-8">

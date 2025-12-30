@@ -132,6 +132,14 @@ export default function HomePage() {
             <Logo size="md" />
 
             <div className="hidden md:flex items-center gap-8">
+              <Link href="/#features" className="nav-link">
+                Features
+              </Link>
+              <Link href="/#integrations" className="nav-link">
+                Integrations
+              </Link>
+              <Link href="/#pricing" className="nav-link">
+                Pricing
               <Link href="/#features" className="nav-link" scroll={true}>
                 Features
               </Link>

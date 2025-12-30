@@ -139,13 +139,14 @@ test.describe("Auth Button Navigation", () => {
     await page.goto("/");
 
     // Scroll to pricing section
-    await page.getByRole("link", { name: "Pricing" }).click();
+    await page.getByRole("navigation").getByRole("link", { name: "Pricing" }).click();
     await page.waitForTimeout(500);
 
     // Check for pricing buttons
-    const getStartedButton = page.getByRole("button", { name: "Get Started" });
-    const startTrialButton = page.getByRole("button", { name: "Start Free Trial" });
-    const contactButton = page.getByRole("button", { name: "Contact Sales" });
+    // Pricing CTAs are rendered as links (Button-asChild), so assert on links.
+    const getStartedButton = page.getByRole("link", { name: "Get Started" });
+    const startTrialButton = page.getByRole("link", { name: "Start Free Trial" });
+    const contactButton = page.getByRole("link", { name: "Contact Sales" });
 
     // At least one should be visible
     const hasButtons =

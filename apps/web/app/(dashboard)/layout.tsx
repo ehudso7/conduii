@@ -54,12 +54,31 @@ async function getUserProjects(userId: string) {
   }
 }
 
+function isClerkConfigured() {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const secretKey = process.env.CLERK_SECRET_KEY;
+  const hasValidPublishable =
+    !!publishableKey && /^pk_(test|live)_[a-zA-Z0-9_-]+$/.test(publishableKey);
+  const hasValidSecret = !!secretKey && /^sk_(test|live)_[a-zA-Z0-9_-]+$/.test(secretKey);
+  return hasValidPublishable && hasValidSecret;
+}
+
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { userId } = auth();
+  // If Clerk isn't configured (or middleware isn't active), treat as signed out.
+  if (!isClerkConfigured()) {
+    redirect("/sign-in");
+  }
+
+  let userId: string | null = null;
+  try {
+    userId = auth().userId ?? null;
+  } catch {
+    userId = null;
+  }
 
   if (!userId) {
     redirect("/sign-in");

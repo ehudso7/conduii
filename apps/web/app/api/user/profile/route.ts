@@ -9,6 +9,29 @@ const updateProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
 });
 
+export async function GET() {
+  try {
+    const user = await requireAuth();
+
+    const profile = await db.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    if (!profile) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ user: profile });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
 export async function PATCH(req: NextRequest) {
   try {
     const user = await requireAuth();

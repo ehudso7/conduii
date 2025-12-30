@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
@@ -17,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
+import { getAuthUser } from "@/lib/auth";
 
 async function getDashboardData(userId: string) {
   try {
@@ -91,13 +91,12 @@ async function getDashboardData(userId: string) {
 }
 
 export default async function DashboardPage() {
-  const { userId } = auth();
-
-  if (!userId) {
+  const user = await getAuthUser();
+  if (!user) {
     redirect("/sign-in");
   }
 
-  const data = await getDashboardData(userId);
+  const data = await getDashboardData(user.clerkId);
 
   // Handle database error
   if (data && "error" in data) {

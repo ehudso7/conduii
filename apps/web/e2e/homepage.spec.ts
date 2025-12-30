@@ -18,16 +18,17 @@ test.describe("Homepage", () => {
     await page.goto("/");
 
     // Check navigation is present
-    await expect(page.getByRole("link", { name: "Features" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Integrations" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Pricing" })).toBeVisible();
+    const nav = page.getByRole("navigation");
+    await expect(nav.getByRole("link", { name: "Features" })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Integrations" })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Pricing" })).toBeVisible();
   });
 
   test("should display features section", async ({ page }) => {
     await page.goto("/");
 
     // Navigate to features section
-    await page.getByRole("link", { name: "Features" }).click();
+    await page.getByRole("navigation").getByRole("link", { name: "Features" }).click();
 
     // Check features content
     await expect(page.getByText("Auto-Discovery")).toBeVisible();
@@ -39,26 +40,28 @@ test.describe("Homepage", () => {
     await page.goto("/");
 
     // Navigate to pricing section
-    await page.getByRole("link", { name: "Pricing" }).click();
+    await page.getByRole("navigation").getByRole("link", { name: "Pricing" }).click();
 
     // Check pricing tiers
-    await expect(page.getByText("Free")).toBeVisible();
-    await expect(page.getByText("Pro")).toBeVisible();
-    await expect(page.getByText("Enterprise")).toBeVisible();
-    await expect(page.getByText("$0")).toBeVisible();
-    await expect(page.getByText("$29")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Free", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Pro", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Enterprise", exact: true })).toBeVisible();
+    await expect(page.getByText("$0", { exact: true })).toBeVisible();
+    await expect(page.getByText("$29", { exact: true })).toBeVisible();
   });
 
   test("should display integrations section", async ({ page }) => {
     await page.goto("/");
 
     // Navigate to integrations section
-    await page.getByRole("link", { name: "Integrations" }).click();
+    await page.getByRole("navigation").getByRole("link", { name: "Integrations" }).click();
 
     // Check some integrations are listed
-    await expect(page.getByText("50+ Integrations")).toBeVisible();
-    await expect(page.getByText("Vercel")).toBeVisible();
-    await expect(page.getByText("Stripe")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "50+ Integrations, Zero Configuration" })
+    ).toBeVisible();
+    await expect(page.getByText("Vercel", { exact: true })).toBeVisible();
+    await expect(page.getByText("Stripe", { exact: true })).toBeVisible();
   });
 
   test("should have sign in and sign up buttons when not authenticated", async ({
@@ -67,10 +70,9 @@ test.describe("Homepage", () => {
     await page.goto("/");
 
     // Check auth buttons are present
-    await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Get Started" })
-    ).toBeVisible();
+    const navAuth = page.getByRole("navigation");
+    await expect(navAuth.getByRole("button", { name: "Sign In", exact: true })).toBeVisible();
+    await expect(navAuth.getByRole("button", { name: "Get Started", exact: true })).toBeVisible();
   });
 
   test("should display the CLI code example", async ({ page }) => {
@@ -78,8 +80,8 @@ test.describe("Homepage", () => {
 
     // Check code preview is visible
     await expect(page.getByText("npm install -g @conduii/cli")).toBeVisible();
-    await expect(page.getByText("conduii discover")).toBeVisible();
-    await expect(page.getByText("conduii run")).toBeVisible();
+    await expect(page.getByText("$ conduii discover")).toBeVisible();
+    await expect(page.getByText("$ conduii run")).toBeVisible();
   });
 
   test("should display footer with links", async ({ page }) => {
@@ -89,9 +91,10 @@ test.describe("Homepage", () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
     // Check footer links
-    await expect(page.getByRole("link", { name: "About" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Privacy" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Terms" })).toBeVisible();
+    const footer = page.getByRole("contentinfo");
+    await expect(footer.getByRole("link", { name: "About" })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Privacy" })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Terms" })).toBeVisible();
   });
 });
 
@@ -102,7 +105,7 @@ test.describe("Public Pages", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       "About Conduii"
     );
-    await expect(page.getByText("AI-Powered Testing")).toBeVisible();
+    await expect(page.getByText(/AI-powered platform/i)).toBeVisible();
   });
 
   test("privacy page loads correctly", async ({ page }) => {
@@ -140,7 +143,7 @@ test.describe("Responsive Design", () => {
 
     // Check that main content is visible
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByText("Features")).toBeVisible();
+    await expect(page.getByRole("navigation").getByRole("link", { name: "Features" })).toBeVisible();
   });
 });
 
@@ -170,10 +173,10 @@ test.describe("Accessibility", () => {
     await page.goto("/");
 
     // Check navigation links have text
-    const featuresLink = page.getByRole("link", { name: "Features" });
+    const featuresLink = page.getByRole("navigation").getByRole("link", { name: "Features" });
     await expect(featuresLink).toHaveAccessibleName("Features");
 
-    const pricingLink = page.getByRole("link", { name: "Pricing" });
+    const pricingLink = page.getByRole("navigation").getByRole("link", { name: "Pricing" });
     await expect(pricingLink).toHaveAccessibleName("Pricing");
   });
 });

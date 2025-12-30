@@ -9,9 +9,9 @@ test.describe("Interactive Elements - Pricing Cards", () => {
     await page.waitForTimeout(500);
 
     // Check all three tiers are visible
-    await expect(page.getByText("Free").first()).toBeVisible();
-    await expect(page.getByText("Pro").first()).toBeVisible();
-    await expect(page.getByText("Enterprise").first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Free", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Pro", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Enterprise", exact: true })).toBeVisible();
   });
 
   test("pricing cards should display prices", async ({ page }) => {
@@ -20,9 +20,9 @@ test.describe("Interactive Elements - Pricing Cards", () => {
     await page.getByRole("link", { name: "Pricing" }).first().click();
     await page.waitForTimeout(500);
 
-    await expect(page.getByText("$0")).toBeVisible();
-    await expect(page.getByText("$29")).toBeVisible();
-    await expect(page.getByText("Custom")).toBeVisible();
+    await expect(page.getByText("$0", { exact: true })).toBeVisible();
+    await expect(page.getByText("$29", { exact: true })).toBeVisible();
+    await expect(page.getByText("Custom", { exact: true })).toBeVisible();
   });
 
   test("pricing cards should display feature lists", async ({ page }) => {
@@ -54,12 +54,12 @@ test.describe("Interactive Elements - Feature Cards", () => {
     await page.getByRole("link", { name: "Features" }).first().click();
     await page.waitForTimeout(500);
 
-    await expect(page.getByText("Auto-Discovery")).toBeVisible();
-    await expect(page.getByText("Live Testing")).toBeVisible();
-    await expect(page.getByText("AI-Powered Diagnostics")).toBeVisible();
-    await expect(page.getByText("Zero Config")).toBeVisible();
-    await expect(page.getByText("Multiple Interfaces")).toBeVisible();
-    await expect(page.getByText("Detailed Reports")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Auto-Discovery", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Live Testing", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "AI-Powered Diagnostics", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Zero Config", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Multiple Interfaces", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Detailed Reports", exact: true })).toBeVisible();
   });
 
   test("feature cards should have descriptions", async ({ page }) => {
@@ -80,9 +80,9 @@ test.describe("Interactive Elements - Integrations", () => {
     await page.getByRole("link", { name: "Integrations" }).first().click();
     await page.waitForTimeout(500);
 
-    await expect(page.getByText("Vercel")).toBeVisible();
-    await expect(page.getByText("Stripe")).toBeVisible();
-    await expect(page.getByText("Supabase")).toBeVisible();
+    await expect(page.getByText("Vercel", { exact: true })).toBeVisible();
+    await expect(page.getByText("Stripe", { exact: true })).toBeVisible();
+    await expect(page.getByText("Supabase", { exact: true })).toBeVisible();
   });
 
   test("integrations section should show 50+ integrations text", async ({ page }) => {
@@ -101,8 +101,8 @@ test.describe("Interactive Elements - Code Preview", () => {
 
     // Check terminal-like code preview
     await expect(page.getByText("npm install -g @conduii/cli")).toBeVisible();
-    await expect(page.getByText("conduii discover")).toBeVisible();
-    await expect(page.getByText("conduii run")).toBeVisible();
+    await expect(page.getByText("$ conduii discover")).toBeVisible();
+    await expect(page.getByText("$ conduii run")).toBeVisible();
   });
 
   test("code preview should show sample output", async ({ page }) => {
@@ -166,6 +166,6 @@ test.describe("Scroll Behavior", () => {
     await page.waitForTimeout(500);
 
     // Footer should be visible
-    await expect(page.getByText("AI-powered testing platform for modern applications")).toBeVisible();
+    await expect(page.getByText("Deployment testing platform for modern applications.")).toBeVisible();
   });
 });

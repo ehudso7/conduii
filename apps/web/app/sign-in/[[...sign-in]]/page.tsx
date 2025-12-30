@@ -2,7 +2,14 @@ import { SignIn } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+function isClerkConfigured() {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  return !!publishableKey && /^pk_(test|live)_[a-zA-Z0-9_-]+$/.test(publishableKey);
+}
+
 export default function SignInPage() {
+  const clerkConfigured = isClerkConfigured();
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted/30">
       {/* Header */}
@@ -18,23 +25,46 @@ export default function SignInPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center">
-        <SignIn
-          routing="path"
-          path="/sign-in"
-          signUpUrl="/sign-up"
-          afterSignInUrl="/dashboard"
-          appearance={{
-            elements: {
-              rootBox: "mx-auto",
-              card: "shadow-xl border",
-              headerTitle: "text-2xl font-bold",
-              headerSubtitle: "text-muted-foreground",
-              socialButtonsBlockButton: "border",
-              formButtonPrimary: "bg-primary hover:bg-primary/90",
-              footerActionLink: "text-primary hover:text-primary/90",
-            },
-          }}
-        />
+        {clerkConfigured ? (
+          <SignIn
+            routing="path"
+            path="/sign-in"
+            signUpUrl="/sign-up"
+            afterSignInUrl="/dashboard"
+            appearance={{
+              elements: {
+                rootBox: "mx-auto",
+                card: "shadow-xl border",
+                headerTitle: "text-2xl font-bold",
+                headerSubtitle: "text-muted-foreground",
+                socialButtonsBlockButton: "border",
+                formButtonPrimary: "bg-primary hover:bg-primary/90",
+                footerActionLink: "text-primary hover:text-primary/90",
+              },
+            }}
+          />
+        ) : (
+          <div className="max-w-md mx-auto text-center p-8 rounded-xl border bg-background shadow-sm">
+            <h1 className="text-2xl font-bold mb-2">Sign in</h1>
+            <p className="text-muted-foreground mb-6">
+              Authentication isn’t configured for this environment yet.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/sign-up"
+                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
+              >
+                Create an account
+              </Link>
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center rounded-md border px-4 py-2 hover:bg-muted/50"
+              >
+                Back to home
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
