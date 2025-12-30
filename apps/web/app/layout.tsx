@@ -4,6 +4,15 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
+function isClerkConfigured() {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const secretKey = process.env.CLERK_SECRET_KEY;
+  const hasValidPublishable =
+    !!publishableKey && /^pk_(test|live)_[a-zA-Z0-9_-]+$/.test(publishableKey);
+  const hasValidSecret = !!secretKey && /^sk_(test|live)_[a-zA-Z0-9_-]+$/.test(secretKey);
+  return hasValidPublishable && hasValidSecret;
+}
+
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#0D9488" },
@@ -89,8 +98,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const clerkConfigured = isClerkConfigured();
+  const Provider = clerkConfigured ? ClerkProvider : ({ children: c }: { children: React.ReactNode }) => c;
+
   return (
-    <ClerkProvider>
+    <Provider>
       <html lang="en" suppressHydrationWarning>
         <body className="font-sans antialiased">
           <ThemeProvider
@@ -104,6 +116,6 @@ export default function RootLayout({
           </ThemeProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </Provider>
   );
 }

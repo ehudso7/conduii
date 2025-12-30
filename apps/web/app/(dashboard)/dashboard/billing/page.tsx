@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import {
   CreditCard,
@@ -18,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
 import { getPlanLimits } from "@/lib/stripe";
+import { getAuthUser } from "@/lib/auth";
 import {
   UpgradeButton,
   ManageBillingButton,
@@ -54,13 +54,10 @@ async function getBillingData(userId: string) {
 }
 
 export default async function BillingPage() {
-  const { userId } = auth();
+  const authUser = await getAuthUser();
+  if (!authUser) redirect("/sign-in");
 
-  if (!userId) {
-    redirect("/sign-in");
-  }
-
-  const user = await getBillingData(userId);
+  const user = await getBillingData(authUser.clerkId);
 
   if (!user) {
     redirect("/sign-in");

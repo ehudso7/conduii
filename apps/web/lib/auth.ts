@@ -2,6 +2,15 @@ import { auth, currentUser } from "@clerk/nextjs";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
+function isClerkConfigured() {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const secretKey = process.env.CLERK_SECRET_KEY;
+  const hasValidPublishable =
+    !!publishableKey && /^pk_(test|live)_[a-zA-Z0-9_-]+$/.test(publishableKey);
+  const hasValidSecret = !!secretKey && /^sk_(test|live)_[a-zA-Z0-9_-]+$/.test(secretKey);
+  return hasValidPublishable && hasValidSecret;
+}
+
 /**
  * Standard API error with HTTP status + machine code
  */
@@ -32,7 +41,17 @@ function jsonError(status: number, code: string, message: string, details?: unkn
 }
 
 export async function getAuthUser() {
-  const { userId } = auth();
+  // In local/dev environments Clerk is often not configured.
+  // Avoid calling Clerk helpers in that case so routes fail as unauthenticated
+  // instead of throwing and breaking the app.
+  if (!isClerkConfigured()) return null;
+
+  let userId: string | null = null;
+  try {
+    userId = auth().userId ?? null;
+  } catch {
+    return null;
+  }
 
   if (!userId) return null;
 

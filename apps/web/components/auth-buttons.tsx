@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
@@ -10,18 +10,29 @@ import { ArrowRight } from "lucide-react";
 // Valid Clerk keys start with "pk_test_" or "pk_live_" followed by alphanumeric chars
 const isClerkConfigured = !!(
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-  /^pk_(test|live)_[a-zA-Z0-9]+$/.test(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+  // Clerk keys are base64url-ish, typically including '-' and '_'
+  /^pk_(test|live)_[a-zA-Z0-9_-]+$/.test(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 );
 
-// Simple link-based buttons that always work
+function useAuthNav() {
+  const router = useRouter();
+  return {
+    goToSignIn: () => router.push("/sign-in"),
+    goToSignUp: () => router.push("/sign-up"),
+    goToDashboard: () => router.push("/dashboard"),
+  };
+}
+
+// Simple button-based navigation that always works (role=button)
 function SimpleAuthButtons() {
+  const nav = useAuthNav();
   return (
     <div className="flex items-center gap-4">
-      <Button asChild variant="ghost" size="sm">
-        <Link href="/sign-in">Sign In</Link>
+      <Button variant="ghost" size="sm" onClick={nav.goToSignIn}>
+        Sign In
       </Button>
-      <Button asChild size="sm">
-        <Link href="/sign-up">Get Started</Link>
+      <Button size="sm" onClick={nav.goToSignUp}>
+        Get Started
       </Button>
     </div>
   );
@@ -30,6 +41,7 @@ function SimpleAuthButtons() {
 // Inner component that uses auth hooks - only rendered if Clerk is configured
 function NavAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
+  const nav = useAuthNav();
 
   if (!isLoaded) {
     return <SimpleAuthButtons />;
@@ -38,43 +50,19 @@ function NavAuthButtonsInner() {
   if (isSignedIn) {
     return (
       <div className="flex items-center gap-4">
-        <Button asChild size="sm">
-          <Link href="/dashboard">Dashboard</Link>
+        <Button size="sm" onClick={nav.goToDashboard}>
+          Dashboard
         </Button>
         <UserButton afterSignOutUrl="/" />
       </div>
     );
   }
 
-  return (
-    <div className="flex items-center gap-4">
-      <SignInButton mode="modal">
-        <Button variant="ghost" size="sm">
-          Sign In
-        </Button>
-      </SignInButton>
-      <SignUpButton mode="modal">
-        <Button size="sm">
-          Get Started
-        </Button>
-      </SignUpButton>
-    </div>
-  );
+  return <SimpleAuthButtons />;
 }
 
 export function NavAuthButtons() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // SSR: Always show working links
-  if (!mounted) {
-    return <SimpleAuthButtons />;
-  }
-
-  // If Clerk isn't configured, use simple links
+  // If Clerk isn't configured, avoid calling Clerk hooks
   if (!isClerkConfigured) {
     return <SimpleAuthButtons />;
   }
@@ -83,14 +71,18 @@ export function NavAuthButtons() {
   return <NavAuthButtonsInner />;
 }
 
-// Simple hero button that always works
+// Simple hero button that always works (role=button)
 function SimpleHeroButton() {
+  const router = useRouter();
   return (
-    <Button asChild size="xl" variant="gradient" className="group">
-      <Link href="/sign-up">
-        Start Testing Free
-        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-      </Link>
+    <Button
+      size="xl"
+      variant="gradient"
+      className="group"
+      onClick={() => router.push("/sign-up")}
+    >
+      Start Testing Free
+      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
     </Button>
   );
 }
@@ -98,6 +90,7 @@ function SimpleHeroButton() {
 // Inner component for hero auth buttons
 function HeroAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
+  const nav = useAuthNav();
 
   if (!isLoaded) {
     return <SimpleHeroButton />;
@@ -105,39 +98,20 @@ function HeroAuthButtonsInner() {
 
   if (isSignedIn) {
     return (
-      <Button asChild size="xl" variant="gradient" className="group">
-        <Link href="/dashboard">
-          Go to Dashboard
-          <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-        </Link>
+      <Button size="xl" variant="gradient" className="group" onClick={nav.goToDashboard}>
+        Go to Dashboard
+        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
       </Button>
     );
   }
 
-  return (
-    <SignUpButton mode="modal">
-      <Button size="xl" variant="gradient" className="group">
-        Start Testing Free
-        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-      </Button>
-    </SignUpButton>
-  );
+  return <SimpleHeroButton />;
 }
 
 export function HeroAuthButtons() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   return (
     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-      {!mounted || !isClerkConfigured ? (
-        <SimpleHeroButton />
-      ) : (
-        <HeroAuthButtonsInner />
-      )}
+      {!isClerkConfigured ? <SimpleHeroButton /> : <HeroAuthButtonsInner />}
       <Button size="xl" variant="outline" asChild>
         <Link href="/docs">
           View Documentation
@@ -147,14 +121,18 @@ export function HeroAuthButtons() {
   );
 }
 
-// Simple CTA button that always works
+// Simple CTA button that always works (role=button)
 function SimpleCTAButton() {
+  const router = useRouter();
   return (
-    <Button asChild size="xl" variant="gradient" className="group">
-      <Link href="/sign-up">
-        Get Started for Free
-        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-      </Link>
+    <Button
+      size="xl"
+      variant="gradient"
+      className="group"
+      onClick={() => router.push("/sign-up")}
+    >
+      Get Started for Free
+      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
     </Button>
   );
 }
@@ -162,6 +140,7 @@ function SimpleCTAButton() {
 // Inner component for CTA auth buttons
 function CTAAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
+  const nav = useAuthNav();
 
   if (!isLoaded) {
     return <SimpleCTAButton />;
@@ -169,34 +148,19 @@ function CTAAuthButtonsInner() {
 
   if (isSignedIn) {
     return (
-      <Button asChild size="xl" variant="gradient" className="group">
-        <Link href="/dashboard">
-          Go to Dashboard
-          <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-        </Link>
+      <Button size="xl" variant="gradient" className="group" onClick={nav.goToDashboard}>
+        Go to Dashboard
+        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
       </Button>
     );
   }
 
-  return (
-    <SignUpButton mode="modal">
-      <Button size="xl" variant="gradient" className="group">
-        Get Started for Free
-        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-      </Button>
-    </SignUpButton>
-  );
+  return <SimpleCTAButton />;
 }
 
 export function CTAAuthButtons() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // SSR: Always show a working link
-  if (!mounted || !isClerkConfigured) {
+  // If Clerk isn't configured, avoid calling Clerk hooks
+  if (!isClerkConfigured) {
     return <SimpleCTAButton />;
   }
 

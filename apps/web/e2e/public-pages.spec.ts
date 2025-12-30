@@ -62,17 +62,17 @@ test.describe("Documentation Page", () => {
     await page.goto("/docs");
 
     // Check main section cards
-    await expect(page.getByText("Getting Started")).toBeVisible();
-    await expect(page.getByText("CLI Reference")).toBeVisible();
-    await expect(page.getByText("API Reference")).toBeVisible();
-    await expect(page.getByText("Integrations")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Getting Started", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "CLI Reference", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "API Reference", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Integrations", exact: true })).toBeVisible();
   });
 
   test("should display installation section", async ({ page }) => {
     await page.goto("/docs");
 
     // Check installation content
-    await expect(page.getByRole("heading", { name: "Installation" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Installation", exact: true })).toBeVisible();
     await expect(page.getByText("npm install -g @conduii/cli")).toBeVisible();
   });
 
@@ -80,7 +80,7 @@ test.describe("Documentation Page", () => {
     await page.goto("/docs");
 
     await expect(page.getByRole("heading", { name: "Configuration" })).toBeVisible();
-    await expect(page.getByText("conduii.config.js")).toBeVisible();
+    await expect(page.getByText("conduii.config.js", { exact: true })).toBeVisible();
   });
 
   test("should display CLI commands", async ({ page }) => {
@@ -151,10 +151,10 @@ test.describe("Blog Page", () => {
     await page.goto("/blog");
 
     // Check categories
-    await expect(page.getByText("Announcement")).toBeVisible();
-    await expect(page.getByText("Engineering")).toBeVisible();
-    await expect(page.getByText("Tutorial")).toBeVisible();
-    await expect(page.getByText("Best Practices")).toBeVisible();
+    await expect(page.getByText("Announcement", { exact: true })).toBeVisible();
+    await expect(page.getByText("Engineering", { exact: true })).toBeVisible();
+    await expect(page.getByText("Tutorial", { exact: true })).toBeVisible();
+    await expect(page.getByText("Best Practices", { exact: true })).toBeVisible();
 
     // Check read times
     await expect(page.getByText("5 min read")).toBeVisible();
