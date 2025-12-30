@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 // Check if Clerk is configured via environment variable
 // Valid Clerk keys start with "pk_test_" or "pk_live_" followed by alphanumeric chars
@@ -30,9 +30,30 @@ function SimpleAuthButtons() {
 // Inner component that uses auth hooks - only rendered if Clerk is configured
 function NavAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
+  const [showLoadingState, setShowLoadingState] = useState(false);
+
+  // Timeout for loading state - if Clerk doesn't load in 3 seconds, show simple buttons
+  useEffect(() => {
+    if (!isLoaded) {
+      const timeout = setTimeout(() => {
+        setShowLoadingState(true);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoaded]);
 
   if (!isLoaded) {
-    return <SimpleAuthButtons />;
+    if (showLoadingState) {
+      // Fallback to simple buttons if loading takes too long
+      return <SimpleAuthButtons />;
+    }
+    return (
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" disabled>
+          <Loader2 className="w-4 h-4 animate-spin" />
+        </Button>
+      </div>
+    );
   }
 
   if (isSignedIn) {
@@ -46,8 +67,15 @@ function NavAuthButtonsInner() {
     );
   }
 
+  // Use redirect mode instead of modal to avoid stuck loading states
   return (
     <div className="flex items-center gap-4">
+      <Button asChild variant="ghost" size="sm">
+        <Link href="/sign-in">Sign In</Link>
+      </Button>
+      <Button asChild size="sm">
+        <Link href="/sign-up">Get Started</Link>
+      </Button>
       <SignInButton mode="redirect" redirectUrl="/dashboard">
         <Button variant="ghost" size="sm">
           Sign In
@@ -98,9 +126,26 @@ function SimpleHeroButton() {
 // Inner component for hero auth buttons
 function HeroAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
+  const [showLoadingState, setShowLoadingState] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      const timeout = setTimeout(() => {
+        setShowLoadingState(true);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoaded]);
 
   if (!isLoaded) {
-    return <SimpleHeroButton />;
+    if (showLoadingState) {
+      return <SimpleHeroButton />;
+    }
+    return (
+      <Button size="xl" variant="gradient" disabled>
+        <Loader2 className="w-5 h-5 animate-spin" />
+      </Button>
+    );
   }
 
   if (isSignedIn) {
@@ -114,6 +159,8 @@ function HeroAuthButtonsInner() {
     );
   }
 
+  // Use link instead of modal to avoid stuck states
+  return <SimpleHeroButton />;
   return (
     <SignUpButton mode="redirect" redirectUrl="/dashboard">
       <Button size="xl" variant="gradient" className="group">
@@ -162,9 +209,26 @@ function SimpleCTAButton() {
 // Inner component for CTA auth buttons
 function CTAAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
+  const [showLoadingState, setShowLoadingState] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      const timeout = setTimeout(() => {
+        setShowLoadingState(true);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoaded]);
 
   if (!isLoaded) {
-    return <SimpleCTAButton />;
+    if (showLoadingState) {
+      return <SimpleCTAButton />;
+    }
+    return (
+      <Button size="xl" variant="gradient" disabled>
+        <Loader2 className="w-5 h-5 animate-spin" />
+      </Button>
+    );
   }
 
   if (isSignedIn) {
@@ -178,6 +242,8 @@ function CTAAuthButtonsInner() {
     );
   }
 
+  // Use link instead of modal to avoid stuck states
+  return <SimpleCTAButton />;
   return (
     <SignUpButton mode="redirect" redirectUrl="/dashboard">
       <Button size="xl" variant="gradient" className="group">

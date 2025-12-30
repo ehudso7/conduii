@@ -62,35 +62,55 @@ export function DashboardNav({
 
       {/* Organization Switcher */}
       <div className="p-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full justify-between"
-              role="combobox"
-            >
-              <span className="truncate">{currentOrg?.name}</span>
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="start">
-            <DropdownMenuLabel>Organizations</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {organizations.map((org) => (
-              <DropdownMenuItem key={org.id}>
-                <span className="truncate">{org.name}</span>
-                {org.plan !== "FREE" && (
-                  <span className="ml-auto text-xs text-primary">PRO</span>
-                )}
+        {organizations.length > 1 ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+                role="combobox"
+                aria-label="Switch organization"
+              >
+                <span className="truncate">{currentOrg?.name || "Select organization"}</span>
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {organizations.map((org) => (
+                <DropdownMenuItem 
+                  key={org.id}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    // Org switching logic would go here
+                    // TODO: Implement organization switching
+                  }}
+                >
+                  <span className="truncate">{org.name}</span>
+                  {org.plan !== "FREE" && (
+                    <span className="ml-auto text-xs text-primary">PRO</span>
+                  )}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => {
+                  // Navigate to create org page
+                  window.location.href = "/dashboard/organizations/new";
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Create Organization
               </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Organization
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="px-3 py-2 rounded-lg border bg-muted/50">
+            <span className="text-sm font-medium truncate">{currentOrg?.name || "Default Organization"}</span>
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
