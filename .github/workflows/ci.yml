@@ -148,6 +148,20 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     needs: [build]
+    # Run on all PRs and pushes (not just manual dispatch)
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+    
+    env:
+      NODE_ENV: test
+      
+      # Prisma dummy envs (required for Next.js to boot)
+      POSTGRES_PRISMA_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      DIRECT_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      
+      # Clerk (REAL keys from GitHub Secrets for E2E testing)
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+    
     # IMPORTANT: don't gate on missing secrets unless you want it skipped
     if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
     env:
@@ -172,13 +186,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        run: yarn db:generate
+
       - name: Install Playwright
         run: cd apps/web && npx playwright install --with-deps chromium
 
       - name: Run E2E tests
         run: cd apps/web && yarn test:e2e
-        env:
-          PLAYWRIGHT_TEST_BASE_URL: ${{ secrets.PRODUCTION_URL || 'https://www.conduii.com' }}
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
