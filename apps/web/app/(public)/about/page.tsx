@@ -17,11 +17,11 @@ export default function AboutPage() {
             Conduii
           </Link>
           <nav className="hidden md:flex items-center gap-6">
+            <Link href="/" className="text-muted-foreground hover:text-foreground">
+              Back to Home
+            </Link>
             <Link href="/docs" className="text-muted-foreground hover:text-foreground">
               Docs
-            </Link>
-            <Link href="/about" className="text-muted-foreground hover:text-foreground">
-              About
             </Link>
             <Link href="/sign-in">
               <Button variant="ghost">Sign In</Button>
@@ -39,7 +39,7 @@ export default function AboutPage() {
           About Conduii
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          We're building the future of deployment testing. Our AI-powered platform
+          We're building the future of deployment testing. Our AI-Powered Testing platform
           helps developers ensure their applications work perfectly, every time.
         </p>
       </section>
