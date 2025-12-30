@@ -35,21 +35,22 @@ export function UpgradeButton({
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create checkout session");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+      if (!data.url) {
+        throw new Error("Invalid response from server");
       }
+      window.location.href = data.url;
     } catch (error) {
+      console.error("Checkout error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to start checkout",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -80,21 +81,22 @@ export function ManageBillingButton({ organizationId }: { organizationId: string
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to open billing portal");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+      if (!data.url) {
+        throw new Error("Invalid response from server");
       }
+      window.location.href = data.url;
     } catch (error) {
+      console.error("Billing portal error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to open billing portal",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };

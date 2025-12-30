@@ -88,6 +88,11 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
   html {
     scroll-behavior: smooth;
   }

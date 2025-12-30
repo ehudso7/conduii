@@ -50,8 +50,8 @@ export function ProjectActionsDropdown({ projectId, projectName }: ProjectAction
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to discover services");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       toast({
@@ -60,6 +60,7 @@ export function ProjectActionsDropdown({ projectId, projectName }: ProjectAction
       });
       router.refresh();
     } catch (error) {
+      console.error("Discovery error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to discover services",
@@ -87,22 +88,26 @@ export function ProjectActionsDropdown({ projectId, projectName }: ProjectAction
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to delete project");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       toast({
         title: "Project Deleted",
         description: "The project has been permanently deleted.",
       });
-      router.push("/dashboard/projects");
+      
+      // Give toast time to show, then navigate
+      setTimeout(() => {
+        router.push("/dashboard/projects");
+      }, 500);
     } catch (error) {
+      console.error("Delete project error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to delete project",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -185,8 +190,8 @@ export function CheckHealthButton({ projectId }: { projectId: string }) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to check health");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       toast({
@@ -195,6 +200,7 @@ export function CheckHealthButton({ projectId }: { projectId: string }) {
       });
       router.refresh();
     } catch (error) {
+      console.error("Health check error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to check health",
@@ -233,7 +239,7 @@ export function CreateTestSuiteButton({ projectId }: CreateTestSuiteButtonProps)
   const handleCreate = async () => {
     if (!name.trim()) {
       toast({
-        title: "Error",
+        title: "Validation Error",
         description: "Please enter a test suite name",
         variant: "destructive",
       });
@@ -245,12 +251,12 @@ export function CreateTestSuiteButton({ projectId }: CreateTestSuiteButtonProps)
       const res = await fetch(`/api/projects/${projectId}/test-suites`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description }),
+        body: JSON.stringify({ name: name.trim(), description: description.trim() }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create test suite");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       toast({
@@ -262,6 +268,7 @@ export function CreateTestSuiteButton({ projectId }: CreateTestSuiteButtonProps)
       setDescription("");
       router.refresh();
     } catch (error) {
+      console.error("Create test suite error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create test suite",
@@ -338,23 +345,27 @@ export function RunTestSuiteButton({ projectId, suiteId }: { projectId: string; 
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to start test run");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       const data = await res.json();
+      if (!data.testRun || !data.testRun.id) {
+        throw new Error("Invalid response from server");
+      }
+
       toast({
         title: "Test Run Started",
         description: "The test suite is now running.",
       });
       router.push(`/dashboard/projects/${projectId}/runs/${data.testRun.id}`);
     } catch (error) {
+      console.error("Run test suite error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to start test run",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
