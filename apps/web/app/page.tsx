@@ -201,10 +201,16 @@ export default function HomePage() {
                   </div>
                   <div className="code-block-content">
                     <p className="text-slate-500"># Install Conduii CLI</p>
-                    <p className="text-teal-400">$ npm install -g @conduii/cli</p>
+                    <p className="text-teal-400">
+                      <span className="select-none mr-2">$</span>
+                      <span>npm install -g @conduii/cli</span>
+                    </p>
                     <br />
                     <p className="text-slate-500"># Discover your project</p>
-                    <p className="text-teal-400">$ conduii discover</p>
+                    <p className="text-teal-400">
+                      <span className="select-none mr-2">$</span>
+                      <span>conduii discover</span>
+                    </p>
                     <p className="text-slate-300">
                       <span className="text-green-400">&#10003;</span> Found Next.js project<br />
                       <span className="text-green-400">&#10003;</span> Detected: Vercel, Supabase, Stripe, Clerk<br />
@@ -212,7 +218,10 @@ export default function HomePage() {
                     </p>
                     <br />
                     <p className="text-slate-500"># Run tests</p>
-                    <p className="text-teal-400">$ conduii run</p>
+                    <p className="text-teal-400">
+                      <span className="select-none mr-2">$</span>
+                      <span>conduii run</span>
+                    </p>
                     <p className="text-green-400">
                       &#10003; All 24 tests passed in 12.4s
                     </p>
