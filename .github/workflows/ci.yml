@@ -42,6 +42,12 @@ jobs:
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
+    env:
+      # Dummy values ONLY to satisfy Prisma schema validation during generate/typecheck in CI.
+      # Prisma will NOT connect to the DB for generate.
+      POSTGRES_PRISMA_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      DIRECT_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      NODE_ENV: "test"
     steps:
       - uses: actions/checkout@v4
 
@@ -51,14 +57,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: Install dependencies
+      - name: Install
         run: yarn install --frozen-lockfile
 
-      - name: Generate Prisma Client
-        run: yarn db:generate
+      - name: Prisma generate (web)
+        run: yarn turbo db:generate --filter=web --no-daemon
 
-      - name: Type check
-        run: yarn typecheck
+      - name: Type check (web)
+        run: yarn turbo typecheck --filter=web --no-daemon
 
   test:
     name: Unit Tests
