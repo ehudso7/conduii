@@ -322,66 +322,56 @@ model UsageRecord {
   @@index([period])
 }
 
+// ============================================================================
+// WEBHOOKS & NOTIFICATIONS
+// ============================================================================
+
 model Webhook {
   id             String          @id @default(cuid())
   name           String
   url            String
   provider       WebhookProvider @default(CUSTOM)
   secret         String?
-  events         String[]
   enabled        Boolean         @default(true)
+  events         String[]        // Array of event types to listen for
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
-  organizationId String
+
   organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  deliveries     WebhookDelivery[]
-
-  @@index([organizationId])
-}
-
-model WebhookDelivery {
-  id           String                @id @default(cuid())
-  eventType     String
-  status        WebhookDeliveryStatus
-  payload       String
-  responseCode  Int
-  error         String?
-  createdAt     DateTime              @default(now())
-  webhookId     String
-  webhook       Webhook               @relation(fields: [webhookId], references: [id], onDelete: Cascade)
-
-  @@index([webhookId])
-  @@index([createdAt])
-  @@index([status])
-  id             String            @id @default(cuid())
-  name           String
-  url            String
-  provider       WebhookProvider   @default(CUSTOM)
-  secret         String?
-  events         String[]
-  enabled        Boolean           @default(true)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
   organizationId String
-  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   deliveries     WebhookDelivery[]
 
   @@index([organizationId])
   @@index([enabled])
 }
 
+enum WebhookProvider {
+  SLACK
+  DISCORD
+  CUSTOM
+}
+
 model WebhookDelivery {
-  id           String   @id @default(cuid())
+  id           String                @id @default(cuid())
   eventType    String
-  status       String
-  payload      String
-  responseCode Int
-  createdAt    DateTime @default(now())
+  status       WebhookDeliveryStatus
+  payload      String                @db.Text
+  responseCode Int?
+  error        String?
+  createdAt    DateTime              @default(now())
+
+  webhook      Webhook               @relation(fields: [webhookId], references: [id], onDelete: Cascade)
   webhookId    String
-  webhook      Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
 
   @@index([webhookId])
+  @@index([status])
   @@index([createdAt])
+}
+
+enum WebhookDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
 }
 
 enum NotificationType {
@@ -486,15 +476,4 @@ enum DiagnosticSeverity {
   WARNING
   ERROR
   CRITICAL
-}
-
-enum WebhookProvider {
-  SLACK
-  DISCORD
-  CUSTOM
-}
-
-enum WebhookDeliveryStatus {
-  DELIVERED
-  FAILED
 }
