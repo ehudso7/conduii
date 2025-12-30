@@ -35,7 +35,7 @@ const features = [
   },
   {
     icon: Bot,
-    title: "Smart Diagnostics",
+    title: "AI-Powered Diagnostics",
     description:
       "Get intelligent root cause analysis and fix suggestions when tests fail.",
   },
@@ -132,6 +132,13 @@ export default function HomePage() {
             <Logo size="md" />
 
             <div className="hidden md:flex items-center gap-8">
+              <Link href="/#features" className="nav-link">
+                Features
+              </Link>
+              <Link href="/#integrations" className="nav-link">
+                Integrations
+              </Link>
+              <Link href="/#pricing" className="nav-link">
               <SmoothScrollLink href="#features" className="nav-link">
                 Features
               </SmoothScrollLink>
@@ -161,7 +168,7 @@ export default function HomePage() {
             <div className="text-center max-w-4xl mx-auto">
               <Badge variant="secondary" className="mb-6 badge-brand">
                 <Zap className="w-3 h-3 mr-1" />
-                Deployment Testing Platform
+                AI-Powered Testing Platform
               </Badge>
 
               <h1 className="hero-title mb-6">
