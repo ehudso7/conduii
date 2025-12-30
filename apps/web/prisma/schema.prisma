@@ -323,6 +323,36 @@ model UsageRecord {
 }
 
 model Webhook {
+  id             String          @id @default(cuid())
+  name           String
+  url            String
+  provider       WebhookProvider @default(CUSTOM)
+  secret         String?
+  events         String[]
+  enabled        Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  deliveries     WebhookDelivery[]
+
+  @@index([organizationId])
+}
+
+model WebhookDelivery {
+  id           String                @id @default(cuid())
+  eventType     String
+  status        WebhookDeliveryStatus
+  payload       String
+  responseCode  Int
+  error         String?
+  createdAt     DateTime              @default(now())
+  webhookId     String
+  webhook       Webhook               @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+  @@index([createdAt])
+  @@index([status])
   id             String            @id @default(cuid())
   name           String
   url            String
@@ -462,4 +492,9 @@ enum WebhookProvider {
   SLACK
   DISCORD
   CUSTOM
+}
+
+enum WebhookDeliveryStatus {
+  DELIVERED
+  FAILED
 }
