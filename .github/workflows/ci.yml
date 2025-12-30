@@ -69,6 +69,13 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    env:
+      # Dummy values ONLY to satisfy Prisma schema validation during generate in CI.
+      # Dummy values ONLY to satisfy Prisma schema validation during generate/typecheck in CI.
+      # Prisma will NOT connect to the DB for generate.
+      POSTGRES_PRISMA_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      DIRECT_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      NODE_ENV: "test"
     steps:
       - uses: actions/checkout@v4
 
@@ -98,6 +105,12 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: [lint, typecheck, test]
+    env:
+      # Dummy values ONLY to satisfy Prisma schema validation during generate in CI.
+      # Prisma will NOT connect to the DB for generate.
+      POSTGRES_PRISMA_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      DIRECT_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      NODE_ENV: "test"
     steps:
       - uses: actions/checkout@v4
 
