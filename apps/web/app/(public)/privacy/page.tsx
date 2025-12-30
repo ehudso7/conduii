@@ -16,11 +16,11 @@ export default function PrivacyPage() {
             Conduii
           </Link>
           <nav className="hidden md:flex items-center gap-6">
+            <Link href="/" className="text-muted-foreground hover:text-foreground">
+              Back to Home
+            </Link>
             <Link href="/docs" className="text-muted-foreground hover:text-foreground">
               Docs
-            </Link>
-            <Link href="/about" className="text-muted-foreground hover:text-foreground">
-              About
             </Link>
             <Link href="/sign-in">
               <Button variant="ghost">Sign In</Button>
