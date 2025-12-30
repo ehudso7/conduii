@@ -129,7 +129,19 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     needs: [build]
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_e2e == 'true'
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+
+    env:
+      NODE_ENV: test
+
+      # Prisma dummy envs (you already did this pattern elsewhere)
+      POSTGRES_PRISMA_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+      DIRECT_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
+
+      # Clerk (REAL keys from GitHub Secrets)
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
     steps:
       - uses: actions/checkout@v4
 
