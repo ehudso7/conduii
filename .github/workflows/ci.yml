@@ -70,6 +70,7 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     env:
+      # Dummy values ONLY to satisfy Prisma schema validation during generate in CI.
       # Dummy values ONLY to satisfy Prisma schema validation during generate/typecheck in CI.
       # Prisma will NOT connect to the DB for generate.
       POSTGRES_PRISMA_URL: "postgresql://user:pass@localhost:5432/db?schema=public"
