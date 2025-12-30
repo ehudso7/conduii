@@ -38,22 +38,33 @@ export function ApiKeyManagement({ apiKeys: initialKeys, organizationId: _organi
   const { toast } = useToast();
 
   const handleCreate = async () => {
-    if (!keyName) return;
+    if (!keyName.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "API key name cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setCreating(true);
     try {
       const res = await fetch("/api/api-keys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: keyName, expiresIn }),
+        body: JSON.stringify({ name: keyName.trim(), expiresIn }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create API key");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       const data = await res.json();
+      if (!data.apiKey || !data.apiKey.key) {
+        throw new Error("Invalid response from server");
+      }
+
       setNewKeyValue(data.apiKey.key);
       setApiKeys([data.apiKey, ...apiKeys]);
       setKeyName("");
@@ -63,6 +74,7 @@ export function ApiKeyManagement({ apiKeys: initialKeys, organizationId: _organi
         description: "Make sure to copy your key - it won't be shown again!",
       });
     } catch (error) {
+      console.error("API key creation error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create API key",
@@ -84,8 +96,8 @@ export function ApiKeyManagement({ apiKeys: initialKeys, organizationId: _organi
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to revoke API key");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       setApiKeys(apiKeys.filter(k => k.id !== keyId));
@@ -94,6 +106,7 @@ export function ApiKeyManagement({ apiKeys: initialKeys, organizationId: _organi
         description: "The API key has been revoked successfully.",
       });
     } catch (error) {
+      console.error("API key deletion error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to revoke API key",
