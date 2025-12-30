@@ -68,6 +68,7 @@ export const metadata: Metadata = {
     ],
     locale: "en_US",
     type: "website",
+    
   },
   twitter: {
     card: "summary_large_image",
@@ -117,5 +118,42 @@ export default function RootLayout({
         </body>
       </html>
     </Provider>
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const isClerkValid = clerkKey && /^pk_(test|live)_[a-zA-Z0-9]+$/.test(clerkKey);
+
+  if (isClerkValid) {
+    return (
+      <ClerkProvider>
+        <html lang="en" suppressHydrationWarning>
+          <body className="font-sans antialiased">
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </body>
+        </html>
+      </ClerkProvider>
+    );
+  }
+
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className="font-sans antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

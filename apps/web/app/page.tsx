@@ -6,6 +6,7 @@ import { NavAuthButtons, HeroAuthButtons, CTAAuthButtons } from "@/components/au
 import { PricingButton } from "@/components/pricing-buttons";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Logo } from "@/components/brand/logo";
+import { SmoothScrollLink } from "@/components/smooth-scroll-link";
 import {
   Globe,
   Check,
@@ -139,7 +140,29 @@ export default function HomePage() {
               </Link>
               <Link href="/#pricing" className="nav-link">
                 Pricing
+              <Link href="/#features" className="nav-link" scroll={true}>
+                Features
               </Link>
+              <Link href="/#integrations" className="nav-link" scroll={true}>
+                Integrations
+              </Link>
+              <Link href="/#pricing" className="nav-link" scroll={true}>
+              <Link href="/#features" className="nav-link">
+                Features
+              </Link>
+              <Link href="/#integrations" className="nav-link">
+                Integrations
+              </Link>
+              <Link href="/#pricing" className="nav-link">
+              <SmoothScrollLink href="#features" className="nav-link">
+                Features
+              </SmoothScrollLink>
+              <SmoothScrollLink href="#integrations" className="nav-link">
+                Integrations
+              </SmoothScrollLink>
+              <SmoothScrollLink href="#pricing" className="nav-link">
+                Pricing
+              </SmoothScrollLink>
               <Link href="/docs" className="nav-link">
                 Docs
               </Link>
@@ -186,10 +209,16 @@ export default function HomePage() {
                   </div>
                   <div className="code-block-content">
                     <p className="text-slate-500"># Install Conduii CLI</p>
-                    <p className="text-teal-400">$ npm install -g @conduii/cli</p>
+                    <p className="text-teal-400">
+                      <span className="select-none mr-2">$</span>
+                      <span>npm install -g @conduii/cli</span>
+                    </p>
                     <br />
                     <p className="text-slate-500"># Discover your project</p>
-                    <p className="text-teal-400">$ conduii discover</p>
+                    <p className="text-teal-400">
+                      <span className="select-none mr-2">$</span>
+                      <span>conduii discover</span>
+                    </p>
                     <p className="text-slate-300">
                       <span className="text-green-400">&#10003;</span> Found Next.js project<br />
                       <span className="text-green-400">&#10003;</span> Detected: Vercel, Supabase, Stripe, Clerk<br />
@@ -197,7 +226,10 @@ export default function HomePage() {
                     </p>
                     <br />
                     <p className="text-slate-500"># Run tests</p>
-                    <p className="text-teal-400">$ conduii run</p>
+                    <p className="text-teal-400">
+                      <span className="select-none mr-2">$</span>
+                      <span>conduii run</span>
+                    </p>
                     <p className="text-green-400">
                       &#10003; All 24 tests passed in 12.4s
                     </p>
@@ -379,7 +411,7 @@ export default function HomePage() {
             <div>
               <Logo size="md" linkToHome={false} className="mb-4" />
               <p className="text-sm text-muted-foreground">
-                Deployment testing platform for modern applications.
+                AI-powered testing platform for modern applications.
               </p>
             </div>
 

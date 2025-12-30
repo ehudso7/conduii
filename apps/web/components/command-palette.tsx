@@ -128,7 +128,16 @@ export function CommandPalette({ projects = [] }: CommandPaletteProps) {
       icon: <LogOut className="w-4 h-4" />,
       label: "Sign Out",
       description: "Sign out of your account",
-      action: () => signOut().then(() => router.push("/")),
+      action: async () => {
+        try {
+          await signOut();
+          router.push("/");
+        } catch (error) {
+          console.error("Sign out error:", error);
+          // Fallback to hard navigation
+          window.location.href = "/";
+        }
+      },
       category: "Account",
     },
   ];
@@ -171,17 +180,28 @@ export function CommandPalette({ projects = [] }: CommandPaletteProps) {
       // Open command palette with Cmd+K or Ctrl+K
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
+        e.stopPropagation();
         toggle();
+        return;
+      }
+
+      // Only handle additional shortcuts when palette is open
+      if (!isOpen) return;
+
+      // Close with Escape (backup in case dialog doesn't handle it)
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [toggle]);
+    document.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () => document.removeEventListener("keydown", handleKeyDown, { capture: true });
+  }, [toggle, close, isOpen]);
 
   // Handle navigation within palette
   const handleKeyNavigation = useCallback(
-    (e: React.KeyboardEvent) => {
+    async (e: React.KeyboardEvent) => {
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIndex((prev) =>
@@ -194,10 +214,15 @@ export function CommandPalette({ projects = [] }: CommandPaletteProps) {
         );
       } else if (e.key === "Enter" && flatCommands[selectedIndex]) {
         e.preventDefault();
-        flatCommands[selectedIndex].action();
-        close();
-        setSearch("");
-        setSelectedIndex(0);
+        try {
+          await flatCommands[selectedIndex].action();
+        } catch (error) {
+          console.error("Command execution error:", error);
+        } finally {
+          close();
+          setSearch("");
+          setSelectedIndex(0);
+        }
       } else if (e.key === "Escape") {
         close();
         setSearch("");
@@ -212,11 +237,19 @@ export function CommandPalette({ projects = [] }: CommandPaletteProps) {
     setSelectedIndex(0);
   }, [search]);
 
-  const handleSelect = (command: CommandItem) => {
-    command.action();
-    close();
-    setSearch("");
-    setSelectedIndex(0);
+  const handleSelect = async (command: CommandItem) => {
+    try {
+      await command.action();
+      close();
+      setSearch("");
+      setSelectedIndex(0);
+    } catch (error) {
+      console.error("Command execution error:", error);
+      // Still close the palette even if action fails
+      close();
+      setSearch("");
+      setSelectedIndex(0);
+    }
   };
 
   const handleOpenChange = (open: boolean) => {

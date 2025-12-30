@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 // Check if Clerk is configured via environment variable
 // Valid Clerk keys start with "pk_test_" or "pk_live_" followed by alphanumeric chars
@@ -42,9 +42,30 @@ function SimpleAuthButtons() {
 function NavAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
   const nav = useAuthNav();
+  const [showLoadingState, setShowLoadingState] = useState(false);
+
+  // Timeout for loading state - if Clerk doesn't load in 3 seconds, show simple buttons
+  useEffect(() => {
+    if (!isLoaded) {
+      const timeout = setTimeout(() => {
+        setShowLoadingState(true);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoaded]);
 
   if (!isLoaded) {
-    return <SimpleAuthButtons />;
+    if (showLoadingState) {
+      // Fallback to simple buttons if loading takes too long
+      return <SimpleAuthButtons />;
+    }
+    return (
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" disabled>
+          <Loader2 className="w-4 h-4 animate-spin" />
+        </Button>
+      </div>
+    );
   }
 
   if (isSignedIn) {
@@ -59,6 +80,27 @@ function NavAuthButtonsInner() {
   }
 
   return <SimpleAuthButtons />;
+  // Use redirect mode instead of modal to avoid stuck loading states
+  return (
+    <div className="flex items-center gap-4">
+      <Button asChild variant="ghost" size="sm">
+        <Link href="/sign-in">Sign In</Link>
+      </Button>
+      <Button asChild size="sm">
+        <Link href="/sign-up">Get Started</Link>
+      </Button>
+      <SignInButton mode="redirect" redirectUrl="/dashboard">
+        <Button variant="ghost" size="sm">
+          Sign In
+        </Button>
+      </SignInButton>
+      <SignUpButton mode="redirect" redirectUrl="/dashboard">
+        <Button size="sm">
+          Get Started
+        </Button>
+      </SignUpButton>
+    </div>
+  );
 }
 
 export function NavAuthButtons() {
@@ -91,9 +133,26 @@ function SimpleHeroButton() {
 function HeroAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
   const nav = useAuthNav();
+  const [showLoadingState, setShowLoadingState] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      const timeout = setTimeout(() => {
+        setShowLoadingState(true);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoaded]);
 
   if (!isLoaded) {
-    return <SimpleHeroButton />;
+    if (showLoadingState) {
+      return <SimpleHeroButton />;
+    }
+    return (
+      <Button size="xl" variant="gradient" disabled>
+        <Loader2 className="w-5 h-5 animate-spin" />
+      </Button>
+    );
   }
 
   if (isSignedIn) {
@@ -106,6 +165,16 @@ function HeroAuthButtonsInner() {
   }
 
   return <SimpleHeroButton />;
+  // Use link instead of modal to avoid stuck states
+  return <SimpleHeroButton />;
+  return (
+    <SignUpButton mode="redirect" redirectUrl="/dashboard">
+      <Button size="xl" variant="gradient" className="group">
+        Start Testing Free
+        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+      </Button>
+    </SignUpButton>
+  );
 }
 
 export function HeroAuthButtons() {
@@ -141,9 +210,26 @@ function SimpleCTAButton() {
 function CTAAuthButtonsInner() {
   const { isLoaded, isSignedIn } = useAuth();
   const nav = useAuthNav();
+  const [showLoadingState, setShowLoadingState] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      const timeout = setTimeout(() => {
+        setShowLoadingState(true);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoaded]);
 
   if (!isLoaded) {
-    return <SimpleCTAButton />;
+    if (showLoadingState) {
+      return <SimpleCTAButton />;
+    }
+    return (
+      <Button size="xl" variant="gradient" disabled>
+        <Loader2 className="w-5 h-5 animate-spin" />
+      </Button>
+    );
   }
 
   if (isSignedIn) {
@@ -156,6 +242,16 @@ function CTAAuthButtonsInner() {
   }
 
   return <SimpleCTAButton />;
+  // Use link instead of modal to avoid stuck states
+  return <SimpleCTAButton />;
+  return (
+    <SignUpButton mode="redirect" redirectUrl="/dashboard">
+      <Button size="xl" variant="gradient" className="group">
+        Get Started for Free
+        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
+      </Button>
+    </SignUpButton>
+  );
 }
 
 export function CTAAuthButtons() {

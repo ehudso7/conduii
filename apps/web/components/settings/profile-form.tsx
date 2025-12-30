@@ -21,24 +21,39 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const { toast } = useToast();
 
   const handleSave = async () => {
+    if (!name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Name cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: name.trim() }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to update profile");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
       toast({
         title: "Profile Updated",
         description: "Your profile has been updated successfully.",
       });
+
+      // Refresh the page after a short delay to show updated data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
+      console.error("Profile update error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update profile",
