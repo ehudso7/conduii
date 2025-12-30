@@ -6,6 +6,7 @@ import { NavAuthButtons, HeroAuthButtons, CTAAuthButtons } from "@/components/au
 import { PricingButton } from "@/components/pricing-buttons";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Logo } from "@/components/brand/logo";
+import { SmoothScrollLink } from "@/components/smooth-scroll-link";
 import {
   Globe,
   Check,
@@ -138,8 +139,15 @@ export default function HomePage() {
                 Integrations
               </Link>
               <Link href="/#pricing" className="nav-link">
+              <SmoothScrollLink href="#features" className="nav-link">
+                Features
+              </SmoothScrollLink>
+              <SmoothScrollLink href="#integrations" className="nav-link">
+                Integrations
+              </SmoothScrollLink>
+              <SmoothScrollLink href="#pricing" className="nav-link">
                 Pricing
-              </Link>
+              </SmoothScrollLink>
               <Link href="/docs" className="nav-link">
                 Docs
               </Link>
@@ -379,7 +387,7 @@ export default function HomePage() {
             <div>
               <Logo size="md" linkToHome={false} className="mb-4" />
               <p className="text-sm text-muted-foreground">
-                Deployment testing platform for modern applications.
+                AI-powered testing platform for modern applications.
               </p>
             </div>
 
