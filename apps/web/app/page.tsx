@@ -13,39 +13,7 @@ export default function HomePage() {
 
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-8" aria-label="Primary">
-              {/* Use plain anchors for hash scroll — avoids Next Link quirks + prevents malformed JSX */}
               <a href="#features" className="nav-link hover:opacity-80 transition">
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Logo size="md" />
-
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/#features" className="nav-link">
-                Features
-              </Link>
-              <Link href="/#integrations" className="nav-link">
-                Integrations
-              </Link>
-              <Link href="/#pricing" className="nav-link">
-                Pricing
-              <Link href="/#features" className="nav-link" scroll={true}>
-                Features
-              </Link>
-              <Link href="/#integrations" className="nav-link" scroll={true}>
-                Integrations
-              </Link>
-              <Link href="/#pricing" className="nav-link" scroll={true}>
-              <Link href="/#features" className="nav-link">
-                Features
-              </Link>
-              <Link href="/#integrations" className="nav-link">
-                Integrations
-              </Link>
-              <Link href="/#pricing" className="nav-link">
-              <SmoothScrollLink href="#features" className="nav-link">
                 Features
               </a>
               <a href="#integrations" className="nav-link hover:opacity-80 transition">

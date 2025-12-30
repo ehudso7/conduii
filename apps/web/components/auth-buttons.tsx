@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserButton, useAuth } from "@clerk/nextjs";
@@ -80,8 +81,6 @@ function NavAuthButtonsInner() {
   }
 
   return <SimpleAuthButtons />;
-  // Use redirect mode instead of modal to avoid stuck loading states
-  return <SimpleAuthButtons />;
 }
 
 export function NavAuthButtons() {
@@ -145,8 +144,6 @@ function HeroAuthButtonsInner() {
     );
   }
 
-  return <SimpleHeroButton />;
-  // Use link instead of modal to avoid stuck states
   return <SimpleHeroButton />;
 }
 
@@ -214,8 +211,6 @@ function CTAAuthButtonsInner() {
     );
   }
 
-  return <SimpleCTAButton />;
-  // Use link instead of modal to avoid stuck states
   return <SimpleCTAButton />;
 }
 
