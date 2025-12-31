@@ -77,6 +77,7 @@ export default function ChangelogPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-home"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home

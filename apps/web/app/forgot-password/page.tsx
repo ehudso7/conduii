@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
                 If you don't see the email, check your spam folder. The link will expire in 24 hours.
               </p>
               <div className="space-y-3">
-                <Button asChild className="w-full">
+                <Button asChild className="w-full" data-testid="forgot-return">
                   <Link href="/sign-in">Return to Sign In</Link>
                 </Button>
                 <Button
@@ -70,6 +70,7 @@ export default function ForgotPasswordPage() {
                     setIsSubmitted(false);
                     setEmail("");
                   }}
+                  data-testid="forgot-retry"
                 >
                   Try a different email
                 </Button>
@@ -88,6 +89,7 @@ export default function ForgotPasswordPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          data-testid="back-home"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -120,6 +122,7 @@ export default function ForgotPasswordPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
                     required
+                    data-testid="forgot-email"
                   />
                 </div>
               </div>
@@ -130,7 +133,7 @@ export default function ForgotPasswordPage() {
                 </div>
               )}
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading} data-testid="forgot-submit">
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -144,7 +147,7 @@ export default function ForgotPasswordPage() {
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               Remember your password?{" "}
-              <Link href="/sign-in" className="text-primary hover:underline font-medium">
+              <Link href="/sign-in" className="text-primary hover:underline font-medium" data-testid="forgot-signin">
                 Sign in
               </Link>
             </p>

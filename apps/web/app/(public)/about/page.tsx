@@ -17,16 +17,16 @@ export default function AboutPage() {
             Conduii
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-muted-foreground hover:text-foreground">
+            <Link href="/" className="text-muted-foreground hover:text-foreground" data-testid="back-home">
               Back to Home
             </Link>
-            <Link href="/docs" className="text-muted-foreground hover:text-foreground">
+            <Link href="/docs" className="text-muted-foreground hover:text-foreground" data-testid="nav-docs">
               Docs
             </Link>
-            <Link href="/sign-in">
+            <Link href="/sign-in" data-testid="nav-signin">
               <Button variant="ghost">Sign In</Button>
             </Link>
-            <Link href="/sign-up">
+            <Link href="/sign-up" data-testid="nav-getstarted">
               <Button>Get Started</Button>
             </Link>
           </nav>
@@ -120,7 +120,7 @@ export default function AboutPage() {
             reliability engineering. We're backed by leading investors and trusted
             by developers worldwide.
           </p>
-          <Link href="/sign-up">
+          <Link href="/sign-up" data-testid="cta-getstarted">
             <Button size="lg">
               Start Testing for Free
               <ArrowRight className="ml-2 w-4 h-4" />

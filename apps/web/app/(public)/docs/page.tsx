@@ -109,6 +109,7 @@ export default function DocsPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-home"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -465,7 +466,7 @@ jobs:
         {/* CTA */}
         <div className="text-center pt-8 border-t">
           <p className="text-muted-foreground mb-4">Ready to get started?</p>
-          <Link href="/sign-up">
+          <Link href="/sign-up" data-testid="docs-getstarted">
             <Button size="lg">Get Started Free</Button>
           </Link>
         </div>

@@ -37,10 +37,18 @@ export function SmoothScrollLink({ href, children, className }: SmoothScrollLink
     }
   };
 
+  // Map href to testid
+  const testIdMap: Record<string, string> = {
+    "#features": "nav-features",
+    "#integrations": "nav-integrations",
+    "#pricing": "nav-pricing",
+  };
+  const testId = testIdMap[href];
+
   // For hash links on homepage, use anchor tag directly
   if (isSamePage) {
     return (
-      <a href={href} className={className} onClick={handleClick}>
+      <a href={href} className={className} onClick={handleClick} data-testid={testId}>
         {children}
       </a>
     );
@@ -48,7 +56,7 @@ export function SmoothScrollLink({ href, children, className }: SmoothScrollLink
 
   // For other links, use Next.js Link
   return (
-    <Link href={href} className={className}>
+    <Link href={href} className={className} data-testid={testId}>
       {children}
     </Link>
   );

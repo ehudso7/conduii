@@ -45,6 +45,7 @@ export default function BlogPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-home"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -57,7 +58,7 @@ export default function BlogPage() {
 
         <div className="space-y-6">
           {posts.map((post) => (
-            <Link key={post.slug} href={`/blog/${post.slug}`}>
+            <Link key={post.slug} href={`/blog/${post.slug}`} data-testid={`blog-post-${post.slug}`}>
               <Card className="hover:shadow-lg transition cursor-pointer">
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">

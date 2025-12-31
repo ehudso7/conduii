@@ -141,7 +141,7 @@ export default function HomePage() {
               <SmoothScrollLink href="#pricing" className="nav-link">
                 Pricing
               </SmoothScrollLink>
-              <Link href="/docs" className="nav-link">
+              <Link href="/docs" className="nav-link" data-testid="nav-docs">
                 Docs
               </Link>
             </div>
@@ -396,30 +396,30 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4 text-base">Product</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/features" className="hover:text-foreground transition">Features</Link></li>
-                <li><Link href="/integrations" className="hover:text-foreground transition">Integrations</Link></li>
-                <li><Link href="/pricing" className="hover:text-foreground transition">Pricing</Link></li>
-                <li><Link href="/changelog" className="hover:text-foreground transition">Changelog</Link></li>
+                <li><Link href="/features" className="hover:text-foreground transition" data-testid="footer-features">Features</Link></li>
+                <li><Link href="/integrations" className="hover:text-foreground transition" data-testid="footer-integrations">Integrations</Link></li>
+                <li><Link href="/pricing" className="hover:text-foreground transition" data-testid="footer-pricing">Pricing</Link></li>
+                <li><Link href="/changelog" className="hover:text-foreground transition" data-testid="footer-changelog">Changelog</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4 text-base">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/docs" className="hover:text-foreground transition">Documentation</Link></li>
-                <li><Link href="/docs#cli-discover" className="hover:text-foreground transition">CLI Reference</Link></li>
-                <li><Link href="/docs#api-auth" className="hover:text-foreground transition">API</Link></li>
-                <li><Link href="/blog" className="hover:text-foreground transition">Blog</Link></li>
+                <li><Link href="/docs" className="hover:text-foreground transition" data-testid="footer-docs">Documentation</Link></li>
+                <li><Link href="/docs#cli-discover" className="hover:text-foreground transition" data-testid="footer-cli">CLI Reference</Link></li>
+                <li><Link href="/docs#api-auth" className="hover:text-foreground transition" data-testid="footer-api">API</Link></li>
+                <li><Link href="/blog" className="hover:text-foreground transition" data-testid="footer-blog">Blog</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4 text-base">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:text-foreground transition">About</Link></li>
-                <li><Link href="/privacy" className="hover:text-foreground transition">Privacy</Link></li>
-                <li><Link href="/terms" className="hover:text-foreground transition">Terms</Link></li>
-                <li><Link href="https://github.com/ehudso7/conduii" className="hover:text-foreground transition">GitHub</Link></li>
+                <li><Link href="/about" className="hover:text-foreground transition" data-testid="footer-about">About</Link></li>
+                <li><Link href="/privacy" className="hover:text-foreground transition" data-testid="footer-privacy">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-foreground transition" data-testid="footer-terms">Terms</Link></li>
+                <li><Link href="https://github.com/ehudso7/conduii" className="hover:text-foreground transition" data-testid="footer-github">GitHub</Link></li>
               </ul>
             </div>
           </div>

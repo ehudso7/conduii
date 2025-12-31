@@ -81,7 +81,7 @@ export function Logo({
 
   if (linkToHome) {
     return (
-      <Link href="/" className="hover:opacity-90 transition-opacity">
+      <Link href="/" className="hover:opacity-90 transition-opacity" data-testid="logo">
         {content}
       </Link>
     );
