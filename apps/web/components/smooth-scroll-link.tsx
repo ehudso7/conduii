@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ReactNode, MouseEvent } from "react";
-import { cn } from "@/lib/utils";
 
 interface SmoothScrollLinkProps {
   href: string;
