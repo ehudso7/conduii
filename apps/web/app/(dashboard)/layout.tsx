@@ -9,6 +9,9 @@ import {
   Zap,
   Plus,
   Command,
+  Brain,
+  Globe,
+  Wand2,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { db } from "@/lib/db";
@@ -20,6 +23,9 @@ import { DashboardProviders } from "@/components/dashboard/dashboard-providers";
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "AI Insights", href: "/dashboard/insights", icon: Brain },
+  { name: "Discover", href: "/dashboard/discover", icon: Globe },
+  { name: "Generate Tests", href: "/dashboard/generate", icon: Wand2 },
   { name: "Projects", href: "/dashboard/projects", icon: FolderKanban },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
   { name: "Billing", href: "/dashboard/billing", icon: CreditCard },
