@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     ],
     locale: "en_US",
     type: "website",
-    
+
   },
   twitter: {
     card: "summary_large_image",
@@ -100,7 +100,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const clerkConfigured = isClerkConfigured();
-  const Provider = clerkConfigured ? ClerkProvider : ({ children: c }: { children: React.ReactNode }) => c;
+  const Provider = clerkConfigured
+    ? ClerkProvider
+    : ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
   return (
     <Provider>
