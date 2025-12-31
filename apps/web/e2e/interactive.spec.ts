@@ -166,6 +166,6 @@ test.describe("Scroll Behavior", () => {
     await page.waitForTimeout(500);
 
     // Footer should be visible
-    await expect(page.getByText("Deployment testing platform for modern applications.")).toBeVisible();
+    await expect(page.getByText("AI-powered testing platform for modern applications.")).toBeVisible();
   });
 });
