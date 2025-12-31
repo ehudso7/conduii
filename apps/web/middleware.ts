@@ -14,9 +14,6 @@ function isClerkConfigured() {
 const clerkConfigured = isClerkConfigured();
 
 export default clerkConfigured
-const isClerkConfigured = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-export default isClerkConfigured
   ? authMiddleware({
       // Routes that can be accessed while signed out
       publicRoutes: [
@@ -51,7 +48,6 @@ export default isClerkConfigured
       // If Clerk isn't configured (common in local/dev), don't block navigation.
       return NextResponse.next();
     };
-  : () => NextResponse.next();
 
 export const config = {
   matcher: [
