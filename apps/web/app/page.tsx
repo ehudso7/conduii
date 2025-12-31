@@ -129,26 +129,30 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Logo size="md" />
+            <Logo size="md" testId="topnav-logo" />
 
             <div className="hidden md:flex items-center gap-8">
-              <SmoothScrollLink href="#features" className="nav-link">
+              <SmoothScrollLink href="#features" className="nav-link" testId="topnav-link-features">
                 Features
               </SmoothScrollLink>
-              <SmoothScrollLink href="#integrations" className="nav-link">
+              <SmoothScrollLink
+                href="#integrations"
+                className="nav-link"
+                testId="topnav-link-integrations"
+              >
                 Integrations
               </SmoothScrollLink>
-              <SmoothScrollLink href="#pricing" className="nav-link">
+              <SmoothScrollLink href="#pricing" className="nav-link" testId="topnav-link-pricing">
                 Pricing
               </SmoothScrollLink>
-              <Link href="/docs" className="nav-link">
+              <Link href="/docs" className="nav-link" data-testid="topnav-link-docs">
                 Docs
               </Link>
             </div>
 
             <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <NavAuthButtons />
+              <ThemeToggle testId="topnav-theme-toggle" />
+              <NavAuthButtons testIdPrefix="topnav" />
             </div>
           </div>
         </div>
@@ -357,7 +361,11 @@ export default function HomePage() {
                         </li>
                       ))}
                     </ul>
-                    <PricingButton cta={plan.cta} popular={plan.popular} />
+                    <PricingButton
+                      cta={plan.cta}
+                      popular={plan.popular}
+                      testId={`home-pricing-cta-${plan.name.toLowerCase()}`}
+                    />
                   </CardContent>
                 </Card>
               ))}
@@ -396,30 +404,30 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4 text-base">Product</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/features" className="hover:text-foreground transition">Features</Link></li>
-                <li><Link href="/integrations" className="hover:text-foreground transition">Integrations</Link></li>
-                <li><Link href="/pricing" className="hover:text-foreground transition">Pricing</Link></li>
-                <li><Link href="/changelog" className="hover:text-foreground transition">Changelog</Link></li>
+                <li><Link href="/features" className="hover:text-foreground transition" data-testid="footer-link-features">Features</Link></li>
+                <li><Link href="/integrations" className="hover:text-foreground transition" data-testid="footer-link-integrations">Integrations</Link></li>
+                <li><Link href="/pricing" className="hover:text-foreground transition" data-testid="footer-link-pricing">Pricing</Link></li>
+                <li><Link href="/changelog" className="hover:text-foreground transition" data-testid="footer-link-changelog">Changelog</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4 text-base">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/docs" className="hover:text-foreground transition">Documentation</Link></li>
-                <li><Link href="/docs#cli-discover" className="hover:text-foreground transition">CLI Reference</Link></li>
-                <li><Link href="/docs#api-auth" className="hover:text-foreground transition">API</Link></li>
-                <li><Link href="/blog" className="hover:text-foreground transition">Blog</Link></li>
+                <li><Link href="/docs" className="hover:text-foreground transition" data-testid="footer-link-docs">Documentation</Link></li>
+                <li><Link href="/docs#cli-discover" className="hover:text-foreground transition" data-testid="footer-link-cli-reference">CLI Reference</Link></li>
+                <li><Link href="/docs#api-auth" className="hover:text-foreground transition" data-testid="footer-link-api">API</Link></li>
+                <li><Link href="/blog" className="hover:text-foreground transition" data-testid="footer-link-blog">Blog</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4 text-base">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:text-foreground transition">About</Link></li>
-                <li><Link href="/privacy" className="hover:text-foreground transition">Privacy</Link></li>
-                <li><Link href="/terms" className="hover:text-foreground transition">Terms</Link></li>
-                <li><Link href="https://github.com/ehudso7/conduii" className="hover:text-foreground transition">GitHub</Link></li>
+                <li><Link href="/about" className="hover:text-foreground transition" data-testid="footer-link-about">About</Link></li>
+                <li><Link href="/privacy" className="hover:text-foreground transition" data-testid="footer-link-privacy">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-foreground transition" data-testid="footer-link-terms">Terms</Link></li>
+                <li><Link href="https://github.com/ehudso7/conduii" className="hover:text-foreground transition" data-testid="footer-link-github">GitHub</Link></li>
               </ul>
             </div>
           </div>

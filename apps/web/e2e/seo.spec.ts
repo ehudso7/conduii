@@ -1,4 +1,15 @@
 import { test, expect } from "@playwright/test";
+import { attachClickIntegrityGuard } from "./utils/click-integrity-guard";
+
+test.beforeEach(async ({ page }, testInfo) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (testInfo as any)._clickIntegrityGuard = attachClickIntegrityGuard(page, testInfo);
+});
+
+test.afterEach(async ({}, testInfo) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (testInfo as any)._clickIntegrityGuard?.assertNoIntegrityIssues?.();
+});
 
 test.describe("SEO and Metadata", () => {
   test("homepage should have proper title", async ({ page }) => {

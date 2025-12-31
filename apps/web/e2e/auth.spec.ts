@@ -1,4 +1,15 @@
 import { test, expect } from "@playwright/test";
+import { attachClickIntegrityGuard } from "./utils/click-integrity-guard";
+
+test.beforeEach(async ({ page }, testInfo) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (testInfo as any)._clickIntegrityGuard = attachClickIntegrityGuard(page, testInfo);
+});
+
+test.afterEach(async ({}, testInfo) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (testInfo as any)._clickIntegrityGuard?.assertNoIntegrityIssues?.();
+});
 
 test.describe("Sign In Page", () => {
   test("should display sign in page", async ({ page }) => {
@@ -18,10 +29,6 @@ test.describe("Sign In Page", () => {
 
   test("should display Clerk sign in component", async ({ page }) => {
     await page.goto("/sign-in");
-
-    // Wait for Clerk to load - it renders a form or widget
-    // The exact selectors depend on Clerk's implementation
-    await page.waitForTimeout(2000); // Give Clerk time to load
 
     // Check that the page has content (Clerk widget or loading state)
     const body = page.locator("body");
@@ -47,9 +54,6 @@ test.describe("Sign Up Page", () => {
 
   test("should display Clerk sign up component", async ({ page }) => {
     await page.goto("/sign-up");
-
-    // Wait for Clerk to load
-    await page.waitForTimeout(2000);
 
     // Check that the page has content
     const body = page.locator("body");
@@ -98,62 +102,32 @@ test.describe("Auth Button Navigation", () => {
   test("clicking Sign In in nav should navigate to sign-in page", async ({ page }) => {
     await page.goto("/");
 
-    // Find and click the sign in button/link
-    const signInButton = page.getByRole("button", { name: "Sign In" }).first();
-
-    // If it's a modal trigger, it might not navigate
-    // If it's a link, it will navigate
-    if (await signInButton.isVisible()) {
-      await signInButton.click();
-      // Either modal opens or we navigate
-      await page.waitForTimeout(1000);
-    }
+    await page.getByTestId("topnav-auth-sign-in").click();
+    await expect(page).toHaveURL(/\/sign-in/);
   });
 
   test("clicking Get Started should trigger sign up flow", async ({ page }) => {
     await page.goto("/");
 
-    // Find the Get Started button
-    const getStartedButton = page.getByRole("button", { name: "Get Started" }).first();
-
-    if (await getStartedButton.isVisible()) {
-      await getStartedButton.click();
-      // Either modal opens or we navigate
-      await page.waitForTimeout(1000);
-    }
+    await page.getByTestId("topnav-auth-sign-up").click();
+    await expect(page).toHaveURL(/\/sign-up/);
   });
 
   test("hero Start Testing Free button should work", async ({ page }) => {
     await page.goto("/");
 
-    // Find the hero CTA button
-    const heroButton = page.getByRole("button", { name: /Start Testing Free/i }).first();
-
-    if (await heroButton.isVisible()) {
-      await heroButton.click();
-      await page.waitForTimeout(1000);
-    }
+    await page.getByTestId("home-cta-start-testing").click();
+    await expect(page).toHaveURL(/\/(sign-up|dashboard)/);
   });
 
   test("pricing buttons should be present and clickable", async ({ page }) => {
     await page.goto("/");
 
-    // Scroll to pricing section
-    await page.getByRole("navigation").getByRole("link", { name: "Pricing" }).click();
-    await page.waitForTimeout(500);
+    await page.getByTestId("topnav-link-pricing").click();
+    await expect(page).toHaveURL(/#pricing$/);
 
-    // Check for pricing buttons
-    // Pricing CTAs are rendered as links (Button-asChild), so assert on links.
-    const getStartedButton = page.getByRole("link", { name: "Get Started" });
-    const startTrialButton = page.getByRole("link", { name: "Start Free Trial" });
-    const contactButton = page.getByRole("link", { name: "Contact Sales" });
-
-    // At least one should be visible
-    const hasButtons =
-      await getStartedButton.first().isVisible() ||
-      await startTrialButton.isVisible() ||
-      await contactButton.isVisible();
-
-    expect(hasButtons).toBeTruthy();
+    await expect(page.getByTestId("home-pricing-cta-free")).toBeVisible();
+    await expect(page.getByTestId("home-pricing-cta-pro")).toBeVisible();
+    await expect(page.getByTestId("home-pricing-cta-enterprise")).toBeVisible();
   });
 });

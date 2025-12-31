@@ -17,7 +17,8 @@ export async function GET() {
 
   // In CI/test environments, we don't want health to depend on a live database.
   // Treat DB as optional unless explicitly running in a real environment.
-  const shouldCheckDb = process.env.NODE_ENV !== "test";
+  const hasDbUrl = !!process.env.POSTGRES_PRISMA_URL || !!process.env.DATABASE_URL;
+  const shouldCheckDb = process.env.NODE_ENV !== "test" && hasDbUrl;
 
   // Check database connection with 5 second timeout
   if (shouldCheckDb) {

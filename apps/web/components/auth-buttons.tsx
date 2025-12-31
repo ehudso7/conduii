@@ -25,14 +25,19 @@ function useAuthNav() {
 }
 
 // Simple button-based navigation that always works (role=button)
-function SimpleAuthButtons() {
+function SimpleAuthButtons({ testIdPrefix }: { testIdPrefix: string }) {
   const nav = useAuthNav();
   return (
     <div className="flex items-center gap-4">
-      <Button variant="ghost" size="sm" onClick={nav.goToSignIn}>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={nav.goToSignIn}
+        data-testid={`${testIdPrefix}-auth-sign-in`}
+      >
         Sign In
       </Button>
-      <Button size="sm" onClick={nav.goToSignUp}>
+      <Button size="sm" onClick={nav.goToSignUp} data-testid={`${testIdPrefix}-auth-sign-up`}>
         Get Started
       </Button>
     </div>
@@ -40,7 +45,7 @@ function SimpleAuthButtons() {
 }
 
 // Inner component that uses auth hooks - only rendered if Clerk is configured
-function NavAuthButtonsInner() {
+function NavAuthButtonsInner({ testIdPrefix }: { testIdPrefix: string }) {
   const { isLoaded, isSignedIn } = useAuth();
   const nav = useAuthNav();
   const [showLoadingState, setShowLoadingState] = useState(false);
@@ -58,11 +63,11 @@ function NavAuthButtonsInner() {
   if (!isLoaded) {
     if (showLoadingState) {
       // Fallback to simple buttons if loading takes too long
-      return <SimpleAuthButtons />;
+      return <SimpleAuthButtons testIdPrefix={testIdPrefix} />;
     }
     return (
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" disabled>
+        <Button variant="ghost" size="sm" disabled data-testid={`${testIdPrefix}-auth-loading`}>
           <Loader2 className="w-4 h-4 animate-spin" />
         </Button>
       </div>
@@ -72,25 +77,31 @@ function NavAuthButtonsInner() {
   if (isSignedIn) {
     return (
       <div className="flex items-center gap-4">
-        <Button size="sm" onClick={nav.goToDashboard}>
+        <Button
+          size="sm"
+          onClick={nav.goToDashboard}
+          data-testid={`${testIdPrefix}-auth-dashboard`}
+        >
           Dashboard
         </Button>
-        <UserButton afterSignOutUrl="/" />
+        <div data-testid={`${testIdPrefix}-auth-user`}>
+          <UserButton afterSignOutUrl="/" />
+        </div>
       </div>
     );
   }
 
-  return <SimpleAuthButtons />;
+  return <SimpleAuthButtons testIdPrefix={testIdPrefix} />;
 }
 
-export function NavAuthButtons() {
+export function NavAuthButtons({ testIdPrefix = "topnav" }: { testIdPrefix?: string }) {
   // If Clerk isn't configured, avoid calling Clerk hooks
   if (!isClerkConfigured) {
-    return <SimpleAuthButtons />;
+    return <SimpleAuthButtons testIdPrefix={testIdPrefix} />;
   }
 
   // Client: Use auth-aware component
-  return <NavAuthButtonsInner />;
+  return <NavAuthButtonsInner testIdPrefix={testIdPrefix} />;
 }
 
 // Simple hero button that always works (role=button)
@@ -102,6 +113,7 @@ function SimpleHeroButton() {
       variant="gradient"
       className="group"
       onClick={() => router.push("/sign-up")}
+      data-testid="home-cta-start-testing"
     >
       Start Testing Free
       <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
@@ -129,7 +141,7 @@ function HeroAuthButtonsInner() {
       return <SimpleHeroButton />;
     }
     return (
-      <Button size="xl" variant="gradient" disabled>
+      <Button size="xl" variant="gradient" disabled data-testid="home-cta-start-testing">
         <Loader2 className="w-5 h-5 animate-spin" />
       </Button>
     );
@@ -137,7 +149,13 @@ function HeroAuthButtonsInner() {
 
   if (isSignedIn) {
     return (
-      <Button size="xl" variant="gradient" className="group" onClick={nav.goToDashboard}>
+      <Button
+        size="xl"
+        variant="gradient"
+        className="group"
+        onClick={nav.goToDashboard}
+        data-testid="home-cta-start-testing"
+      >
         Go to Dashboard
         <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
       </Button>
@@ -152,7 +170,7 @@ export function HeroAuthButtons() {
     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
       {!isClerkConfigured ? <SimpleHeroButton /> : <HeroAuthButtonsInner />}
       <Button size="xl" variant="outline" asChild>
-        <Link href="/docs">
+        <Link href="/docs" data-testid="home-cta-view-docs">
           View Documentation
         </Link>
       </Button>
@@ -169,6 +187,7 @@ function SimpleCTAButton() {
       variant="gradient"
       className="group"
       onClick={() => router.push("/sign-up")}
+      data-testid="home-cta-get-started"
     >
       Get Started for Free
       <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
@@ -196,7 +215,7 @@ function CTAAuthButtonsInner() {
       return <SimpleCTAButton />;
     }
     return (
-      <Button size="xl" variant="gradient" disabled>
+      <Button size="xl" variant="gradient" disabled data-testid="home-cta-get-started">
         <Loader2 className="w-5 h-5 animate-spin" />
       </Button>
     );
@@ -204,7 +223,13 @@ function CTAAuthButtonsInner() {
 
   if (isSignedIn) {
     return (
-      <Button size="xl" variant="gradient" className="group" onClick={nav.goToDashboard}>
+      <Button
+        size="xl"
+        variant="gradient"
+        className="group"
+        onClick={nav.goToDashboard}
+        data-testid="home-cta-get-started"
+      >
         Go to Dashboard
         <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
       </Button>

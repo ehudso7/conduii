@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { attachClickIntegrityGuard } from "./utils/click-integrity-guard";
 
 test.describe("Main Navigation", () => {
-  test("logo should link to homepage", async ({ page }) => {
+  test("logo should link to homepage", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/about");
 
     // Header brand should return to home
@@ -9,165 +11,180 @@ test.describe("Main Navigation", () => {
     await expect(brandLink).toBeVisible();
     await brandLink.click();
     await expect(page).toHaveURL("/");
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("features link should scroll to features section", async ({ page }) => {
+  test("features link should scroll to features section", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
-    const featuresLink = page.getByRole("link", { name: "Features" }).first();
-    await featuresLink.click();
+    await page.getByTestId("topnav-link-features").click();
 
     // Should scroll to features section
-    await expect(page).toHaveURL("/#features");
+    await expect(page).toHaveURL(/#features$/);
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("integrations link should scroll to integrations section", async ({ page }) => {
+  test("integrations link should scroll to integrations section", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
-    const integrationsLink = page.getByRole("link", { name: "Integrations" }).first();
-    await integrationsLink.click();
+    await page.getByTestId("topnav-link-integrations").click();
 
-    await expect(page).toHaveURL("/#integrations");
+    await expect(page).toHaveURL(/#integrations$/);
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("pricing link should scroll to pricing section", async ({ page }) => {
+  test("pricing link should scroll to pricing section", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
-    const pricingLink = page.getByRole("link", { name: "Pricing" }).first();
-    await pricingLink.click();
+    await page.getByTestId("topnav-link-pricing").click();
 
-    await expect(page).toHaveURL("/#pricing");
+    await expect(page).toHaveURL(/#pricing$/);
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("docs link should navigate to docs page", async ({ page }) => {
+  test("docs link should navigate to docs page", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
-    const docsLink = page.getByRole("link", { name: "Docs" }).first();
-    await docsLink.click();
+    await page.getByTestId("topnav-link-docs").click();
 
     await expect(page).toHaveURL("/docs");
+    await guard.assertNoIntegrityIssues();
   });
 });
 
 test.describe("Footer Navigation", () => {
-  test("footer should contain product links", async ({ page }) => {
+  test("footer should contain product links", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     // Scroll to footer
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
 
-    const footer = page.getByRole("contentinfo");
-    await expect(footer.getByRole("link", { name: "Features" })).toBeVisible();
-    await expect(footer.getByRole("link", { name: "Integrations" })).toBeVisible();
-    await expect(footer.getByRole("link", { name: "Pricing" })).toBeVisible();
-    await expect(footer.getByRole("link", { name: "Changelog" })).toBeVisible();
+    await expect(page.getByTestId("footer-link-features")).toBeVisible();
+    await expect(page.getByTestId("footer-link-integrations")).toBeVisible();
+    await expect(page.getByTestId("footer-link-pricing")).toBeVisible();
+    await expect(page.getByTestId("footer-link-changelog")).toBeVisible();
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("footer should contain resources links", async ({ page }) => {
+  test("footer should contain resources links", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
 
-    const footer = page.getByRole("contentinfo");
-    await expect(footer.getByRole("link", { name: "Documentation", exact: true })).toBeVisible();
-    await expect(footer.getByRole("link", { name: "Blog", exact: true })).toBeVisible();
+    await expect(page.getByTestId("footer-link-docs")).toBeVisible();
+    await expect(page.getByTestId("footer-link-blog")).toBeVisible();
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("footer should contain company links", async ({ page }) => {
+  test("footer should contain company links", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
 
-    const footer = page.getByRole("contentinfo");
-    await expect(footer.getByRole("link", { name: "About", exact: true })).toBeVisible();
-    await expect(footer.getByRole("link", { name: "Privacy", exact: true })).toBeVisible();
-    await expect(footer.getByRole("link", { name: "Terms", exact: true })).toBeVisible();
+    await expect(page.getByTestId("footer-link-about")).toBeVisible();
+    await expect(page.getByTestId("footer-link-privacy")).toBeVisible();
+    await expect(page.getByTestId("footer-link-terms")).toBeVisible();
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("changelog link should navigate to changelog page", async ({ page }) => {
+  test("changelog link should navigate to changelog page", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
 
-    const changelogLink = page.getByRole("link", { name: "Changelog" });
-    await changelogLink.click();
+    await page.getByTestId("footer-link-changelog").click();
 
     await expect(page).toHaveURL("/changelog");
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("blog link should navigate to blog page", async ({ page }) => {
+  test("blog link should navigate to blog page", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
 
-    const blogLink = page.getByRole("link", { name: "Blog" });
-    await blogLink.click();
+    await page.getByTestId("footer-link-blog").click();
 
     await expect(page).toHaveURL("/blog");
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("documentation link should navigate to docs page", async ({ page }) => {
+  test("documentation link should navigate to docs page", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
 
-    const docsLink = page.getByRole("contentinfo").getByRole("link", { name: "Documentation", exact: true });
-    await docsLink.click();
+    await page.getByTestId("footer-link-docs").click();
 
     await expect(page).toHaveURL("/docs");
+    await guard.assertNoIntegrityIssues();
   });
 });
 
 test.describe("Cross-Page Navigation", () => {
-  test("should navigate from homepage to about and back", async ({ page }) => {
+  test("should navigate from homepage to about and back", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     // Go to about
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
-    await page.getByRole("link", { name: "About" }).click();
-    await expect(page).toHaveURL("/about");
+    await page.getByTestId("footer-link-about").scrollIntoViewIfNeeded();
+    await page.getByTestId("footer-link-about").click();
+    await page.waitForURL("/about");
+    await page.waitForLoadState("domcontentloaded");
 
     // Go back to home
     await page.getByRole("banner").getByRole("link", { name: "Conduii" }).first().click();
     await expect(page).toHaveURL("/");
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("should navigate from homepage to privacy and back", async ({ page }) => {
+  test("should navigate from homepage to privacy and back", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
-    await page.getByRole("link", { name: "Privacy" }).click();
-    await expect(page).toHaveURL("/privacy");
+    await page.getByTestId("footer-link-privacy").scrollIntoViewIfNeeded();
+    await page.getByTestId("footer-link-privacy").click();
+    await page.waitForURL("/privacy");
+    await page.waitForLoadState("domcontentloaded");
 
     await page.getByRole("banner").getByRole("link", { name: "Conduii" }).first().click();
     await expect(page).toHaveURL("/");
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("should navigate from homepage to terms and back", async ({ page }) => {
+  test("should navigate from homepage to terms and back", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
-    await page.getByRole("link", { name: "Terms" }).click();
-    await expect(page).toHaveURL("/terms");
+    await page.getByTestId("footer-link-terms").scrollIntoViewIfNeeded();
+    await page.getByTestId("footer-link-terms").click();
+    await page.waitForURL("/terms");
+    await page.waitForLoadState("domcontentloaded");
 
     await page.getByRole("banner").getByRole("link", { name: "Conduii" }).first().click();
     await expect(page).toHaveURL("/");
+    await guard.assertNoIntegrityIssues();
   });
 
-  test("should navigate through multiple pages without errors", async ({ page }) => {
+  test("should navigate through multiple pages without errors", async ({ page }, testInfo) => {
+    const guard = attachClickIntegrityGuard(page, testInfo);
     await page.goto("/");
 
     // Navigate to docs
-    await page.getByRole("link", { name: "Docs" }).first().click();
+    await page.getByTestId("topnav-link-docs").click();
     await expect(page).toHaveURL("/docs");
 
     // Navigate back home
@@ -176,8 +193,7 @@ test.describe("Cross-Page Navigation", () => {
 
     // Navigate to blog
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
-    await page.getByRole("link", { name: "Blog" }).click();
+    await page.getByTestId("footer-link-blog").click();
     await expect(page).toHaveURL("/blog");
 
     // Navigate back home
@@ -186,8 +202,8 @@ test.describe("Cross-Page Navigation", () => {
 
     // Navigate to changelog
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
-    await page.getByRole("link", { name: "Changelog" }).click();
+    await page.getByTestId("footer-link-changelog").click();
     await expect(page).toHaveURL("/changelog");
+    await guard.assertNoIntegrityIssues();
   });
 });

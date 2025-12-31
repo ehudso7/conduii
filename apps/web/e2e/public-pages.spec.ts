@@ -1,4 +1,16 @@
 import { test, expect } from "@playwright/test";
+import { attachClickIntegrityGuard } from "./utils/click-integrity-guard";
+
+test.beforeEach(async ({ page }, testInfo) => {
+  // Store on testInfo to assert in afterEach.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (testInfo as any)._clickIntegrityGuard = attachClickIntegrityGuard(page, testInfo);
+});
+
+test.afterEach(async ({}, testInfo) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (testInfo as any)._clickIntegrityGuard?.assertNoIntegrityIssues?.();
+});
 
 test.describe("Changelog Page", () => {
   test("should display changelog with release versions", async ({ page }) => {

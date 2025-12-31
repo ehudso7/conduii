@@ -6,6 +6,7 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
   linkToHome?: boolean;
+  testId?: string;
 }
 
 const sizeClasses = {
@@ -25,6 +26,7 @@ export function Logo({
   size = "md",
   showText = true,
   linkToHome = true,
+  testId,
 }: LogoProps) {
   const content = (
     <div className={cn("flex items-center gap-2", className)}>
@@ -81,7 +83,7 @@ export function Logo({
 
   if (linkToHome) {
     return (
-      <Link href="/" className="hover:opacity-90 transition-opacity">
+      <Link href="/" className="hover:opacity-90 transition-opacity" data-testid={testId}>
         {content}
       </Link>
     );
