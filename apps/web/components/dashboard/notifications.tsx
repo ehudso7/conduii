@@ -127,7 +127,7 @@ export function NotificationDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" data-testid="notifications-trigger">
           <Bell className="w-5 h-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
@@ -145,6 +145,7 @@ export function NotificationDropdown() {
               size="sm"
               className="text-xs h-auto p-1"
               onClick={markAllAsRead}
+              data-testid="notifications-mark-all-read"
             >
               Mark all read
             </Button>
@@ -226,6 +227,7 @@ export function NotificationDropdown() {
               <Link
                 href="/dashboard/settings"
                 className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                data-testid="notification-settings-link"
               >
                 <Settings className="w-4 h-4" />
                 Notification Settings

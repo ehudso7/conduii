@@ -59,6 +59,7 @@ export default function NewProjectPage() {
         <Link
           href="/dashboard/projects"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+          data-testid="back-to-projects"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Projects
@@ -93,6 +94,7 @@ export default function NewProjectPage() {
                 placeholder="My SaaS App"
                 className="w-full px-4 py-3 bg-background border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                 required
+                data-testid="project-name-input"
               />
             </div>
 
@@ -109,6 +111,7 @@ export default function NewProjectPage() {
                 placeholder="A brief description of your project..."
                 rows={3}
                 className="w-full px-4 py-3 bg-background border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none transition-all"
+                data-testid="project-description-input"
               />
             </div>
 
@@ -126,6 +129,7 @@ export default function NewProjectPage() {
                 }
                 placeholder="https://github.com/username/repo"
                 className="w-full px-4 py-3 bg-background border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                data-testid="repo-url-input"
               />
               <p className="text-xs text-muted-foreground">
                 Optional. Used for GitHub integration and auto-discovery.
@@ -146,6 +150,7 @@ export default function NewProjectPage() {
                 }
                 placeholder="https://myapp.com"
                 className="w-full px-4 py-3 bg-background border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                data-testid="prod-url-input"
               />
               <p className="text-xs text-muted-foreground">
                 The URL of your deployed application.
@@ -174,7 +179,7 @@ export default function NewProjectPage() {
         {/* Actions */}
         <div className="flex items-center justify-end gap-3">
           <Link href="/dashboard/projects">
-            <Button variant="outline" type="button" className="px-6">
+            <Button variant="outline" type="button" className="px-6" data-testid="cancel-button">
               Cancel
             </Button>
           </Link>
@@ -182,6 +187,7 @@ export default function NewProjectPage() {
             type="submit"
             disabled={loading || !formData.name}
             className="px-6 gap-2"
+            data-testid="create-project-button"
           >
             {loading ? (
               <>

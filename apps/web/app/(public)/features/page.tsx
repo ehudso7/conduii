@@ -92,25 +92,25 @@ export default function FeaturesPage() {
           <div className="flex justify-between items-center h-16">
             <Logo size="md" />
             <div className="hidden md:flex items-center gap-8">
-              <Link href="/features" className="text-sm font-medium">
+              <Link href="/features" className="text-sm font-medium" data-testid="nav-features">
                 Features
               </Link>
-              <Link href="/integrations" className="text-sm text-muted-foreground hover:text-foreground transition">
+              <Link href="/integrations" className="text-sm text-muted-foreground hover:text-foreground transition" data-testid="nav-integrations">
                 Integrations
               </Link>
-              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition">
+              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition" data-testid="nav-pricing">
                 Pricing
               </Link>
-              <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition">
+              <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition" data-testid="nav-docs">
                 Docs
               </Link>
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <Button asChild variant="ghost" size="sm">
+              <Button asChild variant="ghost" size="sm" data-testid="nav-sign-in">
                 <Link href="/sign-in">Sign In</Link>
               </Button>
-              <Button asChild size="sm">
+              <Button asChild size="sm" data-testid="nav-get-started">
                 <Link href="/sign-up">Get Started</Link>
               </Button>
             </div>
@@ -123,6 +123,7 @@ export default function FeaturesPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-to-home"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -234,13 +235,13 @@ export default function FeaturesPage() {
             Start testing your deployments in minutes.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button asChild size="lg">
+            <Button asChild size="lg" data-testid="cta-get-started">
               <Link href="/sign-up">
                 Get Started Free
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <Button asChild variant="outline" size="lg" data-testid="cta-docs">
               <Link href="/docs">Read the Docs</Link>
             </Button>
           </div>
@@ -255,13 +256,13 @@ export default function FeaturesPage() {
               &copy; {new Date().getFullYear()} Conduii. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm">
-              <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
+              <Link href="/privacy" className="text-muted-foreground hover:text-foreground" data-testid="footer-privacy">
                 Privacy
               </Link>
-              <Link href="/terms" className="text-muted-foreground hover:text-foreground">
+              <Link href="/terms" className="text-muted-foreground hover:text-foreground" data-testid="footer-terms">
                 Terms
               </Link>
-              <Link href="/docs" className="text-muted-foreground hover:text-foreground">
+              <Link href="/docs" className="text-muted-foreground hover:text-foreground" data-testid="footer-docs">
                 Documentation
               </Link>
             </div>

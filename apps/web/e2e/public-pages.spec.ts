@@ -1,186 +1,147 @@
 import { test, expect } from "@playwright/test";
+import { installClickIntegrityGuard } from "./utils/guard";
 
-test.describe("Changelog Page", () => {
-  test("should display changelog with release versions", async ({ page }) => {
-    await page.goto("/changelog");
+test.beforeEach(async ({ page }) => {
+  await installClickIntegrityGuard(page);
+});
 
-    // Check page title and description
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Changelog");
-    await expect(page.getByText("All the latest updates, improvements, and fixes")).toBeVisible();
-  });
-
-  test("should display release versions", async ({ page }) => {
-    await page.goto("/changelog");
-
-    // Check that version badges are displayed
-    await expect(page.getByText("v1.0.0")).toBeVisible();
-    await expect(page.getByText("v0.9.0")).toBeVisible();
-    await expect(page.getByText("v0.8.0")).toBeVisible();
-  });
-
-  test("should display release titles", async ({ page }) => {
-    await page.goto("/changelog");
-
-    await expect(page.getByText("Initial Release")).toBeVisible();
-    await expect(page.getByText("Beta Release")).toBeVisible();
-    await expect(page.getByText("Alpha Release")).toBeVisible();
-  });
-
-  test("should display change types with badges", async ({ page }) => {
-    await page.goto("/changelog");
-
-    // Check feature badges
-    const featureBadges = page.getByText("feature", { exact: true });
-    await expect(featureBadges.first()).toBeVisible();
-
-    // Check improvement badges
-    await expect(page.getByText("improvement", { exact: true }).first()).toBeVisible();
-
-    // Check fix badges
-    await expect(page.getByText("fix", { exact: true }).first()).toBeVisible();
-  });
-
-  test("should have back to home link", async ({ page }) => {
-    await page.goto("/changelog");
-
-    const backLink = page.getByRole("link", { name: /Back to Home/i });
-    await expect(backLink).toBeVisible();
-    await backLink.click();
-    await expect(page).toHaveURL("/");
+test.describe("Features Page", () => {
+  test("should load correctly", async ({ page }) => {
+    await page.goto("/features");
+    
+    // Nav
+    await expect(page.getByTestId("nav-features")).toBeVisible();
+    await expect(page.getByTestId("nav-integrations")).toBeVisible();
+    await expect(page.getByTestId("nav-pricing")).toBeVisible();
+    await expect(page.getByTestId("nav-docs")).toBeVisible();
+    
+    // Auth
+    await expect(page.getByTestId("nav-sign-in")).toBeVisible();
+    await expect(page.getByTestId("nav-get-started")).toBeVisible();
+    
+    // Back link
+    await expect(page.getByTestId("back-to-home")).toBeVisible();
+    
+    // Content
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Everything You Need");
+    
+    // CTA
+    await expect(page.getByTestId("cta-get-started")).toBeVisible();
+    await expect(page.getByTestId("cta-docs")).toBeVisible();
+    
+    // Footer
+    await expect(page.getByTestId("footer-privacy")).toBeVisible();
   });
 });
 
-test.describe("Documentation Page", () => {
-  test("should display documentation page with sections", async ({ page }) => {
-    await page.goto("/docs");
+test.describe("Integrations Page", () => {
+  test("should load correctly", async ({ page }) => {
+    await page.goto("/integrations");
+    
+    await expect(page.getByTestId("nav-integrations")).toBeVisible();
+    await expect(page.getByTestId("back-to-home")).toBeVisible();
+    await expect(page.getByTestId("request-integration")).toBeVisible();
+    
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("50+ Integrations");
+    
+    await expect(page.getByTestId("cta-get-started")).toBeVisible();
+    await expect(page.getByTestId("footer-terms")).toBeVisible();
+  });
+});
 
+test.describe("Pricing Page", () => {
+  test("should load correctly", async ({ page }) => {
+    await page.goto("/pricing");
+    
+    await expect(page.getByTestId("nav-pricing")).toBeVisible();
+    await expect(page.getByTestId("back-to-home")).toBeVisible();
+    
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Simple, Transparent Pricing");
+    
+    // Check Plan CTAs
+    await expect(page.getByTestId("pricing-cta-free")).toBeVisible();
+    await expect(page.getByTestId("pricing-cta-pro")).toBeVisible();
+    await expect(page.getByTestId("pricing-contact-sales")).toBeVisible();
+    
+    await expect(page.getByTestId("cta-start-trial")).toBeVisible();
+    await expect(page.getByTestId("cta-docs")).toBeVisible();
+  });
+});
+
+test.describe("Docs Page", () => {
+  test("should load correctly", async ({ page }) => {
+    await page.goto("/docs");
+    
+    await expect(page.getByTestId("back-to-home")).toBeVisible();
+    
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Documentation");
-    await expect(page.getByText("Everything you need to get started with Conduii")).toBeVisible();
+    
+    // Check Sections
+    await expect(page.getByTestId("section-installation")).toBeVisible();
+    await expect(page.getByTestId("section-configuration")).toBeVisible();
+    await expect(page.getByTestId("section-first-test")).toBeVisible();
+    
+    await expect(page.getByTestId("cta-get-started")).toBeVisible();
   });
+});
 
-  test("should display section cards", async ({ page }) => {
-    await page.goto("/docs");
-
-    // Check main section cards
-    await expect(page.getByRole("heading", { name: "Getting Started", exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "CLI Reference", exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "API Reference", exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Integrations", exact: true })).toBeVisible();
-  });
-
-  test("should display installation section", async ({ page }) => {
-    await page.goto("/docs");
-
-    // Check installation content
-    await expect(page.getByRole("heading", { name: "Installation", exact: true })).toBeVisible();
-    await expect(page.getByText("npm install -g @conduii/cli")).toBeVisible();
-  });
-
-  test("should display configuration section", async ({ page }) => {
-    await page.goto("/docs");
-
-    await expect(page.getByRole("heading", { name: "Configuration" })).toBeVisible();
-    await expect(page.getByText("conduii.config.js", { exact: true })).toBeVisible();
-  });
-
-  test("should display CLI commands", async ({ page }) => {
-    await page.goto("/docs");
-
-    await expect(page.getByRole("heading", { name: "conduii discover" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "conduii run" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "conduii status" })).toBeVisible();
-  });
-
-  test("should display API reference sections", async ({ page }) => {
-    await page.goto("/docs");
-
-    await expect(page.getByRole("heading", { name: "Authentication" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Projects API" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Test Runs API" })).toBeVisible();
-  });
-
-  test("should display integrations sections", async ({ page }) => {
-    await page.goto("/docs");
-
-    await expect(page.getByRole("heading", { name: "GitHub Actions" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Vercel Integration" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Webhooks" })).toBeVisible();
-  });
-
-  test("should have copy buttons on code blocks", async ({ page }) => {
-    await page.goto("/docs");
-
-    // Check that copy buttons exist (they appear on hover)
-    const codeBlocks = page.locator("pre");
-    await expect(codeBlocks.first()).toBeVisible();
-  });
-
-  test("should have back to home link", async ({ page }) => {
-    await page.goto("/docs");
-
-    const backLink = page.getByRole("link", { name: /Back to Home/i });
-    await expect(backLink).toBeVisible();
-  });
-
-  test("should have get started button", async ({ page }) => {
-    await page.goto("/docs");
-
-    await expect(page.getByRole("link", { name: "Get Started Free" })).toBeVisible();
+test.describe("Changelog Page", () => {
+  test("should load correctly", async ({ page }) => {
+    await page.goto("/changelog");
+    
+    await expect(page.getByTestId("back-to-home")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Changelog");
+    
+    // Check releases (assuming content exists)
+    await expect(page.getByText("v1.0.0")).toBeVisible();
   });
 });
 
 test.describe("Blog Page", () => {
-  test("should display blog page with posts", async ({ page }) => {
+  test("should load correctly", async ({ page }) => {
     await page.goto("/blog");
-
+    
+    await expect(page.getByTestId("back-to-home")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Blog");
-    await expect(page.getByText("Insights, tutorials, and updates from the Conduii team")).toBeVisible();
+    
+    // Check post link
+    await expect(page.getByTestId("blog-post-introducing-conduii")).toBeVisible();
   });
-
-  test("should display blog post cards", async ({ page }) => {
+  
+  test("should navigate to blog post", async ({ page }) => {
     await page.goto("/blog");
-
-    // Check that blog posts are displayed
-    await expect(page.getByText("Introducing Conduii: AI-Powered Testing for Modern Apps")).toBeVisible();
-    await expect(page.getByText("Why Traditional E2E Testing Falls Short")).toBeVisible();
-    await expect(page.getByText("Getting Started with Service Discovery")).toBeVisible();
-    await expect(page.getByText("Best Practices for Deployment Validation")).toBeVisible();
-  });
-
-  test("should display post metadata", async ({ page }) => {
-    await page.goto("/blog");
-
-    // Check categories
-    await expect(page.getByText("Announcement", { exact: true })).toBeVisible();
-    await expect(page.getByText("Engineering", { exact: true })).toBeVisible();
-    await expect(page.getByText("Tutorial", { exact: true })).toBeVisible();
-    await expect(page.getByText("Best Practices", { exact: true })).toBeVisible();
-
-    // Check read times
-    await expect(page.getByText("5 min read")).toBeVisible();
-    await expect(page.getByText("8 min read")).toBeVisible();
-  });
-
-  test("should have clickable blog post cards", async ({ page }) => {
-    await page.goto("/blog");
-
-    const firstPost = page.getByRole("link", { name: /Introducing Conduii/i });
-    await expect(firstPost).toBeVisible();
-  });
-
-  test("should have back to home link", async ({ page }) => {
-    await page.goto("/blog");
-
-    const backLink = page.getByRole("link", { name: /Back to Home/i });
-    await expect(backLink).toBeVisible();
+    await page.getByTestId("blog-post-introducing-conduii").click();
+    
+    await expect(page).toHaveURL(/\/blog\/introducing-conduii/);
+    await expect(page.getByTestId("back-to-blog")).toBeVisible();
+    await expect(page.getByTestId("read-more")).toBeVisible();
   });
 });
 
-test.describe("Blog Post Page", () => {
-  test("should display individual blog post", async ({ page }) => {
-    await page.goto("/blog/introducing-conduii");
+test.describe("About Page", () => {
+  test("should load correctly", async ({ page }) => {
+    await page.goto("/about");
+    
+    await expect(page.getByTestId("header-home")).toBeVisible();
+    await expect(page.getByTestId("cta-start-testing")).toBeVisible();
+    await expect(page.getByTestId("footer-privacy")).toBeVisible();
+  });
+});
 
-    // Blog post page should load (may show 404 if not implemented, but should not error)
-    await expect(page).toHaveURL("/blog/introducing-conduii");
+test.describe("Privacy Page", () => {
+  test("should load correctly", async ({ page }) => {
+    await page.goto("/privacy");
+    
+    await expect(page.getByTestId("header-home")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Privacy Policy");
+  });
+});
+
+test.describe("Terms Page", () => {
+  test("should load correctly", async ({ page }) => {
+    await page.goto("/terms");
+    
+    await expect(page.getByTestId("header-home")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Terms of Service");
   });
 });

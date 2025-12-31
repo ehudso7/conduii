@@ -102,7 +102,7 @@ export default async function DashboardLayout({
         <aside className="fixed inset-y-0 left-0 z-50 w-72 hidden lg:flex lg:flex-col sidebar-futuristic border-r">
           {/* Logo Section */}
           <div className="flex items-center gap-3 px-6 h-16">
-            <Link href="/dashboard" className="flex items-center gap-3 group">
+            <Link href="/dashboard" className="flex items-center gap-3 group" data-testid="dashboard-sidebar-logo">
               <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-teal-400 flex items-center justify-center shadow-lg group-hover:shadow-primary/25 transition-shadow">
                 <Zap className="w-5 h-5 text-white" />
                 <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -125,6 +125,7 @@ export default async function DashboardLayout({
                 key={item.name}
                 href={item.href}
                 className="nav-item-futuristic"
+                data-testid={`dashboard-nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
               >
                 <item.icon className="w-5 h-5" />
                 <span className="font-medium">{item.name}</span>
@@ -141,6 +142,7 @@ export default async function DashboardLayout({
                     key={project.id}
                     href={`/dashboard/projects/${project.id}`}
                     className="nav-item-futuristic"
+                    data-testid={`dashboard-project-link`}
                   >
                     <div className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
                       {project.name.charAt(0).toUpperCase()}
@@ -155,7 +157,7 @@ export default async function DashboardLayout({
           {/* Bottom Section */}
           <div className="p-4 space-y-3">
             {/* Quick Action */}
-            <Link href="/dashboard/projects/new" className="block">
+            <Link href="/dashboard/projects/new" className="block" data-testid="dashboard-new-project">
               <div className="quick-action-btn w-full justify-center">
                 <Plus className="w-4 h-4" />
                 <span>New Project</span>

@@ -17,6 +17,7 @@ export function DashboardSearch() {
     <button
       onClick={open}
       className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted w-full max-w-sm hover:bg-muted/80 transition-colors text-left"
+      data-testid="dashboard-search-trigger"
     >
       <Search className="w-4 h-4 text-muted-foreground" />
       <span className="text-sm text-muted-foreground flex-1">

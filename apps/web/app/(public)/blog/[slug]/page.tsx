@@ -429,6 +429,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <Link
           href="/blog"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-to-blog"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Blog
@@ -536,7 +537,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               </div>
             </div>
             <Link href="/blog">
-              <Button variant="outline">
+              <Button variant="outline" data-testid="read-more">
                 Read More Posts
               </Button>
             </Link>

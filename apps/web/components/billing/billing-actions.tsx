@@ -61,6 +61,7 @@ export function UpgradeButton({
       disabled={loading}
       variant={variant}
       className={className}
+      data-testid="upgrade-button"
     >
       {loading ? "Loading..." : children}
     </Button>
@@ -102,7 +103,7 @@ export function ManageBillingButton({ organizationId }: { organizationId: string
   };
 
   return (
-    <Button onClick={handleManageBilling} disabled={loading} variant="outline">
+    <Button onClick={handleManageBilling} disabled={loading} variant="outline" data-testid="manage-billing-button">
       {loading ? "Loading..." : "Manage Billing"}
     </Button>
   );
@@ -114,7 +115,7 @@ export function ContactSalesButton() {
   };
 
   return (
-    <Button onClick={handleContact} variant="outline" className="w-full mt-6">
+    <Button onClick={handleContact} variant="outline" className="w-full mt-6" data-testid="contact-sales-button">
       Contact Sales
     </Button>
   );

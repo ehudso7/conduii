@@ -116,16 +116,16 @@ export function ProjectActionsDropdown({ projectId, projectName }: ProjectAction
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" data-testid="project-actions-dropdown">
             <MoreVertical className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleDiscover} disabled={discovering}>
+          <DropdownMenuItem onClick={handleDiscover} disabled={discovering} data-testid="discover-services">
             <RefreshCw className={`w-4 h-4 mr-2 ${discovering ? 'animate-spin' : ''}`} />
             {discovering ? "Discovering..." : "Re-discover Services"}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push(`/dashboard/projects/${projectId}/settings`)}>
+          <DropdownMenuItem onClick={() => router.push(`/dashboard/projects/${projectId}/settings`)} data-testid="project-settings">
             <Settings className="w-4 h-4 mr-2" />
             Project Settings
           </DropdownMenuItem>
@@ -133,6 +133,7 @@ export function ProjectActionsDropdown({ projectId, projectName }: ProjectAction
           <DropdownMenuItem
             className="text-red-600"
             onClick={() => setShowDeleteDialog(true)}
+            data-testid="delete-project"
           >
             <Trash2 className="w-4 h-4 mr-2" />
             Delete Project
@@ -217,6 +218,7 @@ export function CheckHealthButton({ projectId }: { projectId: string }) {
       size="sm"
       onClick={handleCheckHealth}
       disabled={loading}
+      data-testid="check-health-button"
     >
       <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
       {loading ? "Checking..." : "Check Health"}
@@ -281,7 +283,7 @@ export function CreateTestSuiteButton({ projectId }: CreateTestSuiteButtonProps)
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setShowDialog(true)}>
+      <Button variant="outline" size="sm" onClick={() => setShowDialog(true)} data-testid="create-test-suite-button">
         <Plus className="w-4 h-4 mr-2" />
         Create Test Suite
       </Button>
@@ -371,7 +373,7 @@ export function RunTestSuiteButton({ projectId, suiteId }: { projectId: string; 
   };
 
   return (
-    <Button variant="ghost" size="sm" onClick={handleRun} disabled={loading}>
+    <Button variant="ghost" size="sm" onClick={handleRun} disabled={loading} data-testid={`run-test-suite-button-${suiteId}`}>
       <Play className={`w-4 h-4 mr-1 ${loading ? 'animate-pulse' : ''}`} />
       {loading ? "Starting..." : "Run"}
     </Button>

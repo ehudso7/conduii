@@ -158,7 +158,7 @@ export default async function ProjectDetailPage({
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
           <Link href="/dashboard/projects">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" data-testid="back-to-projects">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
@@ -202,7 +202,7 @@ export default async function ProjectDetailPage({
         </div>
         <div className="flex items-center gap-2">
           <Link href={`/dashboard/projects/${project.id}/runs`}>
-            <Button>
+            <Button data-testid="run-tests-header">
               <Play className="w-4 h-4 mr-2" />
               Run Tests
             </Button>
@@ -300,6 +300,7 @@ export default async function ProjectDetailPage({
                   <div
                     key={service.id}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                    data-testid={`service-item-${service.id}`}
                   >
                     <div className="flex items-center gap-3">
                       {getServiceStatusIcon(service.status)}
@@ -344,7 +345,7 @@ export default async function ProjectDetailPage({
                 <CardDescription>Latest test execution results</CardDescription>
               </div>
               <Link href={`/dashboard/projects/${project.id}/runs`}>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" data-testid="view-all-runs">
                   View All
                 </Button>
               </Link>
@@ -373,6 +374,7 @@ export default async function ProjectDetailPage({
                       key={run.id}
                       href={`/dashboard/projects/${project.id}/runs/${run.id}`}
                       className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      data-testid={`run-item-${run.id}`}
                     >
                       <div className="flex items-center gap-3">
                         {run.status === "PASSED" ? (
@@ -552,6 +554,7 @@ export default async function ProjectDetailPage({
                 <div
                   key={suite.id}
                   className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
+                  data-testid={`test-suite-${suite.id}`}
                 >
                   <div className="flex items-start justify-between">
                     <div>

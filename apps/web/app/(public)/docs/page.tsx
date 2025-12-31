@@ -109,6 +109,7 @@ export default function DocsPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-to-home"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -144,6 +145,7 @@ export default function DocsPage() {
                       <button
                         onClick={() => scrollToSection(link.href)}
                         className="text-sm text-muted-foreground hover:text-primary transition flex items-center gap-2 w-full text-left"
+                        data-testid={`section-${link.href}`}
                       >
                         <ChevronRight className="w-4 h-4" />
                         {link.title}
@@ -466,7 +468,7 @@ jobs:
         <div className="text-center pt-8 border-t">
           <p className="text-muted-foreground mb-4">Ready to get started?</p>
           <Link href="/sign-up">
-            <Button size="lg">Get Started Free</Button>
+            <Button size="lg" data-testid="cta-get-started">Get Started Free</Button>
           </Link>
         </div>
       </div>

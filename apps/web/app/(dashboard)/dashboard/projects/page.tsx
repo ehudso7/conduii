@@ -74,7 +74,7 @@ export default async function ProjectsPage() {
           </p>
         </div>
         <Link href="/dashboard/projects/new">
-          <Button className="gap-2">
+          <Button className="gap-2" data-testid="new-project-button">
             <Plus className="w-4 h-4" />
             New Project
           </Button>
@@ -93,7 +93,7 @@ export default async function ProjectsPage() {
             tests on your deployed applications.
           </p>
           <Link href="/dashboard/projects/new">
-            <Button className="gap-2">
+            <Button className="gap-2" data-testid="empty-state-new-project">
               <Plus className="w-4 h-4" />
               Create Your First Project
             </Button>
@@ -154,7 +154,7 @@ export default async function ProjectsPage() {
               };
 
               return (
-                <div key={project.id} className="project-card-futuristic group">
+                <div key={project.id} className="project-card-futuristic group" data-testid={`project-card-${project.id}`}>
                   <div className="p-6">
                     {/* Header */}
                     <div className="flex items-start justify-between mb-4">
@@ -234,13 +234,13 @@ export default async function ProjectsPage() {
                     {/* Actions */}
                     <div className="flex items-center gap-2">
                       <Link href={`/dashboard/projects/${project.id}`} className="flex-1">
-                        <Button variant="outline" className="w-full gap-2 group-hover:border-primary/30 transition-colors">
+                        <Button variant="outline" className="w-full gap-2 group-hover:border-primary/30 transition-colors" data-testid={`view-project-${project.id}`}>
                           View Details
                           <ArrowRight className="w-4 h-4" />
                         </Button>
                       </Link>
                       <Link href={`/dashboard/projects/${project.id}/runs`}>
-                        <Button size="icon" className="shrink-0">
+                        <Button size="icon" className="shrink-0" data-testid={`run-tests-${project.id}`}>
                           <Play className="w-4 h-4" />
                         </Button>
                       </Link>
@@ -251,7 +251,7 @@ export default async function ProjectsPage() {
             })}
 
             {/* Add New Project Card */}
-            <Link href="/dashboard/projects/new" className="block">
+            <Link href="/dashboard/projects/new" className="block" data-testid="new-project-card">
               <div className="h-full min-h-[300px] rounded-2xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 flex flex-col items-center justify-center cursor-pointer group">
                 <div className="w-16 h-16 rounded-2xl bg-muted/50 group-hover:bg-primary/10 flex items-center justify-center mb-4 transition-colors">
                   <Plus className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />

@@ -36,7 +36,7 @@ export function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
+        <Button variant="ghost" size="icon" className="md:hidden" data-testid="mobile-menu-trigger">
           <Menu className="w-5 h-5" />
           <span className="sr-only">Open menu</span>
         </Button>
@@ -64,6 +64,7 @@ export function MobileNav() {
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
+                data-testid={`mobile-nav-${item.name.toLowerCase()}`}
               >
                 <item.icon className="w-5 h-5" />
                 {item.name}
@@ -72,7 +73,7 @@ export function MobileNav() {
           })}
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
-          <Link href="/dashboard/projects/new" onClick={() => setOpen(false)}>
+          <Link href="/dashboard/projects/new" onClick={() => setOpen(false)} data-testid="mobile-new-project">
             <Button className="w-full" variant="outline">
               <Plus className="w-4 h-4 mr-2" />
               New Project

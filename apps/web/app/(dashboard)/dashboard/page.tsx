@@ -159,25 +159,25 @@ export default async function DashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="/dashboard/insights">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" data-testid="header-ai-insights">
               <Brain className="w-4 h-4" />
               AI Insights
             </Button>
           </Link>
           <Link href="/dashboard/generate">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" data-testid="header-generate-tests">
               <Sparkles className="w-4 h-4" />
               Generate Tests
             </Button>
           </Link>
           <Link href="/dashboard/projects/new">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" data-testid="header-new-project">
               <Layers className="w-4 h-4" />
               New Project
             </Button>
           </Link>
           <Link href="/dashboard/projects">
-            <Button className="gap-2">
+            <Button className="gap-2" data-testid="header-run-tests">
               <Play className="w-4 h-4" />
               Run Tests
             </Button>
@@ -295,6 +295,7 @@ export default async function DashboardPage() {
                     key={project.id}
                     href={`/dashboard/projects/${project.id}`}
                     className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/50 transition-colors group"
+                    data-testid={`active-project-${project.id}`}
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">

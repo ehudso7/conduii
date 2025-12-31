@@ -16,17 +16,17 @@ export default function PrivacyPage() {
             Conduii
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-muted-foreground hover:text-foreground">
+            <Link href="/" className="text-muted-foreground hover:text-foreground" data-testid="header-home">
               Back to Home
             </Link>
-            <Link href="/docs" className="text-muted-foreground hover:text-foreground">
+            <Link href="/docs" className="text-muted-foreground hover:text-foreground" data-testid="header-docs">
               Docs
             </Link>
             <Link href="/sign-in">
-              <Button variant="ghost">Sign In</Button>
+              <Button variant="ghost" data-testid="header-sign-in">Sign In</Button>
             </Link>
             <Link href="/sign-up">
-              <Button>Get Started</Button>
+              <Button data-testid="header-get-started">Get Started</Button>
             </Link>
           </nav>
         </div>
@@ -165,13 +165,13 @@ export default function PrivacyPage() {
               &copy; {new Date().getFullYear()} Conduii. All rights reserved.
             </div>
             <div className="flex items-center gap-6 text-sm">
-              <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
+              <Link href="/privacy" className="text-muted-foreground hover:text-foreground" data-testid="footer-privacy">
                 Privacy
               </Link>
-              <Link href="/terms" className="text-muted-foreground hover:text-foreground">
+              <Link href="/terms" className="text-muted-foreground hover:text-foreground" data-testid="footer-terms">
                 Terms
               </Link>
-              <Link href="/docs" className="text-muted-foreground hover:text-foreground">
+              <Link href="/docs" className="text-muted-foreground hover:text-foreground" data-testid="footer-docs">
                 Documentation
               </Link>
             </div>

@@ -17,6 +17,7 @@ export default function SignUpPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          data-testid="back-to-home"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -53,12 +54,14 @@ export default function SignUpPage() {
               <Link
                 href="/"
                 className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
+                data-testid="back-to-home-button"
               >
                 Back to home
               </Link>
               <Link
                 href="/sign-in"
                 className="inline-flex items-center justify-center rounded-md border px-4 py-2 hover:bg-muted/50"
+                data-testid="go-to-sign-in-link"
               >
                 Go to sign in
               </Link>
