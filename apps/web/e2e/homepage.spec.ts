@@ -109,7 +109,7 @@ test.describe("Public Pages", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       "About Conduii"
     );
-    await expect(page.getByText(/AI-Powered Testing platform/i)).toBeVisible();
+    await expect(page.getByText(/AI-powered platform/i)).toBeVisible();
   });
 
   test("privacy page loads correctly", async ({ page }) => {
