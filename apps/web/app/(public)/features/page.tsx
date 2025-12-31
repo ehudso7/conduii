@@ -90,27 +90,27 @@ export default function FeaturesPage() {
       <nav className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Logo size="md" />
+            <Logo size="md" data-testid="logo" />
             <div className="hidden md:flex items-center gap-8">
-              <Link href="/features" className="text-sm font-medium">
+              <Link href="/features" className="text-sm font-medium" data-testid="nav-features">
                 Features
               </Link>
-              <Link href="/integrations" className="text-sm text-muted-foreground hover:text-foreground transition">
+              <Link href="/integrations" className="text-sm text-muted-foreground hover:text-foreground transition" data-testid="nav-integrations">
                 Integrations
               </Link>
-              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition">
+              <Link href="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition" data-testid="nav-pricing">
                 Pricing
               </Link>
-              <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition">
+              <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition" data-testid="nav-docs">
                 Docs
               </Link>
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <Button asChild variant="ghost" size="sm">
+              <Button asChild variant="ghost" size="sm" data-testid="nav-sign-in">
                 <Link href="/sign-in">Sign In</Link>
               </Button>
-              <Button asChild size="sm">
+              <Button asChild size="sm" data-testid="nav-get-started">
                 <Link href="/sign-up">Get Started</Link>
               </Button>
             </div>
@@ -123,6 +123,7 @@ export default function FeaturesPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-to-home"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -147,7 +148,7 @@ export default function FeaturesPage() {
           <h2 className="text-2xl font-bold mb-8 text-center">Core Features</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {coreFeatures.map((feature) => (
-              <Card key={feature.title} className="hover:shadow-lg transition-shadow">
+              <Card key={feature.title} className="hover:shadow-lg transition-shadow" data-testid={`feature-card-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}>
                 <CardHeader>
                   <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                     <feature.icon className="w-6 h-6 text-primary" />
@@ -234,13 +235,13 @@ export default function FeaturesPage() {
             Start testing your deployments in minutes.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button asChild size="lg">
+            <Button asChild size="lg" data-testid="features-cta">
               <Link href="/sign-up">
                 Get Started Free
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <Button asChild variant="outline" size="lg" data-testid="features-docs-cta">
               <Link href="/docs">Read the Docs</Link>
             </Button>
           </div>
