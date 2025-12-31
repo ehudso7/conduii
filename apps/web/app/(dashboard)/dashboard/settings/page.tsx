@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { User, Building2, Key, Bell, Shield } from "lucide-react";
+import { User, Building2, Key, Bell, Shield, Sparkles } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -17,6 +17,7 @@ import {
   NotificationSettings,
   DangerZone,
 } from "@/components/settings";
+import { SmartConfigRecommendations } from "@/components/settings/smart-config";
 
 async function getUserSettings(userId: string) {
   const user = await db.user.findUnique({
@@ -199,6 +200,22 @@ export default async function SettingsPage() {
           </CardHeader>
           <CardContent>
             <NotificationSettings />
+          </CardContent>
+        </Card>
+
+        {/* AI-Powered Configuration Recommendations */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <CardTitle>Smart Recommendations</CardTitle>
+            </div>
+            <CardDescription>
+              AI-powered suggestions to optimize your testing workflow
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SmartConfigRecommendations />
           </CardContent>
         </Card>
 
