@@ -13,10 +13,15 @@ import {
   BarChart3,
   Timer,
   Layers,
+  Brain,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { getAuthUser } from "@/lib/auth";
+import { AIInsights } from "@/components/dashboard/ai-insights";
+import { QuickStats } from "@/components/dashboard/quick-stats";
+import { ActivityFeed } from "@/components/dashboard/activity-feed";
 
 async function getDashboardData(userId: string) {
   try {
@@ -149,10 +154,22 @@ export default async function DashboardPage() {
           <p className="text-sm font-medium text-primary uppercase tracking-wider">Overview</p>
           <h1 className="text-4xl font-bold tracking-tight">Command Center</h1>
           <p className="text-muted-foreground">
-            Real-time testing metrics and activity across all projects
+            AI-powered testing metrics and activity across all projects
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Link href="/dashboard/insights">
+            <Button variant="outline" className="gap-2">
+              <Brain className="w-4 h-4" />
+              AI Insights
+            </Button>
+          </Link>
+          <Link href="/dashboard/generate">
+            <Button variant="outline" className="gap-2">
+              <Sparkles className="w-4 h-4" />
+              Generate Tests
+            </Button>
+          </Link>
           <Link href="/dashboard/projects/new">
             <Button variant="outline" className="gap-2">
               <Layers className="w-4 h-4" />
@@ -167,6 +184,9 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* AI-Powered Quick Stats */}
+      <QuickStats />
 
       {/* Primary Metrics - Large asymmetric cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -381,20 +401,43 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick Stats Footer */}
-      <div className="glow-line" />
-      <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
-            <span>{stats.passedRuns} passed</span>
+      {/* AI Insights Section */}
+      <AIInsights />
+
+      {/* Activity Feed */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ActivityFeed />
+        
+        {/* Quick Stats Footer */}
+        <div className="stat-card">
+          <h3 className="font-semibold text-lg mb-4">Summary</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                <span className="font-medium">Passed Tests</span>
+              </div>
+              <span className="text-2xl font-bold text-green-600">{stats.passedRuns}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-red-500/10">
+              <div className="flex items-center gap-2">
+                <XCircle className="w-5 h-5 text-red-500" />
+                <span className="font-medium">Failed Tests</span>
+              </div>
+              <span className="text-2xl font-bold text-red-600">{stats.failedRuns}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-500" />
+                <span className="font-medium">Pass Rate</span>
+              </div>
+              <span className="text-2xl font-bold text-blue-600">{stats.passRate}%</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <XCircle className="w-4 h-4 text-red-500" />
-            <span>{stats.failedRuns} failed</span>
+          <div className="mt-6 pt-4 border-t text-center text-sm text-muted-foreground">
+            <p>Last updated: {new Date().toLocaleTimeString()}</p>
           </div>
         </div>
-        <p>Last updated: {new Date().toLocaleTimeString()}</p>
       </div>
     </div>
   );

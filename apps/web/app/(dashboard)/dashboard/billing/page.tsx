@@ -25,6 +25,7 @@ import {
   UpgradePromptCard,
   InvoiceList,
 } from "@/components/billing";
+import { UsageAnalytics } from "@/components/billing/usage-analytics";
 
 async function getBillingData(userId: string) {
   const user = await db.user.findUnique({
@@ -180,6 +181,9 @@ export default async function BillingPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* AI-Powered Usage Analytics */}
+        <UsageAnalytics />
 
         {/* Plan Comparison */}
         <div className="grid gap-6 md:grid-cols-3">
