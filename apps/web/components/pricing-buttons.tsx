@@ -12,7 +12,7 @@ export function PricingButton({ cta, popular }: PricingButtonProps) {
   // Contact Sales links to mailto
   if (cta === "Contact Sales") {
     return (
-      <Button asChild className="w-full" variant="outline">
+      <Button asChild className="w-full" variant="outline" data-testid="pricing-enterprise-cta">
         <Link href="mailto:sales@conduii.com?subject=Enterprise%20Inquiry">
           {cta}
         </Link>
@@ -21,8 +21,9 @@ export function PricingButton({ cta, popular }: PricingButtonProps) {
   }
 
   // All other CTAs link to sign-up
+  const testId = cta === "Get Started" ? "pricing-free-cta" : "pricing-pro-cta";
   return (
-    <Button asChild className="w-full" variant={popular ? "gradient" : "outline"}>
+    <Button asChild className="w-full" variant={popular ? "gradient" : "outline"} data-testid={testId}>
       <Link href="/sign-up">
         {cta}
       </Link>

@@ -6,6 +6,7 @@ interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
   linkToHome?: boolean;
+  "data-testid"?: string;
 }
 
 const sizeClasses = {
@@ -25,9 +26,10 @@ export function Logo({
   size = "md",
   showText = true,
   linkToHome = true,
+  "data-testid": testId,
 }: LogoProps) {
   const content = (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-2", className)} data-testid={testId}>
       <div
         className={cn(
           "relative rounded-lg overflow-hidden flex-shrink-0",
