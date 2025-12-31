@@ -2,6 +2,18 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
+    <div className="min-h-screen bg-background">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Logo size="md" />
+
+            <div className="hidden md:flex items-center gap-8">
+              <SmoothScrollLink href="#features" className="nav-link">
+                Features
+              </SmoothScrollLink>
+              <SmoothScrollLink href="#integrations" className="nav-link">
     <main className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
