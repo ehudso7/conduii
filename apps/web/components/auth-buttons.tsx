@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -80,27 +81,6 @@ function NavAuthButtonsInner() {
   }
 
   return <SimpleAuthButtons />;
-  // Use redirect mode instead of modal to avoid stuck loading states
-  return (
-    <div className="flex items-center gap-4">
-      <Button asChild variant="ghost" size="sm">
-        <Link href="/sign-in">Sign In</Link>
-      </Button>
-      <Button asChild size="sm">
-        <Link href="/sign-up">Get Started</Link>
-      </Button>
-      <SignInButton mode="redirect" redirectUrl="/dashboard">
-        <Button variant="ghost" size="sm">
-          Sign In
-        </Button>
-      </SignInButton>
-      <SignUpButton mode="redirect" redirectUrl="/dashboard">
-        <Button size="sm">
-          Get Started
-        </Button>
-      </SignUpButton>
-    </div>
-  );
 }
 
 export function NavAuthButtons() {
@@ -165,16 +145,6 @@ function HeroAuthButtonsInner() {
   }
 
   return <SimpleHeroButton />;
-  // Use link instead of modal to avoid stuck states
-  return <SimpleHeroButton />;
-  return (
-    <SignUpButton mode="redirect" redirectUrl="/dashboard">
-      <Button size="xl" variant="gradient" className="group">
-        Start Testing Free
-        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-      </Button>
-    </SignUpButton>
-  );
 }
 
 export function HeroAuthButtons() {
@@ -242,16 +212,6 @@ function CTAAuthButtonsInner() {
   }
 
   return <SimpleCTAButton />;
-  // Use link instead of modal to avoid stuck states
-  return <SimpleCTAButton />;
-  return (
-    <SignUpButton mode="redirect" redirectUrl="/dashboard">
-      <Button size="xl" variant="gradient" className="group">
-        Get Started for Free
-        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
-      </Button>
-    </SignUpButton>
-  );
 }
 
 export function CTAAuthButtons() {
