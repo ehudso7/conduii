@@ -3,6 +3,11 @@ import { ArrowLeft, Calendar, Clock, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+export const metadata = {
+  title: "Blog - Conduii",
+  description: "Insights, tutorials, and updates from the Conduii team",
+};
+
 const posts = [
   {
     title: "Introducing Conduii: AI-Powered Testing for Modern Apps",
@@ -45,6 +50,7 @@ export default function BlogPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-to-home-link"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home

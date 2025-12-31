@@ -2,6 +2,11 @@ import Link from "next/link";
 import { ArrowLeft, Sparkles, Bug, Zap, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+export const metadata = {
+  title: "Changelog - Conduii",
+  description: "All the latest updates, improvements, and fixes to Conduii",
+};
+
 const releases = [
   {
     version: "1.0.0",
@@ -77,6 +82,7 @@ export default function ChangelogPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-to-home-link"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home

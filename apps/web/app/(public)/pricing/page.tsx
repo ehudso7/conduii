@@ -126,6 +126,7 @@ export default function PricingPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-to-home-link"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -181,13 +182,13 @@ export default function PricingPage() {
                   ))}
                 </ul>
                 {plan.cta === "Contact Sales" ? (
-                  <Button asChild className="w-full" variant="outline">
+                  <Button asChild className="w-full" variant="outline" data-testid="pricing-enterprise-cta">
                     <Link href="mailto:sales@conduii.com?subject=Enterprise%20Inquiry">
                       {plan.cta}
                     </Link>
                   </Button>
                 ) : (
-                  <Button asChild className="w-full" variant={plan.popular ? "default" : "outline"}>
+                  <Button asChild className="w-full" variant={plan.popular ? "default" : "outline"} data-testid={plan.cta === "Start Free Trial" ? "pricing-pro-cta" : "pricing-free-cta"}>
                     <Link href="/sign-up">
                       {plan.cta}
                     </Link>

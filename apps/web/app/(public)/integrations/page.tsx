@@ -146,6 +146,7 @@ export default function IntegrationsPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-to-home-link"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -239,7 +240,7 @@ export default function IntegrationsPage() {
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
             We're constantly adding new integrations. Let us know what services you use and we'll prioritize adding support.
           </p>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" data-testid="request-integration-link">
             <Link href="mailto:support@conduii.com?subject=Integration%20Request">
               Request an Integration
             </Link>
@@ -253,7 +254,7 @@ export default function IntegrationsPage() {
             Conduii discovers your services automatically. No configuration required.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button asChild size="lg">
+            <Button asChild size="lg" data-testid="integrations-cta-signup">
               <Link href="/sign-up">
                 Get Started Free
                 <ArrowRight className="ml-2 w-4 h-4" />

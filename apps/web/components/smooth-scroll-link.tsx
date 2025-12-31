@@ -8,9 +8,10 @@ interface SmoothScrollLinkProps {
   href: string;
   children: ReactNode;
   className?: string;
+  "data-testid"?: string;
 }
 
-export function SmoothScrollLink({ href, children, className }: SmoothScrollLinkProps) {
+export function SmoothScrollLink({ href, children, className, "data-testid": dataTestId }: SmoothScrollLinkProps) {
   const pathname = usePathname();
   const isHashLink = href.startsWith("#");
   const isSamePage = pathname === "/" && isHashLink;
@@ -40,7 +41,7 @@ export function SmoothScrollLink({ href, children, className }: SmoothScrollLink
   // For hash links on homepage, use anchor tag directly
   if (isSamePage) {
     return (
-      <a href={href} className={className} onClick={handleClick}>
+      <a href={href} className={className} onClick={handleClick} data-testid={dataTestId}>
         {children}
       </a>
     );
@@ -48,7 +49,7 @@ export function SmoothScrollLink({ href, children, className }: SmoothScrollLink
 
   // For other links, use Next.js Link
   return (
-    <Link href={href} className={className}>
+    <Link href={href} className={className} data-testid={dataTestId}>
       {children}
     </Link>
   );

@@ -123,6 +123,7 @@ export default function FeaturesPage() {
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+          data-testid="back-to-home-link"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -234,13 +235,13 @@ export default function FeaturesPage() {
             Start testing your deployments in minutes.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button asChild size="lg">
+            <Button asChild size="lg" data-testid="features-cta-signup">
               <Link href="/sign-up">
                 Get Started Free
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <Button asChild variant="outline" size="lg" data-testid="features-cta-docs">
               <Link href="/docs">Read the Docs</Link>
             </Button>
           </div>

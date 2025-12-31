@@ -29,10 +29,10 @@ function SimpleAuthButtons() {
   const nav = useAuthNav();
   return (
     <div className="flex items-center gap-4">
-      <Button variant="ghost" size="sm" onClick={nav.goToSignIn}>
+      <Button variant="ghost" size="sm" onClick={nav.goToSignIn} data-testid="nav-sign-in-btn">
         Sign In
       </Button>
-      <Button size="sm" onClick={nav.goToSignUp}>
+      <Button size="sm" onClick={nav.goToSignUp} data-testid="nav-get-started-btn">
         Get Started
       </Button>
     </div>
@@ -72,7 +72,7 @@ function NavAuthButtonsInner() {
   if (isSignedIn) {
     return (
       <div className="flex items-center gap-4">
-        <Button size="sm" onClick={nav.goToDashboard}>
+        <Button size="sm" onClick={nav.goToDashboard} data-testid="nav-dashboard-btn">
           Dashboard
         </Button>
         <UserButton afterSignOutUrl="/" />
@@ -102,6 +102,7 @@ function SimpleHeroButton() {
       variant="gradient"
       className="group"
       onClick={() => router.push("/sign-up")}
+      data-testid="hero-cta-primary"
     >
       Start Testing Free
       <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
@@ -137,7 +138,7 @@ function HeroAuthButtonsInner() {
 
   if (isSignedIn) {
     return (
-      <Button size="xl" variant="gradient" className="group" onClick={nav.goToDashboard}>
+      <Button size="xl" variant="gradient" className="group" onClick={nav.goToDashboard} data-testid="hero-cta-dashboard">
         Go to Dashboard
         <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
       </Button>
@@ -151,7 +152,7 @@ export function HeroAuthButtons() {
   return (
     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
       {!isClerkConfigured ? <SimpleHeroButton /> : <HeroAuthButtonsInner />}
-      <Button size="xl" variant="outline" asChild>
+      <Button size="xl" variant="outline" asChild data-testid="hero-cta-docs">
         <Link href="/docs">
           View Documentation
         </Link>
@@ -169,6 +170,7 @@ function SimpleCTAButton() {
       variant="gradient"
       className="group"
       onClick={() => router.push("/sign-up")}
+      data-testid="cta-get-started"
     >
       Get Started for Free
       <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
@@ -204,7 +206,7 @@ function CTAAuthButtonsInner() {
 
   if (isSignedIn) {
     return (
-      <Button size="xl" variant="gradient" className="group" onClick={nav.goToDashboard}>
+      <Button size="xl" variant="gradient" className="group" onClick={nav.goToDashboard} data-testid="cta-dashboard">
         Go to Dashboard
         <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition" />
       </Button>

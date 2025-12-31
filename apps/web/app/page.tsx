@@ -132,16 +132,16 @@ export default function HomePage() {
             <Logo size="md" />
 
             <div className="hidden md:flex items-center gap-8">
-              <SmoothScrollLink href="#features" className="nav-link">
+              <SmoothScrollLink href="#features" className="nav-link" data-testid="nav-features-link">
                 Features
               </SmoothScrollLink>
-              <SmoothScrollLink href="#integrations" className="nav-link">
+              <SmoothScrollLink href="#integrations" className="nav-link" data-testid="nav-integrations-link">
                 Integrations
               </SmoothScrollLink>
-              <SmoothScrollLink href="#pricing" className="nav-link">
+              <SmoothScrollLink href="#pricing" className="nav-link" data-testid="nav-pricing-link">
                 Pricing
               </SmoothScrollLink>
-              <Link href="/docs" className="nav-link">
+              <Link href="/docs" className="nav-link" data-testid="nav-docs-link">
                 Docs
               </Link>
             </div>
@@ -396,30 +396,30 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4 text-base">Product</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/features" className="hover:text-foreground transition">Features</Link></li>
-                <li><Link href="/integrations" className="hover:text-foreground transition">Integrations</Link></li>
-                <li><Link href="/pricing" className="hover:text-foreground transition">Pricing</Link></li>
-                <li><Link href="/changelog" className="hover:text-foreground transition">Changelog</Link></li>
+                <li><Link href="/features" className="hover:text-foreground transition" data-testid="footer-features-link">Features</Link></li>
+                <li><Link href="/integrations" className="hover:text-foreground transition" data-testid="footer-integrations-link">Integrations</Link></li>
+                <li><Link href="/pricing" className="hover:text-foreground transition" data-testid="footer-pricing-link">Pricing</Link></li>
+                <li><Link href="/changelog" className="hover:text-foreground transition" data-testid="footer-changelog-link">Changelog</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4 text-base">Resources</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/docs" className="hover:text-foreground transition">Documentation</Link></li>
-                <li><Link href="/docs#cli-discover" className="hover:text-foreground transition">CLI Reference</Link></li>
-                <li><Link href="/docs#api-auth" className="hover:text-foreground transition">API</Link></li>
-                <li><Link href="/blog" className="hover:text-foreground transition">Blog</Link></li>
+                <li><Link href="/docs" className="hover:text-foreground transition" data-testid="footer-docs-link">Documentation</Link></li>
+                <li><Link href="/docs#cli-discover" className="hover:text-foreground transition" data-testid="footer-cli-link">CLI Reference</Link></li>
+                <li><Link href="/docs#api-auth" className="hover:text-foreground transition" data-testid="footer-api-link">API</Link></li>
+                <li><Link href="/blog" className="hover:text-foreground transition" data-testid="footer-blog-link">Blog</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-4 text-base">Company</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:text-foreground transition">About</Link></li>
-                <li><Link href="/privacy" className="hover:text-foreground transition">Privacy</Link></li>
-                <li><Link href="/terms" className="hover:text-foreground transition">Terms</Link></li>
-                <li><Link href="https://github.com/ehudso7/conduii" className="hover:text-foreground transition">GitHub</Link></li>
+                <li><Link href="/about" className="hover:text-foreground transition" data-testid="footer-about-link">About</Link></li>
+                <li><Link href="/privacy" className="hover:text-foreground transition" data-testid="footer-privacy-link">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-foreground transition" data-testid="footer-terms-link">Terms</Link></li>
+                <li><Link href="https://github.com/ehudso7/conduii" className="hover:text-foreground transition" data-testid="footer-github-link" target="_blank" rel="noopener noreferrer">GitHub</Link></li>
               </ul>
             </div>
           </div>

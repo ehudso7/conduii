@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Zap, Users, Globe, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/brand/logo";
 
 export const metadata = {
   title: "About - Conduii",
@@ -13,11 +14,9 @@ export default function AboutPage() {
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold">
-            Conduii
-          </Link>
+          <Logo size="md" />
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-muted-foreground hover:text-foreground">
+            <Link href="/" className="text-muted-foreground hover:text-foreground" data-testid="back-to-home-link">
               Back to Home
             </Link>
             <Link href="/docs" className="text-muted-foreground hover:text-foreground">
