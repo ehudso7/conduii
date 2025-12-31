@@ -39,8 +39,8 @@ export default function AboutPage() {
           About Conduii
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          We're building the future of deployment testing. Our AI-Powered Testing platform
-          helps developers ensure their applications work perfectly, every time.
+          We're building the future of deployment testing. Our AI-powered platform helps
+          developers ensure their applications work perfectly, every time.
         </p>
       </section>
 

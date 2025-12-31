@@ -56,6 +56,62 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
+      </nav>
+
+      <main>
+        {/* Hero Section */}
+        <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center max-w-4xl mx-auto">
+              <Badge variant="secondary" className="mb-6 badge-brand">
+                <Zap className="w-3 h-3 mr-1" />
+                AI-Powered Testing Platform
+              </Badge>
+
+              <h1 className="hero-title mb-6">
+                Test Your Deployments,{" "}
+                <span className="gradient-text">Automatically</span>
+              </h1>
+
+              <p className="hero-subtitle mb-8 mx-auto">
+                Conduii discovers your services, validates connections, and runs comprehensive
+                tests against your live infrastructure. Zero configuration required.
+              </p>
+
+              <HeroAuthButtons />
+
+              {/* Code Preview */}
+              <div className="max-w-2xl mx-auto mt-12">
+                <div className="code-block shadow-2xl">
+                  <div className="code-block-header">
+                    <div className="terminal-dot terminal-dot-red" />
+                    <div className="terminal-dot terminal-dot-yellow" />
+                    <div className="terminal-dot terminal-dot-green" />
+                    <span className="ml-2 text-xs text-slate-400 font-mono">Terminal</span>
+                  </div>
+                  <div className="code-block-content">
+                    <p className="text-slate-500"># Install Conduii CLI</p>
+                    <p className="text-teal-400">
+                      npm install -g @conduii/cli
+                    </p>
+                    <br />
+                    <p className="text-slate-500"># Discover your project</p>
+                    <p className="text-teal-400">$ conduii discover</p>
+                    <p className="text-slate-300">
+                      <span className="text-green-400">&#10003;</span> Found Next.js project<br />
+                      <span className="text-green-400">&#10003;</span> Detected: Vercel, Supabase, Stripe, Clerk<br />
+                      <span className="text-green-400">&#10003;</span> Generated 24 tests
+                    </p>
+                    <br />
+                    <p className="text-slate-500"># Run tests</p>
+                    <p className="text-teal-400">$ conduii run</p>
+                    <p className="text-green-400">
+                      &#10003; All 24 tests passed in 12.4s
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
       </header>
 
       {/* Hero */}
@@ -135,6 +191,49 @@ export default function HomePage() {
               Route alerts to the right channel automatically.
             </p>
           </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <Logo size="md" linkToHome={false} className="mb-4" />
+              <p className="text-sm text-muted-foreground">
+                Deployment testing platform for modern applications.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4 text-base">Product</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/features" className="hover:text-foreground transition">Features</Link></li>
+                <li><Link href="/integrations" className="hover:text-foreground transition">Integrations</Link></li>
+                <li><Link href="/pricing" className="hover:text-foreground transition">Pricing</Link></li>
+                <li><Link href="/changelog" className="hover:text-foreground transition">Changelog</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4 text-base">Resources</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/docs" className="hover:text-foreground transition">Documentation</Link></li>
+                <li><Link href="/docs#cli-discover" className="hover:text-foreground transition">CLI Reference</Link></li>
+                <li><Link href="/docs#api-auth" className="hover:text-foreground transition">API</Link></li>
+                <li><Link href="/blog" className="hover:text-foreground transition">Blog</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4 text-base">Company</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/about" className="hover:text-foreground transition">About</Link></li>
+                <li><Link href="/privacy" className="hover:text-foreground transition">Privacy</Link></li>
+                <li><Link href="/terms" className="hover:text-foreground transition">Terms</Link></li>
+                <li><Link href="https://github.com/ehudso7/conduii" className="hover:text-foreground transition">GitHub</Link></li>
+              </ul>
+            </div>
           <div className="rounded-lg border p-5">
             <h3 className="font-medium">Custom Webhooks</h3>
             <p className="mt-2 text-sm text-muted-foreground">
