@@ -35,8 +35,13 @@ export default clerkConfigured
         "/api/webhooks",
         "/api/webhooks/(.*)",
         "/api/health",
+        "/sitemap.xml",
+        "/robots.txt",
       ],
-      ignoredRoutes: [],
+      ignoredRoutes: [
+        "/sitemap.xml",
+        "/robots.txt",
+      ],
     })
   : function middleware() {
       return NextResponse.next();
