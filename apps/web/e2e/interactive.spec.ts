@@ -99,10 +99,14 @@ test.describe("Interactive Elements - Code Preview", () => {
   test("homepage should display CLI code preview", async ({ page }) => {
     await page.goto("/");
 
+    // Scroll to the CLI section
+    const cliSection = page.getByText("npm install -g @conduii/cli");
+    await cliSection.scrollIntoViewIfNeeded();
+
     // Check terminal-like code preview
-    await expect(page.getByText("npm install -g @conduii/cli")).toBeVisible();
-    await expect(page.getByText("$ conduii discover")).toBeVisible();
-    await expect(page.getByText("$ conduii run")).toBeVisible();
+    await expect(cliSection).toBeVisible();
+    await expect(page.getByText("conduii discover", { exact: true })).toBeVisible();
+    await expect(page.getByText("conduii run", { exact: true })).toBeVisible();
   });
 
   test("code preview should show sample output", async ({ page }) => {
@@ -140,7 +144,7 @@ test.describe("Interactive Elements - Badges", () => {
   test("homepage should display AI-Powered Testing Platform badge", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByText("AI-Powered Testing Platform")).toBeVisible();
+    await expect(page.getByText("AI-Powered Testing Platform", { exact: true })).toBeVisible();
   });
 });
 

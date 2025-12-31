@@ -19,6 +19,10 @@ import {
   Activity,
   Square,
   Trash2,
+  Bot,
+  Terminal,
+  MessageSquare,
+  Sparkles,
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -35,6 +39,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { AIAssistant } from "@/components/test-run/ai-assistant";
+import { StreamingOutput } from "@/components/test-run/streaming-output";
 
 interface TestResult {
   id: string;
@@ -137,6 +149,8 @@ export default function TestRunDetailPage() {
   const [loading, setLoading] = useState(true);
   const [expandedResults, setExpandedResults] = useState<Set<string>>(new Set());
   const [cancelling, setCancelling] = useState(false);
+  const [selectedTest, setSelectedTest] = useState<TestResult | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("results");
 
   useEffect(() => {
     fetchData();
@@ -391,61 +405,210 @@ export default function TestRunDetailPage() {
         </Card>
       </div>
 
-      {/* AI Diagnostics */}
-      {testRun.diagnostics.length > 0 && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-yellow-500" />
-              <CardTitle>AI Diagnostics</CardTitle>
+      {/* Main Content Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
+          <TabsTrigger value="results" className="flex items-center gap-2">
+            <Activity className="w-4 h-4" />
+            <span className="hidden sm:inline">Results</span>
+          </TabsTrigger>
+          <TabsTrigger value="output" className="flex items-center gap-2">
+            <Terminal className="w-4 h-4" />
+            <span className="hidden sm:inline">Live Output</span>
+          </TabsTrigger>
+          <TabsTrigger value="ai" className="flex items-center gap-2">
+            <Bot className="w-4 h-4" />
+            <span className="hidden sm:inline">AI Assistant</span>
+          </TabsTrigger>
+          <TabsTrigger value="diagnostics" className="flex items-center gap-2">
+            <Lightbulb className="w-4 h-4" />
+            <span className="hidden sm:inline">Diagnostics</span>
+            {testRun.diagnostics.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 justify-center">
+                {testRun.diagnostics.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Live Output Tab */}
+        <TabsContent value="output" className="mt-4">
+          <StreamingOutput
+            testRunId={runId}
+            status={testRun.status as "PENDING" | "RUNNING" | "PASSED" | "FAILED" | "CANCELLED"}
+            onTestClick={(testName) => {
+              const test = testRun.results.find(r => r.test.name === testName);
+              if (test) {
+                setSelectedTest(test);
+                setActiveTab("ai");
+              }
+            }}
+          />
+        </TabsContent>
+
+        {/* AI Assistant Tab */}
+        <TabsContent value="ai" className="mt-4">
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <AIAssistant
+                testRunId={runId}
+                projectId={projectId}
+                context={selectedTest ? {
+                  testName: selectedTest.test.name,
+                  testType: selectedTest.test.type,
+                  error: selectedTest.error || undefined,
+                  duration: selectedTest.duration || undefined,
+                  assertions: selectedTest.assertions || undefined,
+                } : undefined}
+                onApplyFix={(code, filename) => {
+                  toast({
+                    title: "Fix Applied",
+                    description: `Code saved to ${filename}. Verify the changes before committing.`,
+                  });
+                }}
+              />
             </div>
-            <CardDescription>
-              Intelligent analysis of test failures with actionable suggestions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
             <div className="space-y-4">
-              {testRun.diagnostics.map((diagnostic) => (
-                <div
-                  key={diagnostic.id}
-                  className={`p-4 rounded-lg border ${getSeverityColor(diagnostic.severity)}`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <Bug className="w-5 h-5 mt-0.5" />
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className="text-xs">
-                            {diagnostic.severity}
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            {diagnostic.component}
-                          </Badge>
-                        </div>
-                        <p className="font-medium">{diagnostic.issue}</p>
-                        <p className="text-sm mt-2 opacity-80">{diagnostic.description}</p>
-                        {diagnostic.suggestions && diagnostic.suggestions.length > 0 && (
-                          <div className="mt-3">
-                            <p className="text-xs font-medium mb-1">Suggestions:</p>
-                            <ul className="text-sm list-disc list-inside opacity-80 space-y-1">
-                              {diagnostic.suggestions.map((suggestion, idx) => (
-                                <li key={idx}>{suggestion}</li>
-                              ))}
-                            </ul>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-yellow-500" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => setSelectedTest(
+                      testRun.results.find(r => r.status === "FAILED") || null
+                    )}
+                  >
+                    <XCircle className="w-4 h-4 mr-2 text-red-500" />
+                    Analyze First Failure
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <Bug className="w-4 h-4 mr-2" />
+                    Debug All Failures
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Generate Report
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              {/* Failed Tests Quick Select */}
+              {testRun.results.filter(r => r.status === "FAILED").length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-red-600">
+                      Failed Tests ({testRun.results.filter(r => r.status === "FAILED").length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-1">
+                    {testRun.results
+                      .filter(r => r.status === "FAILED")
+                      .map((result) => (
+                        <button
+                          key={result.id}
+                          onClick={() => setSelectedTest(result)}
+                          className={`w-full text-left p-2 rounded-lg text-sm transition-colors ${
+                            selectedTest?.id === result.id
+                              ? "bg-red-100 dark:bg-red-950 border border-red-200 dark:border-red-800"
+                              : "hover:bg-muted"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <XCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
+                            <span className="truncate">{result.test.name}</span>
                           </div>
-                        )}
+                        </button>
+                      ))}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Diagnostics Tab */}
+        <TabsContent value="diagnostics" className="mt-4">
+          {testRun.diagnostics.length > 0 ? (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="w-5 h-5 text-yellow-500" />
+                  <CardTitle>AI Diagnostics</CardTitle>
+                </div>
+                <CardDescription>
+                  Intelligent analysis of test failures with actionable suggestions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {testRun.diagnostics.map((diagnostic) => (
+                    <div
+                      key={diagnostic.id}
+                      className={`p-4 rounded-lg border ${getSeverityColor(diagnostic.severity)}`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          <Bug className="w-5 h-5 mt-0.5" />
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="text-xs">
+                                {diagnostic.severity}
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                {diagnostic.component}
+                              </Badge>
+                            </div>
+                            <p className="font-medium">{diagnostic.issue}</p>
+                            <p className="text-sm mt-2 opacity-80">{diagnostic.description}</p>
+                            {diagnostic.suggestions && diagnostic.suggestions.length > 0 && (
+                              <div className="mt-3">
+                                <p className="text-xs font-medium mb-1">Suggestions:</p>
+                                <ul className="text-sm list-disc list-inside opacity-80 space-y-1">
+                                  {diagnostic.suggestions.map((suggestion, idx) => (
+                                    <li key={idx}>{suggestion}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                <Lightbulb className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="font-medium">No Diagnostics Yet</p>
+                <p className="text-sm">
+                  AI diagnostics will appear here after analyzing test failures.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
 
-      {/* Test Results */}
-      <Card>
+        {/* Results Tab */}
+        <TabsContent value="results" className="mt-4">
+          <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <Activity className="w-5 h-5" />
@@ -525,8 +688,23 @@ export default function TestRunDetailPage() {
                     <div className="p-4 mt-1 rounded-lg bg-muted/30 border">
                       {result.error && (
                         <div className="mb-4">
-                          <h4 className="text-sm font-medium text-red-600 mb-2">Error</h4>
-                          <pre className="text-sm bg-red-50 text-red-800 p-3 rounded overflow-x-auto">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-medium text-red-600">Error</h4>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedTest(result);
+                                setActiveTab("ai");
+                              }}
+                              className="h-7 text-xs"
+                            >
+                              <Bot className="w-3 h-3 mr-1" />
+                              Ask AI
+                            </Button>
+                          </div>
+                          <pre className="text-sm bg-red-50 dark:bg-red-950/50 text-red-800 dark:text-red-200 p-3 rounded overflow-x-auto">
                             {result.error}
                           </pre>
                         </div>
@@ -550,6 +728,8 @@ export default function TestRunDetailPage() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Environment Info */}
       {testRun.environment && (
