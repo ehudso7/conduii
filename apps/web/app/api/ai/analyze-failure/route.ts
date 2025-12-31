@@ -1,144 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, handleApiError } from "@/lib/auth";
-import { db } from "@/lib/db";
-import {
-  analyzeFailure,
-  detectFailurePatterns,
-  getCorrelatedFailures,
-} from "@/lib/ai/failure-analyzer";
-import { z } from "zod";
+import { auth } from "@clerk/nextjs";
+import { analyzeFailure, isAIConfigured } from "@/lib/ai";
 
-export const dynamic = "force-dynamic";
-
-const analyzeFailureSchema = z.object({
-  type: z.literal("analyze"),
-  testRunId: z.string(),
-  testResultId: z.string(),
-});
-
-const detectPatternsSchema = z.object({
-  type: z.literal("patterns"),
-  projectId: z.string(),
-  timeRangeHours: z.number().optional(),
-});
-
-const correlatedFailuresSchema = z.object({
-  type: z.literal("correlated"),
-  testResultId: z.string(),
-});
-
-const requestSchema = z.union([
-  analyzeFailureSchema,
-  detectPatternsSchema,
-  correlatedFailuresSchema,
-]);
-
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth();
-    const body = await req.json();
-    const data = requestSchema.parse(body);
-
-    switch (data.type) {
-      case "analyze": {
-        // Verify access
-        const testRun = await db.testRun.findUnique({
-          where: { id: data.testRunId },
-          include: { project: { select: { organizationId: true } } },
-        });
-
-        if (!testRun) {
-          return NextResponse.json(
-            { error: "Test run not found" },
-            { status: 404 }
-          );
-        }
-
-        const membership = await db.organizationMember.findFirst({
-          where: {
-            userId: user.id,
-            organizationId: testRun.project.organizationId,
-          },
-        });
-
-        if (!membership) {
-          return NextResponse.json({ error: "Access denied" }, { status: 403 });
-        }
-
-        const analysis = await analyzeFailure(data.testRunId, data.testResultId);
-        return NextResponse.json({ analysis });
-      }
-
-      case "patterns": {
-        // Verify project access
-        const project = await db.project.findUnique({
-          where: { id: data.projectId },
-          select: { organizationId: true },
-        });
-
-        if (!project) {
-          return NextResponse.json(
-            { error: "Project not found" },
-            { status: 404 }
-          );
-        }
-
-        const membership = await db.organizationMember.findFirst({
-          where: {
-            userId: user.id,
-            organizationId: project.organizationId,
-          },
-        });
-
-        if (!membership) {
-          return NextResponse.json({ error: "Access denied" }, { status: 403 });
-        }
-
-        const patterns = await detectFailurePatterns(
-          data.projectId,
-          data.timeRangeHours
-        );
-        return NextResponse.json({ patterns });
-      }
-
-      case "correlated": {
-        // Verify access via test result
-        const testResult = await db.testResult.findUnique({
-          where: { id: data.testResultId },
-          include: {
-            testRun: { include: { project: { select: { organizationId: true } } } },
-          },
-        });
-
-        if (!testResult) {
-          return NextResponse.json(
-            { error: "Test result not found" },
-            { status: 404 }
-          );
-        }
-
-        const membership = await db.organizationMember.findFirst({
-          where: {
-            userId: user.id,
-            organizationId: testResult.testRun.project.organizationId,
-          },
-        });
-
-        if (!membership) {
-          return NextResponse.json({ error: "Access denied" }, { status: 403 });
-        }
-
-        const correlated = await getCorrelatedFailures(data.testResultId);
-        return NextResponse.json({ correlated });
-      }
+    // Check authentication
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Check if AI is configured
+    if (!isAIConfigured()) {
+      // Return a mock response when AI is not configured
+      return NextResponse.json({
+        analysis: {
+          rootCause: "AI service not configured",
+          explanation: "The AI analysis service is not configured. Please set up your ANTHROPIC_API_KEY or OPENAI_API_KEY environment variable to enable intelligent failure analysis.",
+          suggestedFixes: [
+            {
+              description: "Configure AI API keys in your environment",
+              code: `# Add to your .env file\nANTHROPIC_API_KEY=your_api_key_here\n# or\nOPENAI_API_KEY=your_api_key_here`,
+              priority: "high",
+            },
+          ],
+          category: "configuration",
+          confidence: 100,
+        },
+      });
+    }
+
+    const { testRunId, projectId, error, testName, testType } = await request.json();
+
+    if (!error) {
+      return NextResponse.json({ error: "Error message is required" }, { status: 400 });
+    }
+
+    // Use the AI failure analyzer
+    const analysis = await analyzeFailure({
+      errorMessage: error,
+      stackTrace: error,
+      testName: testName || "Unknown Test",
+      testType: testType || "unknown",
+      context: {
+        testRunId,
+        projectId,
+      },
+    });
+
+    return NextResponse.json({ analysis });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Invalid request", details: error.errors },
-        { status: 400 }
-      );
-    }
-    return handleApiError(error);
+    console.error("AI analysis error:", error);
+    
+    // Return a fallback response on error
+    return NextResponse.json({
+      analysis: {
+        rootCause: "Analysis temporarily unavailable",
+        explanation: "We encountered an issue while analyzing the failure. This could be due to API rate limits or connectivity issues. Please try again in a moment.",
+        suggestedFixes: [
+          {
+            description: "Retry the analysis",
+            priority: "medium",
+          },
+          {
+            description: "Check the error logs manually",
+            priority: "low",
+          },
+        ],
+        category: "unknown",
+        confidence: 0,
+      },
+    });
   }
 }

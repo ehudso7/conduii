@@ -11,7 +11,7 @@ test.describe("Homepage", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       "Test Your Deployments"
     );
-    await expect(page.getByText("AI-Powered Testing Platform")).toBeVisible();
+    await expect(page.getByText("AI-Powered Testing Platform", { exact: true })).toBeVisible();
   });
 
   test("should display navigation links", async ({ page }) => {
@@ -78,10 +78,14 @@ test.describe("Homepage", () => {
   test("should display the CLI code example", async ({ page }) => {
     await page.goto("/");
 
+    // Scroll to the CLI section
+    const cliSection = page.getByText("npm install -g @conduii/cli");
+    await cliSection.scrollIntoViewIfNeeded();
+
     // Check code preview is visible
-    await expect(page.getByText("npm install -g @conduii/cli")).toBeVisible();
-    await expect(page.getByText("$ conduii discover")).toBeVisible();
-    await expect(page.getByText("$ conduii run")).toBeVisible();
+    await expect(cliSection).toBeVisible();
+    await expect(page.getByText("conduii discover", { exact: true })).toBeVisible();
+    await expect(page.getByText("conduii run", { exact: true })).toBeVisible();
   });
 
   test("should display footer with links", async ({ page }) => {

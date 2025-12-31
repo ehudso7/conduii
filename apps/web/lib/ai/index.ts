@@ -175,3 +175,64 @@ export function getDefaultProvider(): AIProvider | null {
   if (process.env.OPENAI_API_KEY) return "openai";
   return null;
 }
+
+/**
+ * Simple failure analysis result
+ */
+export interface SimpleFailureAnalysis {
+  rootCause: string;
+  explanation: string;
+  suggestedFixes: Array<{
+    description: string;
+    code?: string;
+    priority: string;
+  }>;
+  category: string;
+  confidence: number;
+}
+
+const SIMPLE_ANALYSIS_SCHEMA = `{
+  "rootCause": "string - brief summary of the root cause",
+  "explanation": "string - detailed explanation of what went wrong and why",
+  "suggestedFixes": [
+    {
+      "description": "string - what to do to fix it",
+      "code": "string - optional code snippet showing the fix",
+      "priority": "high | medium | low"
+    }
+  ],
+  "category": "string - one of: code_bug, configuration, infrastructure, flaky, data, external_dependency, unknown",
+  "confidence": "number 0-100 - how confident are you in this analysis"
+}`;
+
+/**
+ * Analyze a test failure without database access (for API use)
+ */
+export async function analyzeFailure(input: {
+  errorMessage: string;
+  stackTrace?: string;
+  testName: string;
+  testType: string;
+  context?: Record<string, unknown>;
+}): Promise<SimpleFailureAnalysis> {
+  if (!isAIConfigured()) {
+    throw new Error("AI is not configured");
+  }
+
+  const prompt = `Analyze this test failure and provide detailed root cause analysis:
+
+Test Name: ${input.testName}
+Test Type: ${input.testType}
+Error Message: ${input.errorMessage}
+${input.stackTrace ? `Stack Trace: ${input.stackTrace}` : ""}
+${input.context ? `Additional Context: ${JSON.stringify(input.context, null, 2)}` : ""}
+
+Analyze this failure and provide:
+1. The most likely root cause
+2. A detailed explanation of what went wrong
+3. Specific, actionable fixes (with code if applicable)
+4. Categorize the issue type
+5. Your confidence level in this analysis`;
+
+  return generateJSON<SimpleFailureAnalysis>(prompt, SIMPLE_ANALYSIS_SCHEMA);
+}
