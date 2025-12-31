@@ -12,6 +12,7 @@ function isClerkConfigured() {
 
 const clerkConfigured = isClerkConfigured();
 
+const middleware = clerkConfigured
 export default clerkConfigured
   ? authMiddleware({
       publicRoutes: [
@@ -41,6 +42,8 @@ export default clerkConfigured
   : function middleware() {
       return NextResponse.next();
     };
+
+export default middleware;
 
 export const config = {
   matcher: [

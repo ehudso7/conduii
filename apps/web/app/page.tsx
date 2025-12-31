@@ -56,6 +56,62 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
+      </nav>
+
+      <main>
+        {/* Hero Section */}
+        <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center max-w-4xl mx-auto">
+              <Badge variant="secondary" className="mb-6 badge-brand">
+                <Zap className="w-3 h-3 mr-1" />
+                AI-Powered Testing Platform
+              </Badge>
+
+              <h1 className="hero-title mb-6">
+                Test Your Deployments,{" "}
+                <span className="gradient-text">Automatically</span>
+              </h1>
+
+              <p className="hero-subtitle mb-8 mx-auto">
+                Conduii discovers your services, validates connections, and runs comprehensive
+                tests against your live infrastructure. Zero configuration required.
+              </p>
+
+              <HeroAuthButtons />
+
+              {/* Code Preview */}
+              <div className="max-w-2xl mx-auto mt-12">
+                <div className="code-block shadow-2xl">
+                  <div className="code-block-header">
+                    <div className="terminal-dot terminal-dot-red" />
+                    <div className="terminal-dot terminal-dot-yellow" />
+                    <div className="terminal-dot terminal-dot-green" />
+                    <span className="ml-2 text-xs text-slate-400 font-mono">Terminal</span>
+                  </div>
+                  <div className="code-block-content">
+                    <p className="text-slate-500"># Install Conduii CLI</p>
+                    <p className="text-teal-400">
+                      npm install -g @conduii/cli
+                    </p>
+                    <br />
+                    <p className="text-slate-500"># Discover your project</p>
+                    <p className="text-teal-400">$ conduii discover</p>
+                    <p className="text-slate-300">
+                      <span className="text-green-400">&#10003;</span> Found Next.js project<br />
+                      <span className="text-green-400">&#10003;</span> Detected: Vercel, Supabase, Stripe, Clerk<br />
+                      <span className="text-green-400">&#10003;</span> Generated 24 tests
+                    </p>
+                    <br />
+                    <p className="text-slate-500"># Run tests</p>
+                    <p className="text-teal-400">$ conduii run</p>
+                    <p className="text-green-400">
+                      &#10003; All 24 tests passed in 12.4s
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
       </header>
 
       {/* Hero */}
